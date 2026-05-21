@@ -1,0 +1,201 @@
+package com.expensemanager.app.ui.budget;
+
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.expensemanager.app.R;
+import com.expensemanager.app.data.model.Category;
+import com.expensemanager.app.databinding.ItemBudgetEssentialBinding;
+import com.expensemanager.app.databinding.ItemBudgetSectionBinding;
+import com.expensemanager.app.util.MoneyFormat;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdapter.VH> {
+
+    public static class Section {
+        public String title;
+        public List<CategoryItem> categories = new ArrayList<>();
+        public boolean isExpanded = true;
+
+        public Section(String title) {
+            this.title = title;
+        }
+    }
+
+    public static class CategoryItem {
+        public Category category;
+        public double allocated = 0;
+        public double spent = 0;
+
+        public double getRemaining() {
+            return allocated - spent;
+        }
+
+        public int getProgressPercent() {
+            if (allocated <= 0) return 0;
+            return (int) Math.min((spent / allocated) * 100, 100);
+        }
+    }
+
+    public interface OnCategoryEdit {
+        void onEdit(Category category, double currentAmount);
+    }
+
+    private List<Section> sections = new ArrayList<>();
+    private Map<String, Double> allocatedMap = new HashMap<>();
+    private Map<String, Double> spentMap = new HashMap<>();
+    private OnCategoryEdit editListener;
+
+    public void setSections(List<Section> sections) {
+        this.sections = sections;
+        notifyDataSetChanged();
+    }
+
+    public void setAllocatedMap(Map<String, Double> map) {
+        this.allocatedMap = map;
+        notifyDataSetChanged();
+    }
+
+    public void setSpentMap(Map<String, Double> map) {
+        this.spentMap = map;
+        notifyDataSetChanged();
+    }
+
+    public void setOnCategoryEdit(OnCategoryEdit listener) {
+        this.editListener = listener;
+    }
+
+    @NonNull
+    @Override
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ItemBudgetSectionBinding b = ItemBudgetSectionBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new VH(b);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VH holder, int position) {
+        Section section = sections.get(position);
+        holder.bind(section);
+    }
+
+    @Override
+    public int getItemCount() {
+        return sections.size();
+    }
+
+    class VH extends RecyclerView.ViewHolder {
+        final ItemBudgetSectionBinding binding;
+
+        VH(ItemBudgetSectionBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        void bind(Section section) {
+            binding.textSectionTitle.setText(section.title);
+
+            // Calculate total progress
+            double totalAllocated = 0, totalSpent = 0;
+            for (CategoryItem item : section.categories) {
+                String catId = item.category.getId();
+                item.allocated = allocatedMap.containsKey(catId) ? allocatedMap.get(catId) : 0;
+                item.spent = spentMap.containsKey(catId) ? spentMap.get(catId) : 0;
+                totalAllocated += item.allocated;
+                totalSpent += item.spent;
+            }
+            int progress = totalAllocated > 0 ? (int) (totalSpent / totalAllocated * 100) : 0;
+            binding.textProgress.setText(progress + "%");
+
+            binding.layoutCards.removeAllViews();
+
+            if (section.isExpanded) {
+                for (CategoryItem item : section.categories) {
+                    addCategoryCard(binding.layoutCards, item);
+                }
+            }
+
+            binding.getRoot().setOnClickListener(v -> {
+                section.isExpanded = !section.isExpanded;
+                notifyItemChanged(getAdapterPosition());
+            });
+        }
+
+        private void addCategoryCard(LinearLayout container, CategoryItem item) {
+            ItemBudgetEssentialBinding cardBinding = ItemBudgetEssentialBinding.inflate(
+                    LayoutInflater.from(itemView.getContext()), container, false);
+
+            Category cat = item.category;
+            cardBinding.textCategoryName.setText(cat.getName());
+            cardBinding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
+            cardBinding.textAllocated.setText(MoneyFormat.format(item.allocated));
+            cardBinding.textSpent.setText(MoneyFormat.format(item.spent));
+            cardBinding.textRemaining.setText(MoneyFormat.format(Math.max(item.getRemaining(), 0)));
+
+            int progress = item.getProgressPercent();
+            cardBinding.progressBar.setProgress(progress);
+
+            if (item.getRemaining() < 0) {
+                cardBinding.textRemaining.setTextColor(
+                        itemView.getContext().getColor(R.color.expense_red));
+            }
+
+            if (cat.getColorHex() != null) {
+                try {
+                    int color = Color.parseColor(cat.getColorHex());
+                    GradientDrawable bg = new GradientDrawable();
+                    bg.setShape(GradientDrawable.OVAL);
+                    bg.setColor(color);
+                    cardBinding.viewCategoryBg.setBackground(bg);
+                } catch (Exception ignored) {}
+            }
+
+            // Toggle expand/collapse
+            final boolean[] expanded = {false};
+            cardBinding.layoutHeader.setOnClickListener(v -> {
+                expanded[0] = !expanded[0];
+                cardBinding.layoutExpanded.setVisibility(expanded[0] ? View.VISIBLE : View.GONE);
+                cardBinding.iconExpand.setRotation(expanded[0] ? 180f : 0f);
+            });
+
+            cardBinding.btnEdit.setOnClickListener(v -> {
+                if (editListener != null) {
+                    editListener.onEdit(cat, item.allocated);
+                }
+            });
+
+            container.addView(cardBinding.getRoot());
+        }
+
+        private String getCategoryEmoji(String iconKey) {
+            if (iconKey == null) return "📦";
+            switch (iconKey) {
+                case "food": return "🍔";
+                case "transport": return "🚌";
+                case "shopping": return "🛍️";
+                case "bills": return "📄";
+                case "education": return "📚";
+                case "entertainment": return "🎮";
+                case "health": return "💊";
+                case "family": return "👨‍👩‍👧";
+                case "saving": return "💰";
+                case "home": return "🏠";
+                case "rent": return "🏠";
+                default: return "📦";
+            }
+        }
+    }
+}

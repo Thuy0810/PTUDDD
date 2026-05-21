@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#FFB84D</color>
+    <color name="background">#FFF8EF</color>
+    <color name="background_card">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="budget_danger">#EF4444</color>
+    <color name="budget_safe">#4CAF50</color>
+    <color name="budget_warning">#F59E0B</color>
+    <color name="card_bg">#FFFFFF</color>
+    <color name="card_shadow">#1A000000</color>
+    <color name="divider">#F3E8DC</color>
+    <color name="error">#EF4444</color>
+    <color name="expense_red">#FF6B6B</color>
+    <color name="expense_red_light">#FFEBEE</color>
+    <color name="income_green">#4CAF50</color>
+    <color name="income_green_light">#E8F5E9</color>
+    <color name="info">#3B82F6</color>
+    <color name="overlay">#80000000</color>
+    <color name="primary">#FFB84D</color>
+    <color name="primary_dark">#E09E30</color>
+    <color name="primary_light">#FFD080</color>
+    <color name="progress_background">#FFF3E0</color>
+    <color name="saving_blue">#3B82F6</color>
+    <color name="saving_blue_light">#EFF6FF</color>
+    <color name="success">#22C55E</color>
+    <color name="text_hint">#9CA3AF</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_primary">#1F2937</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="warning">#F59E0B</color>
+    <color name="white">#FFFFFF</color>
+    <string name="add_budget">Đặt ngân sách</string>
+    <string name="add_category">Thêm danh mục</string>
+    <string name="add_goal">Thêm mục tiêu</string>
+    <string name="add_recurring">Thêm giao dịch định kỳ</string>
+    <string name="add_transaction">Thêm giao dịch</string>
+    <string name="add_wallet">Thêm ví</string>
+    <string name="amount">Số tiền</string>
+    <string name="amount_hint">0</string>
+    <string name="app_name">Quản Lý Chi Tiêu</string>
+    <string name="balance">Số dư hiện tại</string>
+    <string name="budget_alert_100">Ngân sách %1$s đã hết!</string>
+    <string name="budget_alert_80">Bạn đã dùng 80%% ngân sách %1$s</string>
+    <string name="budget_allocation">Phân bổ ngân sách</string>
+    <string name="budget_limit">Hạn mức</string>
+    <string name="budget_remaining">Ngân sách còn lại</string>
+    <string name="budget_remaining_short">Còn lại</string>
+    <string name="budget_settings">Cài đặt ngân sách</string>
+    <string name="budget_spent">Đã chi</string>
+    <string name="budgets">Ngân sách</string>
+    <string name="cancel">Hủy</string>
+    <string name="categories">Danh mục</string>
+    <string name="category">Danh mục</string>
+    <string name="category_color">Màu sắc</string>
+    <string name="category_icon">Biểu tượng</string>
+    <string name="category_name">Tên danh mục</string>
+    <string name="category_type">Loại</string>
+    <string name="change_password">Đổi mật khẩu</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="daily_budget">Ngân sách hàng ngày</string>
+    <string name="dark_mode">Chế độ tối</string>
+    <string name="date">Ngày</string>
+    <string name="delete">Xóa</string>
+    <string name="delete_wallet_confirm">Xóa ví này?</string>
+    <string name="display_name">Họ tên</string>
+    <string name="edit">Sửa</string>
+    <string name="edit_budget">Sửa ngân sách</string>
+    <string name="edit_category">Sửa danh mục</string>
+    <string name="edit_profile">Sửa hồ sơ</string>
+    <string name="edit_transaction">Sửa giao dịch</string>
+    <string name="edit_wallet">Sửa ví</string>
+    <string name="email">Email</string>
+    <string name="empty_transactions">Chưa có giao dịch nào</string>
+    <string name="error_empty_amount">Nhập số tiền > 0</string>
+    <string name="error_empty_email">Vui lòng nhập email</string>
+    <string name="error_empty_password">Vui lòng nhập mật khẩu</string>
+    <string name="error_invalid_email">Email không hợp lệ</string>
+    <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="error_password_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_select_category">Chọn danh mục</string>
+    <string name="error_select_wallet">Chọn ví</string>
+    <string name="expense">Chi tiêu</string>
+    <string name="export_data">Sao lưu dữ liệu</string>
+    <string name="financial_health">Sức khỏe tài chính</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="gcm_defaultSenderId" translatable="false">143761311894</string>
+    <string name="goal_current">Đã có</string>
+    <string name="goal_deadline">Hạn hoàn thành</string>
+    <string name="goal_name">Tên mục tiêu</string>
+    <string name="goal_progress">Tiến độ</string>
+    <string name="goal_target">Số tiền cần đạt</string>
+    <string name="goals">Mục tiêu tiết kiệm</string>
+    <string name="google_api_key" translatable="false">AIzaSyDi0iooHsUu_Nxwx9tCdvHL-CkBY-CmqAI</string>
+    <string name="google_app_id" translatable="false">1:143761311894:android:5d1482d16c1d0c6fe09ab7</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDi0iooHsUu_Nxwx9tCdvHL-CkBY-CmqAI</string>
+    <string name="google_storage_bucket" translatable="false">quan-ly-chi-tieu-18e0c.firebasestorage.app</string>
+    <string name="has_account">Đã có tài khoản? Đăng nhập</string>
+    <string name="health_score">Điểm sức khỏe</string>
+    <string name="income">Thu nhập</string>
+    <string name="login">Đăng nhập</string>
+    <string name="login_failed">Đăng nhập thất bại</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="month_expense">Chi tiêu tháng</string>
+    <string name="month_income">Thu nhập tháng</string>
+    <string name="month_prediction">Dự đoán tháng này</string>
+    <string name="mood">Cảm xúc</string>
+    <string name="nav_budget">Ngân sách</string>
+    <string name="nav_home">Tổng quan</string>
+    <string name="nav_profile">Cá nhân</string>
+    <string name="nav_report">Báo cáo</string>
+    <string name="nav_transactions">Giao dịch</string>
+    <string name="necessary">Cần thiết</string>
+    <string name="no_account">Chưa có tài khoản? Đăng ký</string>
+    <string name="no_budgets">Chưa có ngân sách nào</string>
+    <string name="no_goals">Chưa có mục tiêu nào</string>
+    <string name="no_recurring">Chưa có giao dịch định kỳ</string>
+    <string name="no_transactions">Chưa có giao dịch nào</string>
+    <string name="note">Ghi chú</string>
+    <string name="note_hint">Thêm ghi chú…</string>
+    <string name="notifications">Thông báo</string>
+    <string name="password">Mật khẩu</string>
+    <string name="pin_lock">Khóa PIN / Vân tay</string>
+    <string name="profile">Hồ sơ</string>
+    <string name="project_id" translatable="false">quan-ly-chi-tieu-18e0c</string>
+    <string name="quick_input_hint">Nhập nhanh: Cafe 25k</string>
+    <string name="recent_transactions">Giao dịch gần đây</string>
+    <string name="recurring">Giao dịch định kỳ</string>
+    <string name="recurring_amount">Số tiền</string>
+    <string name="recurring_name">Tên khoản</string>
+    <string name="recurring_repeat">Lặp lại</string>
+    <string name="register">Đăng ký</string>
+    <string name="register_failed">Đăng ký thất bại</string>
+    <string name="regret">Khoản chi cần thiết?</string>
+    <string name="repeat_daily">Hàng ngày</string>
+    <string name="repeat_monthly">Hàng tháng</string>
+    <string name="repeat_weekly">Hàng tuần</string>
+    <string name="repeat_yearly">Hàng năm</string>
+    <string name="report_balance">Số dư</string>
+    <string name="report_expense">Tổng chi</string>
+    <string name="report_income">Tổng thu</string>
+    <string name="report_last_month">Tháng trước</string>
+    <string name="report_this_month">Tháng này</string>
+    <string name="report_vs_last">So với tháng trước</string>
+    <string name="reports">Báo cáo</string>
+    <string name="reset_password">Khôi phục mật khẩu</string>
+    <string name="reset_password_desc">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</string>
+    <string name="save">Lưu</string>
+    <string name="search_hint">Tìm kiếm giao dịch…</string>
+    <string name="see_all">Xem tất cả</string>
+    <string name="select_category">Chọn danh mục</string>
+    <string name="select_wallet">Chọn ví</string>
+    <string name="send_reset_link">Gửi link đặt lại</string>
+    <string name="set_budget_hint">Đặt ngân sách để theo dõi chi tiêu</string>
+    <string name="settings">Cài đặt</string>
+    <string name="success_delete">Đã xóa</string>
+    <string name="success_login">Đăng nhập thành công!</string>
+    <string name="success_logout">Đã đăng xuất</string>
+    <string name="success_register">Đăng ký thành công!</string>
+    <string name="success_reset_sent">Đã gửi email đặt lại mật khẩu</string>
+    <string name="success_save">Đã lưu</string>
+    <string name="today_expense">Chi tiêu hôm nay</string>
+    <string name="top_category">Danh mục chi nhiều nhất</string>
+    <string name="transfer">Chuyển tiền</string>
+    <string name="unnecessary">Không cần thiết</string>
+    <string name="wallet">Ví</string>
+    <string name="wallet_balance">Số dư</string>
+    <string name="wallet_bank">Ngân hàng</string>
+    <string name="wallet_cash">Tiền mặt</string>
+    <string name="wallet_name">Tên ví</string>
+    <string name="wallet_other">Khác</string>
+    <string name="wallet_saving">Ví tiết kiệm</string>
+    <string name="wallet_type">Loại ví</string>
+    <string name="wallets">Quản lý ví</string>
+    <style name="ShapeAppearance.ExpenseManager.FAB" parent="ShapeAppearance.Material3.Corner.Full">
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Amount" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Amount.Expense">
+        <item name="android:textColor">@color/expense_red</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Amount.Income">
+        <item name="android:textColor">@color/income_green</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="TextAppearance.ExpenseManager.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Theme.ExpenseManager" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        
+        <item name="materialCardViewStyle">@style/Widget.ExpenseManager.CardView</item>
+
+        
+        <item name="materialButtonStyle">@style/Widget.ExpenseManager.Button</item>
+
+        
+        <item name="textInputStyle">@style/Widget.ExpenseManager.TextInputLayout</item>
+    </style>
+    <style name="Theme.ExpenseManager.Splash" parent="Theme.ExpenseManager">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <style name="Theme.ExpenseManager.WithActionBar" parent="Theme.Material3.Light">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="Widget.ExpenseManager.BottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="backgroundTint">@color/white</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.ExpenseManager.BottomNavigation.ActiveIndicator</item>
+        <item name="itemIconTint">@color/bottom_nav_color</item>
+        <item name="itemTextColor">@color/bottom_nav_color</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+    <style name="Widget.ExpenseManager.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/primary_light</item>
+    </style>
+    <style name="Widget.ExpenseManager.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+    </style>
+    <style name="Widget.ExpenseManager.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="Widget.ExpenseManager.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="Widget.ExpenseManager.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/card_bg</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+    <style name="Widget.ExpenseManager.FAB" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/primary</item>
+        <item name="tint">@color/white</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.ExpenseManager.FAB</item>
+    </style>
+    <style name="Widget.ExpenseManager.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxStrokeColor">@color/primary</item>
+        <item name="hintTextColor">@color/primary</item>
+    </style>
+</resources>

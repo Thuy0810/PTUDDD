@@ -1,0 +1,346 @@
+[
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_settings.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_transaction.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_transaction.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_category.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_category.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_budget.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_budget.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_fragment_transaction_list.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\fragment_transaction_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_red.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_red.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_tabs_container.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_tabs_container.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_chip_inactive.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_chip_inactive.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_budget.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_budget.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/navigation_nav_graph.xml.flat",
+        "source": "com.expensemanager.app-main-57:/navigation/nav_graph.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\navigation_nav_graph.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\navigation\\nav_graph.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_add.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_add.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_budget_edit.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_budget_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_fragment_report.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\fragment_report.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_chip_white.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_chip_white.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_profile.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_profile.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_recurring.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_recurring.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_chip_active.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_chip_active.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_toggle_button.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_toggle_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_input_field.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_input_field.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_logout.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_logout.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_dialog_wallet_payment.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\dialog_wallet_payment.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_wallet.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_wallet.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_hint.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_hint.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_purple.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_purple.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_expand.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_expand.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_primary.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_primary.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_bottom_sheet.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_bottom_sheet.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/drawable_bg_yellow_chip.xml.flat",
+        "source": "com.expensemanager.app-main-57:/drawable/bg_yellow_chip.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_challenge_list.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_challenge_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_zalopay.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_zalopay.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_fragment_budget.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\fragment_budget.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_toggle_expense_selector_left.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_toggle_expense_selector_left.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_vnpay.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_vnpay.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_report.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_report.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_add_transaction.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_add_transaction.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/layout_activity_budget_allocation.xml.flat",
+        "source": "com.expensemanager.app-main-57:/layout/activity_budget_allocation.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_home.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_home.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_viettel.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_viettel.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_cash.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_cash.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_fragment_profile.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\fragment_profile.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_dialog_goal.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\dialog_goal.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_splash.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_splash.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_spinner_dropdown.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_spinner_dropdown.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_login.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_login.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_login.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_login.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_wallet_list.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_wallet_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_goal.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_goal.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\color_bottom_nav_color.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\color\\bottom_nav_color.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_income_badge.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_income_badge.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_wallet_type_selector.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_wallet_type_selector.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_transfer.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_transfer.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_edit.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_dialog_wallet.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\dialog_wallet.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_dialog_recurring.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\dialog_recurring.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_goal_list.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_goal_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_tab_active.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_tab_active.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_back.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_back.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_expense_badge.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_expense_badge.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/layout_item_budget_section.xml.flat",
+        "source": "com.expensemanager.app-main-57:/layout/item_budget_section.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_blue.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_blue.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_splash.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_splash.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_dialog_budget_settings.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\dialog_budget_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_toggle_expense.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_toggle_expense.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_card_input.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_card_input.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_delete.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_delete.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_add_simple.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_add_simple.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/layout_item_budget_alloc_simple.xml.flat",
+        "source": "com.expensemanager.app-main-57:/layout/item_budget_alloc_simple.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/layout_fragment_budget_overview.xml.flat",
+        "source": "com.expensemanager.app-main-57:/layout/fragment_budget_overview.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_momo.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_momo.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\menu_bottom_nav_menu.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\menu\\bottom_nav_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_budget_allocation.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_budget_allocation.xml"
+    },
+    {
+        "merged": "com.expensemanager.app-debug-55:/layout_item_budget_essential.xml.flat",
+        "source": "com.expensemanager.app-main-57:/layout/item_budget_essential.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_toggle_income_selector_right.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_toggle_income_selector_right.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_bg_circle_green.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\bg_circle_green.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_item_budget_allocation.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\item_budget_allocation.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\xml_file_paths.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\xml\\file_paths.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_register.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_register.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_category_list.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_category_list.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\drawable_ic_settings.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\drawable\\ic_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_activity_lock.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\activity_lock.xml"
+    },
+    {
+        "merged": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-debug-55:\\layout_fragment_home.xml.flat",
+        "source": "C:\\Users\\nguye\\.gradle\\daemon\\8.5\\com.expensemanager.app-main-57:\\layout\\fragment_home.xml"
+    }
+]

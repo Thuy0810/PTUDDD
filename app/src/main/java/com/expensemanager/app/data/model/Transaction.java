@@ -1,0 +1,91 @@
+package com.expensemanager.app.data.model;
+
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentId;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Transaction {
+    public static final String TYPE_INCOME = "income";
+    public static final String TYPE_EXPENSE = "expense";
+    public static final String TYPE_TRANSFER = "transfer";
+
+    @DocumentId
+    private String id;
+    private String type;
+    private double amount;
+    private String categoryId;
+    private String walletId;
+    private String fromWalletId;
+    private String toWalletId;
+    private String note;
+    private Timestamp date;
+    private String mood;
+    private String regretFlag;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
+
+    public Transaction() {}
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
+
+    public String getCategoryId() { return categoryId; }
+    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+
+    public String getWalletId() { return walletId; }
+    public void setWalletId(String walletId) { this.walletId = walletId; }
+
+    public String getFromWalletId() { return fromWalletId; }
+    public void setFromWalletId(String fromWalletId) { this.fromWalletId = fromWalletId; }
+
+    public String getToWalletId() { return toWalletId; }
+    public void setToWalletId(String toWalletId) { this.toWalletId = toWalletId; }
+
+    public String getNote() { return note != null ? note : ""; }
+    public void setNote(String note) { this.note = note; }
+
+    public Timestamp getDate() { return date; }
+    public void setDate(Timestamp date) { this.date = date; }
+
+    public Date getDateAsDate() {
+        return date != null ? date.toDate() : new Date();
+    }
+
+    public String getMood() { return mood; }
+    public void setMood(String mood) { this.mood = mood; }
+
+    public String getRegretFlag() { return regretFlag; }
+    public void setRegretFlag(String regretFlag) { this.regretFlag = regretFlag; }
+
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public Timestamp getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", type);
+        map.put("amount", amount);
+        map.put("categoryId", categoryId != null ? categoryId : "");
+        map.put("walletId", walletId != null ? walletId : "");
+        if (fromWalletId != null) map.put("fromWalletId", fromWalletId);
+        if (toWalletId != null) map.put("toWalletId", toWalletId);
+        map.put("note", getNote());
+        map.put("date", date != null ? date : Timestamp.now());
+        if (mood != null) map.put("mood", mood);
+        if (regretFlag != null) map.put("regretFlag", regretFlag);
+        map.put("createdAt", createdAt != null ? createdAt : Timestamp.now());
+        map.put("updatedAt", Timestamp.now());
+        return map;
+    }
+}
