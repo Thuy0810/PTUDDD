@@ -20,7 +20,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Transaction as FirestoreTransaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +107,7 @@ public class TransferActivity extends AppCompatActivity {
 
         binding.btnConfirm.setEnabled(false);
 
-        db.runTransaction((FirestoreTransaction.Function<Void>) transaction -> {
+        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
             DocumentSnapshot fromSnap = transaction.get(
                     db.collection("users").document(uid).collection("wallets").document(fromWallet.getId()));
             DocumentSnapshot toSnap = transaction.get(
@@ -127,7 +126,7 @@ public class TransferActivity extends AppCompatActivity {
             }
 
             Map<String, Object> txData = new HashMap<>();
-            txData.put("type", Transaction.TYPE_TRANSFER);
+            txData.put("type", com.expensemanager.app.data.model.Transaction.TYPE_TRANSFER);
             txData.put("amount", amount);
             txData.put("fromWalletId", fromWallet.getId());
             txData.put("toWalletId", toWallet.getId());

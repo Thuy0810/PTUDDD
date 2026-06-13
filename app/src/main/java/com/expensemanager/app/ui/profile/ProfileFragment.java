@@ -14,6 +14,10 @@ import androidx.fragment.app.Fragment;
 import com.expensemanager.app.databinding.FragmentProfileBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.auth.LoginActivity;
+import com.expensemanager.app.ui.challenge.ChallengeListActivity;
+import com.expensemanager.app.ui.wallet.WalletListActivity;
+import com.expensemanager.app.ui.category.CategoryListActivity;
+import com.expensemanager.app.ui.goal.GoalListActivity;
 import com.expensemanager.app.util.PrefsHelper;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
 
@@ -63,6 +67,24 @@ public class ProfileFragment extends Fragment {
         if (binding.btnLanguage != null) {
             binding.btnLanguage.setOnClickListener(v ->
                     Toast.makeText(requireContext(), "Ngôn ngữ: Tiếng Việt", Toast.LENGTH_SHORT).show());
+        }
+
+        // Quản lý
+        if (binding.btnManageWallets != null) {
+            binding.btnManageWallets.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), WalletListActivity.class)));
+        }
+        if (binding.btnManageCategories != null) {
+            binding.btnManageCategories.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), CategoryListActivity.class)));
+        }
+        if (binding.btnManageGoals != null) {
+            binding.btnManageGoals.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), GoalListActivity.class)));
+        }
+        if (binding.btnManageRecurring != null) {
+            binding.btnManageRecurring.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), ChallengeListActivity.class)));
         }
 
         // Hỗ trợ

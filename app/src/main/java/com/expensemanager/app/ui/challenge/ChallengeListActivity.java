@@ -64,6 +64,10 @@ public class ChallengeListActivity extends AppCompatActivity {
             adapter.setCategoryMap(categoryMap);
         });
 
+        new WalletRepository().observeAll(uid).observe(this, list -> {
+            wallets = list != null ? list : new ArrayList<>();
+        });
+
         recurringRepo.observeAll(uid).observe(this, list -> {
             adapter.setItems(list != null ? list : new ArrayList<>());
             View empty = findViewById(R.id.textEmpty);
@@ -84,12 +88,18 @@ public class ChallengeListActivity extends AppCompatActivity {
             Toast.makeText(this, "Chưa có danh mục", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (wallets.isEmpty()) {
+            Toast.makeText(this, "Chưa có ví", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         LayoutInflater li = LayoutInflater.from(this);
         View view = li.inflate(R.layout.dialog_recurring, null);
         EditText editNote = view.findViewById(R.id.editRecurringNote);
         EditText editAmount = view.findViewById(R.id.editRecurringAmount);
         Spinner spinnerCat = view.findViewById(R.id.spinnerRecurringCategory);
+        Spinner spinnerWallet = view.findViewById(R.id.spinnerRecurringWallet);
+        Spinner spinnerDay = view.findViewById(R.id.spinnerRecurringDay);
 
         List<String> catNames = new ArrayList<>();
         for (Category c : categories) catNames.add(c.getName());
@@ -97,6 +107,20 @@ public class ChallengeListActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, catNames);
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCat.setAdapter(catAdapter);
+
+        List<String> walletNames = new ArrayList<>();
+        for (Wallet w : wallets) walletNames.add(w.getName());
+        ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, walletNames);
+        walletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerWallet.setAdapter(walletAdapter);
+
+        String[] days = new String[31];
+        for (int i = 0; i < 31; i++) days[i] = "Ngày " + (i + 1);
+        ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, java.util.Arrays.asList(days));
+        dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDay.setAdapter(dayAdapter);
 
         new AlertDialog.Builder(this)
                 .setTitle("Giao dịch định kỳ mới")
@@ -114,14 +138,18 @@ public class ChallengeListActivity extends AppCompatActivity {
                         return;
                     }
                     int catPos = spinnerCat.getSelectedItemPosition();
+                    int walletPos = spinnerWallet.getSelectedItemPosition();
+                    int dayPos = spinnerDay.getSelectedItemPosition();
                     Category cat = categories.get(catPos);
+                    Wallet wallet = wallets.get(walletPos);
 
                     RecurringRule r = new RecurringRule();
                     r.setType(Transaction.TYPE_EXPENSE);
                     r.setAmount(amount);
                     r.setCategoryId(cat.getId());
+                    r.setWalletId(wallet.getId());
                     r.setNote(note);
-                    r.setDayOfMonth(1);
+                    r.setDayOfMonth(dayPos + 1);
                     r.setEnabled(true);
                     recurringRepo.add(uid, r);
                     Toast.makeText(this, "Đã tạo giao dịch định kỳ!", Toast.LENGTH_SHORT).show();

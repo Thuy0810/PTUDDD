@@ -38,6 +38,9 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Wallet selectedWallet;
     private Transaction originalTransaction;
     private Map<String, Wallet> walletMap = new HashMap<>();
+    private boolean categoriesLoaded = false;
+    private boolean walletsLoaded = false;
+    private Timestamp parsedDate = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +63,9 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         new CategoryRepository().observeAll(uid).observe(this, list -> {
             categories = list != null ? list : new ArrayList<>();
+            categoriesLoaded = true;
             setupCategorySpinner(Transaction.TYPE_EXPENSE);
+            tryLoadTransaction();
         });
         new WalletRepository().observeAll(uid).observe(this, list -> {
             wallets = list != null ? list : new ArrayList<>();
@@ -68,10 +73,9 @@ public class AddTransactionActivity extends AppCompatActivity {
             for (Wallet w : wallets) {
                 if (w.getId() != null) walletMap.put(w.getId(), w);
             }
+            walletsLoaded = true;
             setupWalletSpinner();
-            if (editTxId != null) {
-                loadTransaction(uid, editTxId);
-            }
+            tryLoadTransaction();
         });
 
         binding.radioType.setOnCheckedChangeListener((g, id) -> {
@@ -84,6 +88,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 QuickParseUtil.ParseResult r = QuickParseUtil.parse(binding.editQuick.getText().toString());
                 if (r.amount != null) binding.editAmount.setText(String.valueOf(r.amount.longValue()));
                 if (r.note != null) binding.editNote.setText(r.note);
+                if (r.date != null) parsedDate = new Timestamp(r.date);
                 String catId = CategorySuggester.suggestCategoryId(r.note != null ? r.note : "");
                 if (catId != null) selectCategory(catId);
             }
@@ -99,6 +104,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         binding.btnSave.setOnClickListener(v -> save());
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirm());
         binding.btnCancel.setOnClickListener(v -> finish());
+    }
+
+    private void tryLoadTransaction() {
+        if (editTxId != null && categoriesLoaded && walletsLoaded) {
+            loadTransaction(authRepo.getUid(), editTxId);
+        }
     }
 
     private void setupCategorySpinner(String type) {
@@ -175,7 +186,6 @@ public class AddTransactionActivity extends AppCompatActivity {
                     binding.editAmount.setText(String.valueOf((long) t.getAmount()));
                     binding.editNote.setText(t.getNote() != null ? t.getNote() : "");
 
-                    // Setup spinner TRUOC, roi moi select
                     setupCategorySpinner(t.getType());
                     selectCategoryById(t.getCategoryId());
                     selectWalletById(t.getWalletId());
@@ -220,74 +230,19 @@ public class AddTransactionActivity extends AppCompatActivity {
         t.setWalletId(wallet.getId());
         t.setNote(binding.editNote.getText() != null ? binding.editNote.getText().toString() : "");
 
-        // Giu ngay cu khi sua, chi dat ngay moi khi tao moi
         if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);
             t.setDate(originalTransaction.getDate());
-            txRepo.update(uid, t);
-            updateWalletBalanceAfterEdit(uid);
+            txRepo.updateAtomic(uid, originalTransaction, t, walletRepo,
+                    originalTransaction.getWalletId(), wallet.getId());
+            Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+            finish();
         } else {
-            t.setDate(Timestamp.now());
-            txRepo.add(uid, t);
-            updateWalletBalance(uid, wallet, amount, isIncome);
-        }
-
-        Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
-        finish();
-    }
-
-    private void updateWalletBalance(String uid, Wallet wallet, double amount, boolean isIncome) {
-        double newBalance = wallet.getCurrentBalance();
-        if (isIncome) {
-            newBalance += amount;
-        } else {
-            newBalance -= amount;
-        }
-        wallet.setCurrentBalance(newBalance);
-        walletRepo.update(uid, wallet);
-    }
-
-    private void updateWalletBalanceAfterEdit(String uid) {
-        if (originalTransaction == null) return;
-
-        String originalWalletId = originalTransaction.getWalletId();
-        Wallet newWallet = (Wallet) binding.spinnerWallet.getSelectedItem();
-        String newWalletId = newWallet != null ? newWallet.getId() : null;
-        Wallet originalWallet = walletMap.get(originalWalletId);
-
-        double originalAmount = originalTransaction.getAmount();
-        boolean originalIsIncome = Transaction.TYPE_INCOME.equals(originalTransaction.getType());
-        boolean newIsIncome = binding.radioIncome.isChecked();
-        double newAmount = 0;
-        try {
-            newAmount = Double.parseDouble(binding.editAmount.getText().toString().replace(",", ""));
-        } catch (Exception ignored) {}
-
-        boolean sameWallet = originalWalletId != null && originalWalletId.equals(newWalletId);
-
-        if (sameWallet) {
-            double originalEffect = originalIsIncome ? originalAmount : -originalAmount;
-            double newEffect = newIsIncome ? newAmount : -newAmount;
-            double balanceChange = newEffect - originalEffect;
-
-            if (originalWallet != null) {
-                originalWallet.setCurrentBalance(originalWallet.getCurrentBalance() + balanceChange);
-                walletRepo.update(uid, originalWallet);
-            }
-        } else {
-            // Hoan tac giao dich cu
-            if (originalWallet != null) {
-                double originalEffect = originalIsIncome ? originalAmount : -originalAmount;
-                originalWallet.setCurrentBalance(originalWallet.getCurrentBalance() - originalEffect);
-                walletRepo.update(uid, originalWallet);
-            }
-
-            // Ap dung giao dich moi
-            if (newWallet != null) {
-                double newEffect = newIsIncome ? newAmount : -newAmount;
-                newWallet.setCurrentBalance(newWallet.getCurrentBalance() + newEffect);
-                walletRepo.update(uid, newWallet);
-            }
+            Timestamp txDate = parsedDate != null ? parsedDate : Timestamp.now();
+            t.setDate(txDate);
+            txRepo.addAtomic(uid, t, walletRepo, wallet.getId());
+            Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -304,40 +259,11 @@ public class AddTransactionActivity extends AppCompatActivity {
         String uid = authRepo.getUid();
         if (uid == null || editTxId == null) return;
 
-        Wallet wallet = (Wallet) binding.spinnerWallet.getSelectedItem();
-
         if (originalTransaction != null) {
             String walletId = originalTransaction.getWalletId();
-            Wallet w = walletMap.get(walletId);
-            double amt = originalTransaction.getAmount();
-            boolean isIncome = Transaction.TYPE_INCOME.equals(originalTransaction.getType());
-
-            if (w != null) {
-                double newBalance = w.getCurrentBalance();
-                if (isIncome) {
-                    newBalance -= amt;
-                } else {
-                    newBalance += amt;
-                }
-                w.setCurrentBalance(newBalance);
-                walletRepo.update(uid, w);
-            }
-        } else if (wallet != null && binding.editAmount.getText() != null) {
-            double amt = 0;
-            try { amt = Double.parseDouble(binding.editAmount.getText().toString().replace(",", "")); } catch (Exception ignored) {}
-            if (amt > 0) {
-                double newBalance = wallet.getCurrentBalance();
-                if (binding.radioIncome.isChecked()) {
-                    newBalance -= amt;
-                } else {
-                    newBalance += amt;
-                }
-                wallet.setCurrentBalance(newBalance);
-                walletRepo.update(uid, wallet);
-            }
+            txRepo.deleteAtomic(uid, originalTransaction, walletRepo, walletId);
         }
 
-        txRepo.delete(uid, editTxId);
         Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
         finish();
     }

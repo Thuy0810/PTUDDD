@@ -26,5 +26,29 @@ service cloud.firestore {
         if request.auth != null
         && request.auth.uid == userId;
     }
+
+    match /users/{userId}/budgets/{document=**} {
+      allow read, write:
+        if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/recurring/{document=**} {
+      allow read, write:
+        if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/savings_goals/{document=**} {
+      allow read, write:
+        if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/savings_challenges/{document=**} {
+      allow read, write:
+        if request.auth != null
+        && request.auth.uid == userId;
+    }
   }
 }

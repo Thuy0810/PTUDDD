@@ -12,6 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 public final class PrefsHelper {
     private static final String PREFS = "expense_prefs";
@@ -49,21 +54,28 @@ public final class PrefsHelper {
     }
 
     public static boolean verifyPin(Context ctx, String pin) {
-        String hash = hashPin(ctx, pin);
-        return hash.equals(prefs(ctx).getString(KEY_PIN_HASH, ""));
+        String storedHash = prefs(ctx).getString(KEY_PIN_HASH, "");
+        if (storedHash == null || storedHash.isEmpty()) return false;
+        String computedHash = hashPin(ctx, pin);
+        return computedHash.equals(storedHash);
     }
 
     public static String hashPin(Context ctx, String pin) {
         try {
             String salt = getOrCreateSalt(ctx);
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(salt.getBytes(StandardCharsets.UTF_8));
-            byte[] hash = digest.digest((pin + salt).getBytes(StandardCharsets.UTF_8));
+            byte[] saltBytes = Base64.decode(salt, Base64.NO_WRAP);
+            int iterations = 120_000;
+            int keyLength = 256;
+
+            PBEKeySpec spec = new PBEKeySpec(pin.toCharArray(), saltBytes, iterations, keyLength);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            byte[] hash = factory.generateSecret(spec).getEncoded();
+
             StringBuilder hex = new StringBuilder();
             for (byte b : hash) hex.append(String.format("%02x", b));
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return String.valueOf(pin.hashCode());
+            return iterations + ":" + Base64.encodeToString(hash, Base64.NO_WRAP);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException("PBKDF2 hashing failed", e);
         }
     }
 

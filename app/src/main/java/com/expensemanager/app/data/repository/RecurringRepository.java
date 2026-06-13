@@ -63,7 +63,7 @@ public class RecurringRepository {
 
         db.collection("users").document(uid).collection("transactions")
                 .whereEqualTo("walletId", rule.getWalletId())
-                .whereEqualTo("note", "Giao dịch định kỳ")
+                .whereEqualTo("note", rule.getNote() != null ? rule.getNote() : "Giao dịch định kỳ")
                 .whereGreaterThanOrEqualTo("date", new Timestamp(new java.util.Date(startTs)))
                 .whereLessThan("date", new Timestamp(new java.util.Date(endTs)))
                 .get()

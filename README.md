@@ -48,7 +48,7 @@ app/src/main/java/com/expensemanager/app/
 
 ## Bottom navigation
 
-Tổng quan | Giao dịch | **+** | Báo cáo | Cá nhân
+Trang chủ | Ngân sách | Giao dịch | Báo cáo | Cá nhân
 
 ## Lưu ý
 

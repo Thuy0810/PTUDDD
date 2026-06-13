@@ -24,6 +24,7 @@ import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.databinding.FragmentBudgetOverviewBinding;
+import com.expensemanager.app.ui.budget.BudgetAllocationActivity;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
 
@@ -89,7 +90,9 @@ public class BudgetOverviewFragment extends Fragment {
         binding.layoutMonth.setOnClickListener(v -> showMonthPicker());
 
         binding.btnAllocate.setOnClickListener(v -> {
-            startActivity(new Intent(requireContext(), BudgetAllocationActivity.class));
+            Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
+            i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, String.format("%04d-%02d", selectedYear, selectedMonth));
+            startActivity(i);
         });
     }
 

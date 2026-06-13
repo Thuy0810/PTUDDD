@@ -4,8 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.Transaction;
-import com.expensemanager.app.util.DateUtils;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -27,14 +28,15 @@ public class TransactionRepository {
             Calendar cal = Calendar.getInstance();
             cal.set(year, month, 1, 0, 0, 0);
             Date start = cal.getTime();
-            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH) + 1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
             Date end = cal.getTime();
 
             db.collection("users").document(uid).collection("transactions")
                     .whereGreaterThanOrEqualTo("date", new Timestamp(start))
-                    .whereLessThanOrEqualTo("date", new Timestamp(end))
+                    .whereLessThan("date", new Timestamp(end))
                     .orderBy("date", Query.Direction.DESCENDING)
                     .addSnapshotListener((snap, e) -> {
                         List<Transaction> list = new ArrayList<>();
@@ -85,6 +87,82 @@ public class TransactionRepository {
     public void delete(String uid, String txId) {
         db.collection("users").document(uid).collection("transactions")
                 .document(txId).delete();
+    }
+
+    public void addAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+            DocumentReference txRef = db.collection("users").document(uid)
+                    .collection("transactions").document();
+            transaction.set(txRef, t.toMap());
+
+            DocumentSnapshot walletSnap = transaction.get(
+                    db.collection("users").document(uid).collection("wallets").document(walletId));
+            Double balance = walletSnap.getDouble("currentBalance");
+            if (balance == null) balance = 0.0;
+            double change = Transaction.TYPE_INCOME.equals(t.getType()) ? t.getAmount() : -t.getAmount();
+            transaction.update(walletSnap.getReference(), "currentBalance", balance + change);
+            return null;
+        });
+    }
+
+    public void updateAtomic(String uid, Transaction original, Transaction updated,
+                             WalletRepository walletRepo,
+                             String originalWalletId, String newWalletId) {
+        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+            DocumentReference txRef = db.collection("users").document(uid)
+                    .collection("transactions").document(updated.getId());
+            transaction.set(txRef, updated.toMap());
+
+            double originalEffect = Transaction.TYPE_INCOME.equals(original.getType())
+                    ? original.getAmount() : -original.getAmount();
+            double newEffect = Transaction.TYPE_INCOME.equals(updated.getType())
+                    ? updated.getAmount() : -updated.getAmount();
+            double totalChange = newEffect - originalEffect;
+
+            if (originalWalletId != null && originalWalletId.equals(newWalletId)) {
+                DocumentSnapshot walletSnap = transaction.get(
+                        db.collection("users").document(uid).collection("wallets").document(originalWalletId));
+                Double balance = walletSnap.getDouble("currentBalance");
+                if (balance == null) balance = 0.0;
+                transaction.update(walletSnap.getReference(), "currentBalance", balance + totalChange);
+            } else {
+                if (originalWalletId != null) {
+                    DocumentSnapshot origSnap = transaction.get(
+                            db.collection("users").document(uid).collection("wallets").document(originalWalletId));
+                    Double origBalance = origSnap.getDouble("currentBalance");
+                    if (origBalance == null) origBalance = 0.0;
+                    transaction.update(origSnap.getReference(), "currentBalance", origBalance - originalEffect);
+                }
+                if (newWalletId != null) {
+                    DocumentSnapshot newSnap = transaction.get(
+                            db.collection("users").document(uid).collection("wallets").document(newWalletId));
+                    Double newBalance = newSnap.getDouble("currentBalance");
+                    if (newBalance == null) newBalance = 0.0;
+                    transaction.update(newSnap.getReference(), "currentBalance", newBalance + newEffect);
+                }
+            }
+            return null;
+        });
+    }
+
+    public void deleteAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+            if (t.getId() != null) {
+                DocumentReference txRef = db.collection("users").document(uid)
+                        .collection("transactions").document(t.getId());
+                transaction.delete(txRef);
+            }
+
+            if (walletId != null) {
+                DocumentSnapshot walletSnap = transaction.get(
+                        db.collection("users").document(uid).collection("wallets").document(walletId));
+                Double balance = walletSnap.getDouble("currentBalance");
+                if (balance == null) balance = 0.0;
+                double change = Transaction.TYPE_INCOME.equals(t.getType()) ? -t.getAmount() : t.getAmount();
+                transaction.update(walletSnap.getReference(), "currentBalance", balance + change);
+            }
+            return null;
+        });
     }
 
     public static List<Transaction> filterByCategory(List<Transaction> list, String categoryId) {

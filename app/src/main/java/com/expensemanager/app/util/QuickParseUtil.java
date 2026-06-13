@@ -57,11 +57,33 @@ public final class QuickParseUtil {
         }
         String trimmed = input.trim();
 
-        Double amount = parseAmount(trimmed);
         Date date = parseRelativeDate(trimmed);
-        String note = buildNote(trimmed, amount, date);
+        String withoutDate = removeDateFromString(trimmed, date);
+        Double amount = parseAmount(withoutDate);
+        String note = buildNote(withoutDate, amount);
 
         return new ParseResult(amount, note, date);
+    }
+
+    private static String removeDateFromString(String input, Date date) {
+        if (date == null) return input;
+        String result = input;
+
+        String[] relativeKeys = {"hom nay", "hom qua", "hom kia", "tuan nay",
+                "tuan truoc", "thang truoc", "thang sau", "ngay mai"};
+        for (String key : relativeKeys) {
+            Pattern p = RELATIVE_DATE_PATTERNS.get(key);
+            if (p != null && p.matcher(result).find()) {
+                result = result.replaceAll("(?i)" + key, "").trim();
+                break;
+            }
+        }
+
+        Matcher dateMatcher = DATE_PATTERN.matcher(result);
+        if (dateMatcher.find()) {
+            result = result.replace(dateMatcher.group(), "").trim();
+        }
+        return result;
     }
 
     private static Double parseAmount(String input) {
@@ -155,35 +177,18 @@ public final class QuickParseUtil {
         }
     }
 
-    private static String buildNote(String original, Double amount, Date date) {
-        String result = original;
+    private static String buildNote(String withoutDate, Double amount) {
+        String result = withoutDate.trim();
 
         if (amount != null) {
-            Matcher am = AMOUNT_PATTERN.matcher(original);
+            Matcher am = AMOUNT_PATTERN.matcher(result);
             String matched = am.find() ? am.group() : null;
             if (matched != null) {
                 result = result.replace(matched, "").trim();
             }
         }
 
-        if (date != null) {
-            String[] relativeKeys = {"hom nay", "hom qua", "hom kia", "tuan nay",
-                    "tuan truoc", "thang truoc", "thang sau", "ngay mai"};
-            for (String key : relativeKeys) {
-                Pattern p = RELATIVE_DATE_PATTERNS.get(key);
-                if (p != null && p.matcher(original).find()) {
-                    result = result.replaceAll("(?i)" + key, "").trim();
-                    break;
-                }
-            }
-
-            Matcher dateMatcher = DATE_PATTERN.matcher(result);
-            if (dateMatcher.find()) {
-                result = result.replace(dateMatcher.group(), "").trim();
-            }
-        }
-
-        if (result.isEmpty()) return original.trim();
+        if (result.isEmpty()) return withoutDate.trim();
         return result.trim();
     }
 

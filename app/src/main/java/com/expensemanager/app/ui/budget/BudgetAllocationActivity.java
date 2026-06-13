@@ -13,9 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Budget;
 import com.expensemanager.app.data.model.Category;
+import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
+import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.databinding.ActivityBudgetAllocationBinding;
 import com.expensemanager.app.databinding.ItemBudgetAllocSimpleBinding;
 import com.expensemanager.app.util.DateUtils;
@@ -28,20 +30,34 @@ import java.util.Map;
 
 public class BudgetAllocationActivity extends AppCompatActivity {
 
+    public static final String EXTRA_MONTH_KEY = "extra_month_key";
+
     private ActivityBudgetAllocationBinding binding;
     private final AuthRepository authRepo = new AuthRepository();
     private final BudgetRepository budgetRepo = new BudgetRepository();
     private final CategoryRepository categoryRepo = new CategoryRepository();
+    private final TransactionRepository txRepo = new TransactionRepository();
 
     private List<Category> expenseCategories = new ArrayList<>();
     private Map<String, Double> allocatedMap = new HashMap<>();
     private boolean isNextMonth = false;
+    private String selectedMonthKey = null;
+    private double monthlyIncome = 0;
+    private String uid = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityBudgetAllocationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        uid = authRepo.getUid();
+        if (uid == null) { finish(); return; }
+
+        selectedMonthKey = getIntent().getStringExtra(EXTRA_MONTH_KEY);
+        if (selectedMonthKey != null) {
+            isNextMonth = false;
+        }
 
         setupClickListeners();
         loadData();
@@ -50,7 +66,6 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnSettings.setOnClickListener(v -> {
-            String uid = authRepo.getUid();
             if (uid != null) {
                 BudgetSettingsDialog dialog = new BudgetSettingsDialog(this, uid);
                 dialog.show();
@@ -63,12 +78,14 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
         binding.tabCurrent.setOnClickListener(v -> {
             isNextMonth = false;
+            selectedMonthKey = null;
             updateTabsUI();
             loadData();
         });
 
         binding.tabNext.setOnClickListener(v -> {
             isNextMonth = true;
+            selectedMonthKey = null;
             updateTabsUI();
             loadData();
         });
@@ -114,10 +131,21 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        String uid = authRepo.getUid();
         if (uid == null) return;
 
         String monthKey = getMonthKey();
+
+        txRepo.observeMonth(uid, monthKey).observe(this, list -> {
+            monthlyIncome = 0;
+            if (list != null) {
+                for (Transaction t : list) {
+                    if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                        monthlyIncome += t.getAmount();
+                    }
+                }
+            }
+            updateUI();
+        });
 
         categoryRepo.observeAll(uid).observe(this, list -> {
             expenseCategories = new ArrayList<>();
@@ -145,6 +173,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     }
 
     private String getMonthKey() {
+        if (selectedMonthKey != null) {
+            return selectedMonthKey;
+        }
         if (isNextMonth) {
             return DateUtils.nextMonthKey();
         }
@@ -157,18 +188,13 @@ public class BudgetAllocationActivity extends AppCompatActivity {
             totalAllocated += d;
         }
 
-        double totalIncome = getMonthlyIncome();
-        double remaining = totalIncome - totalAllocated;
+        double remaining = monthlyIncome - totalAllocated;
         if (remaining < 0) remaining = 0;
 
         binding.textAllocated.setText(MoneyFormat.format(totalAllocated));
         binding.textUnallocated.setText(MoneyFormat.format(remaining));
 
         updateEssentialItems();
-    }
-
-    private double getMonthlyIncome() {
-        return 10000000;
     }
 
     private void updateEssentialItems() {
@@ -249,7 +275,6 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     }
 
     private void saveBudget(Category cat, double amount, String monthKey) {
-        String uid = authRepo.getUid();
         if (uid == null) return;
 
         Budget b = new Budget();
@@ -261,9 +286,25 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
         allocatedMap.put(cat.getId(), amount);
         Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+        updateUI();
     }
 
     private void saveAllAllocations() {
+        if (uid == null) return;
+
+        String monthKey = getMonthKey();
+        for (Map.Entry<String, Double> entry : allocatedMap.entrySet()) {
+            String catId = entry.getKey();
+            Double amount = entry.getValue();
+            if (catId != null && amount != null) {
+                Budget b = new Budget();
+                b.setScope(Budget.SCOPE_CATEGORY);
+                b.setCategoryId(catId);
+                b.setMonth(monthKey);
+                b.setLimitAmount(amount);
+                budgetRepo.addOrUpdate(uid, b);
+            }
+        }
         Toast.makeText(this, "Da luu tat ca phan bo", Toast.LENGTH_SHORT).show();
         finish();
     }
@@ -288,6 +329,8 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     }
 
     private void showCreateGroupDialog() {
+        if (uid == null) return;
+
         EditText input = new EditText(this);
         input.setHint("Ten nhom");
 
@@ -297,7 +340,13 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 .setPositiveButton("Tao", (d, w) -> {
                     String name = input.getText().toString().trim();
                     if (!name.isEmpty()) {
+                        Category group = new Category();
+                        group.setName(name);
+                        group.setType(Category.TYPE_EXPENSE);
+                        group.setGroup("other");
+                        new CategoryRepository().add(uid, group);
                         Toast.makeText(this, "Da tao nhom: " + name, Toast.LENGTH_SHORT).show();
+                        loadData();
                     }
                 })
                 .setNegativeButton("Huy", null)
