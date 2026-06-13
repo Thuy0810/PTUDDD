@@ -267,22 +267,13 @@ public class BudgetOverviewFragment extends Fragment {
         String uid = authRepo.getUid();
         if (uid == null) return;
 
-        // Check if budget exists for this category
-        Budget existing = null;
-        for (Map.Entry<String, Double> e : allocatedMap.entrySet()) {
-            if (e.getKey().equals(cat.getId())) {
-                // Find the Budget object - simplified: update or create
-                break;
-            }
-        }
-
         Budget b = new Budget();
         b.setScope(Budget.SCOPE_CATEGORY);
         b.setCategoryId(cat.getId());
         b.setMonth(monthKey);
         b.setLimitAmount(amount);
-        budgetRepo.add(uid, b);
-        Toast.makeText(requireContext(), "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
+        budgetRepo.addOrUpdate(uid, b);
+        Toast.makeText(requireContext(), "Da luu ngan sach", Toast.LENGTH_SHORT).show();
     }
 
     @Override

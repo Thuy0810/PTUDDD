@@ -8,3 +8,18 @@
 .externalNativeBuild
 .cxx
 app/google-services.json
+
+# Build outputs
+**/build/
+*.apk
+*.aab
+*.dex
+*.class
+
+# Android
+bin/
+gen/
+out/
+
+# Local config
+*.keystore

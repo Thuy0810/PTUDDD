@@ -46,13 +46,13 @@ public class AddTransactionActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Giao dịch");
+            getSupportActionBar().setTitle("Giao dich");
         }
 
         editTxId = getIntent().getStringExtra(EXTRA_TX_ID);
         if (editTxId != null) {
             binding.btnDelete.setVisibility(android.view.View.VISIBLE);
-            getSupportActionBar().setTitle("Sửa giao dịch");
+            getSupportActionBar().setTitle("Sua giao dich");
         }
 
         String uid = authRepo.getUid();
@@ -143,6 +143,19 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
+    private void selectCategoryById(String catId) {
+        if (catId == null) return;
+        ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCategory.getAdapter();
+        if (adapter == null) return;
+        for (int i = 0; i < adapter.getCount(); i++) {
+            Category c = (Category) adapter.getItem(i);
+            if (c != null && catId.equals(c.getId())) {
+                binding.spinnerCategory.setSelection(i);
+                break;
+            }
+        }
+    }
+
     private void loadTransaction(String uid, String txId) {
         FirebaseFirestore.getInstance()
                 .collection("users").document(uid).collection("transactions")
@@ -161,25 +174,12 @@ public class AddTransactionActivity extends AppCompatActivity {
                     }
                     binding.editAmount.setText(String.valueOf((long) t.getAmount()));
                     binding.editNote.setText(t.getNote() != null ? t.getNote() : "");
-                    selectWalletById(t.getWalletId());
-                    selectCategoryById(t.getCategoryId());
 
+                    // Setup spinner TRUOC, roi moi select
                     setupCategorySpinner(t.getType());
+                    selectCategoryById(t.getCategoryId());
                     selectWalletById(t.getWalletId());
                 });
-    }
-
-    private void selectCategoryById(String catId) {
-        if (catId == null) return;
-        ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCategory.getAdapter();
-        if (adapter == null) return;
-        for (int i = 0; i < adapter.getCount(); i++) {
-            Category c = (Category) adapter.getItem(i);
-            if (c != null && catId.equals(c.getId())) {
-                binding.spinnerCategory.setSelection(i);
-                break;
-            }
-        }
     }
 
     private void save() {
@@ -191,22 +191,22 @@ public class AddTransactionActivity extends AppCompatActivity {
         double amount;
         try { amount = Double.parseDouble(amountStr.replace(",", "")); }
         catch (Exception e) {
-            Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
             return;
         }
         if (amount <= 0) {
-            Toast.makeText(this, "Nhập số tiền > 0", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Nhap so tien > 0", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Category cat = (Category) binding.spinnerCategory.getSelectedItem();
         Wallet wallet = (Wallet) binding.spinnerWallet.getSelectedItem();
         if (cat == null) {
-            Toast.makeText(this, "Chọn danh mục", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chon danh muc", Toast.LENGTH_SHORT).show();
             return;
         }
         if (wallet == null) {
-            Toast.makeText(this, "Chọn ví", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chon vi", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -219,22 +219,20 @@ public class AddTransactionActivity extends AppCompatActivity {
         t.setCategoryId(cat.getId());
         t.setWalletId(wallet.getId());
         t.setNote(binding.editNote.getText() != null ? binding.editNote.getText().toString() : "");
-        t.setDate(Timestamp.now());
 
+        // Giu ngay cu khi sua, chi dat ngay moi khi tao moi
         if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);
+            t.setDate(originalTransaction.getDate());
             txRepo.update(uid, t);
             updateWalletBalanceAfterEdit(uid);
-        } else if (editTxId != null) {
-            t.setId(editTxId);
-            txRepo.update(uid, t);
-            updateWalletBalance(uid, wallet, amount, isIncome);
         } else {
+            t.setDate(Timestamp.now());
             txRepo.add(uid, t);
             updateWalletBalance(uid, wallet, amount, isIncome);
         }
 
-        Toast.makeText(this, "Đã lưu", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -253,9 +251,9 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (originalTransaction == null) return;
 
         String originalWalletId = originalTransaction.getWalletId();
-        String newWalletId = originalTransaction.getWalletId();
-        Wallet originalWallet = walletMap.get(originalWalletId);
         Wallet newWallet = (Wallet) binding.spinnerWallet.getSelectedItem();
+        String newWalletId = newWallet != null ? newWallet.getId() : null;
+        Wallet originalWallet = walletMap.get(originalWalletId);
 
         double originalAmount = originalTransaction.getAmount();
         boolean originalIsIncome = Transaction.TYPE_INCOME.equals(originalTransaction.getType());
@@ -277,12 +275,14 @@ public class AddTransactionActivity extends AppCompatActivity {
                 walletRepo.update(uid, originalWallet);
             }
         } else {
+            // Hoan tac giao dich cu
             if (originalWallet != null) {
                 double originalEffect = originalIsIncome ? originalAmount : -originalAmount;
                 originalWallet.setCurrentBalance(originalWallet.getCurrentBalance() - originalEffect);
                 walletRepo.update(uid, originalWallet);
             }
 
+            // Ap dung giao dich moi
             if (newWallet != null) {
                 double newEffect = newIsIncome ? newAmount : -newAmount;
                 newWallet.setCurrentBalance(newWallet.getCurrentBalance() + newEffect);
@@ -293,10 +293,10 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void showDeleteConfirm() {
         new AlertDialog.Builder(this)
-                .setTitle("Xóa giao dịch")
-                .setMessage("Bạn có chắc muốn xóa giao dịch này?")
-                .setPositiveButton("Xóa", (d, w) -> deleteTransaction())
-                .setNegativeButton("Hủy", null)
+                .setTitle("Xoa giao dich")
+                .setMessage("Ban co that su muon xoa giao dich nay?")
+                .setPositiveButton("Xoa", (d, w) -> deleteTransaction())
+                .setNegativeButton("Huy", null)
                 .show();
     }
 
@@ -338,7 +338,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
 
         txRepo.delete(uid, editTxId);
-        Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
         finish();
     }
 

@@ -2,9 +2,9 @@ package com.expensemanager.app.ui.wallet;
 
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.expensemanager.app.R;
@@ -15,7 +15,12 @@ import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.ActivityTransferBinding;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction as FirestoreTransaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +32,7 @@ public class TransferActivity extends AppCompatActivity {
     private final AuthRepository authRepo = new AuthRepository();
     private final WalletRepository walletRepo = new WalletRepository();
     private final TransactionRepository txRepo = new TransactionRepository();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<Wallet> wallets = new ArrayList<>();
     private Map<String, Wallet> walletMap = new HashMap<>();
 
@@ -37,7 +43,7 @@ public class TransferActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Chuyển tiền");
+            getSupportActionBar().setTitle("Chuyen tien");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -67,11 +73,11 @@ public class TransferActivity extends AppCompatActivity {
         try {
             amount = Double.parseDouble(amountStr.replace(",", ""));
         } catch (Exception e) {
-            Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
             return;
         }
         if (amount <= 0) {
-            Toast.makeText(this, "Nhập số tiền > 0", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Nhap so tien > 0", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -79,17 +85,17 @@ public class TransferActivity extends AppCompatActivity {
         Wallet toWallet = (Wallet) binding.spinnerTo.getSelectedItem();
 
         if (fromWallet == null || toWallet == null) {
-            Toast.makeText(this, "Chọn ví nguồn và ví đích", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chon vi nguon va vi dich", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (fromWallet.getId().equals(toWallet.getId())) {
-            Toast.makeText(this, "Chọn hai ví khác nhau", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Chon hai vi khac nhau", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (fromWallet.getCurrentBalance() < amount) {
-            Toast.makeText(this, "Số dư không đủ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "So du khong du", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -98,27 +104,54 @@ public class TransferActivity extends AppCompatActivity {
 
     private void performTransfer(String uid, double amount, Wallet fromWallet, Wallet toWallet) {
         String note = binding.editNote.getText() != null
-                ? binding.editNote.getText().toString().trim() : "Chuyển tiền";
+                ? binding.editNote.getText().toString().trim() : "Chuyen tien";
 
-        Transaction t = new Transaction();
-        t.setType(Transaction.TYPE_TRANSFER);
-        t.setAmount(amount);
-        t.setFromWalletId(fromWallet.getId());
-        t.setToWalletId(toWallet.getId());
-        t.setWalletId(fromWallet.getId());
-        t.setDate(Timestamp.now());
-        t.setNote(note);
+        binding.btnConfirm.setEnabled(false);
 
-        txRepo.add(uid, t);
+        db.runTransaction((FirestoreTransaction.Function<Void>) transaction -> {
+            DocumentSnapshot fromSnap = transaction.get(
+                    db.collection("users").document(uid).collection("wallets").document(fromWallet.getId()));
+            DocumentSnapshot toSnap = transaction.get(
+                    db.collection("users").document(uid).collection("wallets").document(toWallet.getId()));
 
-        fromWallet.setCurrentBalance(fromWallet.getCurrentBalance() - amount);
-        walletRepo.update(uid, fromWallet);
+            Double fromBalance = fromSnap.getDouble("currentBalance");
+            Double toBalance = toSnap.getDouble("currentBalance");
 
-        toWallet.setCurrentBalance(toWallet.getCurrentBalance() + amount);
-        walletRepo.update(uid, toWallet);
+            if (fromBalance == null || toBalance == null) {
+                throw new FirebaseFirestoreException("Khong doc duoc so du",
+                        FirebaseFirestoreException.Code.ABORTED);
+            }
+            if (fromBalance < amount) {
+                throw new FirebaseFirestoreException("So du khong du",
+                        FirebaseFirestoreException.Code.ABORTED);
+            }
 
-        Toast.makeText(this, "Đã chuyển " + formatAmount(amount) + " đ", Toast.LENGTH_SHORT).show();
-        finish();
+            Map<String, Object> txData = new HashMap<>();
+            txData.put("type", Transaction.TYPE_TRANSFER);
+            txData.put("amount", amount);
+            txData.put("fromWalletId", fromWallet.getId());
+            txData.put("toWalletId", toWallet.getId());
+            txData.put("walletId", fromWallet.getId());
+            txData.put("date", FieldValue.serverTimestamp());
+            txData.put("note", note);
+
+            DocumentReference txRef = db.collection("users").document(uid)
+                    .collection("transactions").document();
+            transaction.set(txRef, txData);
+
+            transaction.update(db.collection("users").document(uid).collection("wallets")
+                    .document(fromWallet.getId()), "currentBalance", fromBalance - amount);
+            transaction.update(db.collection("users").document(uid).collection("wallets")
+                    .document(toWallet.getId()), "currentBalance", toBalance + amount);
+
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            Toast.makeText(this, "Da chuyen " + formatAmount(amount) + " dong", Toast.LENGTH_SHORT).show();
+            finish();
+        }).addOnFailureListener(e -> {
+            binding.btnConfirm.setEnabled(true);
+            Toast.makeText(this, "Loi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private String formatAmount(double amount) {
