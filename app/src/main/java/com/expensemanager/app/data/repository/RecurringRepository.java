@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.RecurringRule;
 import com.expensemanager.app.data.model.Transaction;
-import com.expensemanager.app.data.model.Wallet;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -50,56 +49,66 @@ public class RecurringRepository {
                     for (QueryDocumentSnapshot doc : snap) {
                         RecurringRule rule = doc.toObject(RecurringRule.class);
                         if (rule == null || rule.getWalletId() == null) continue;
-                        if (rule.getDayOfMonth() == today) {
+
+                        if (shouldRunToday(rule, now)) {
                             checkAndCreateTransaction(uid, rule, todayStart, todayEnd);
                         }
                     }
                 });
     }
 
+    private boolean shouldRunToday(RecurringRule rule, Calendar now) {
+        String cycle = rule.getCycleType();
+        if (cycle == null) cycle = RecurringRule.CYCLE_MONTHLY;
+
+        switch (cycle) {
+            case RecurringRule.CYCLE_DAILY:
+                return true;
+            case RecurringRule.CYCLE_WEEKLY:
+                return rule.getDayOfWeek() == now.get(Calendar.DAY_OF_WEEK);
+            case RecurringRule.CYCLE_YEARLY:
+                return rule.getDayOfMonth() == now.get(Calendar.DAY_OF_MONTH)
+                        && rule.getMonthOfYear() == now.get(Calendar.MONTH) + 1;
+            case RecurringRule.CYCLE_MONTHLY:
+            default:
+                return rule.getDayOfMonth() == now.get(Calendar.DAY_OF_MONTH);
+        }
+    }
+
     private void checkAndCreateTransaction(String uid, RecurringRule rule, int todayStart, int todayEnd) {
+        if (rule.getId() == null) return;
+
         long startTs = (long) todayStart * 86400000;
         long endTs = (long) todayEnd * 86400000;
 
         db.collection("users").document(uid).collection("transactions")
-                .whereEqualTo("walletId", rule.getWalletId())
-                .whereEqualTo("note", rule.getNote() != null ? rule.getNote() : "Giao dịch định kỳ")
+                .whereEqualTo("recurringRuleId", rule.getId())
                 .whereGreaterThanOrEqualTo("date", new Timestamp(new java.util.Date(startTs)))
                 .whereLessThan("date", new Timestamp(new java.util.Date(endTs)))
                 .get()
                 .addOnSuccessListener(snap -> {
-                    if (snap != null && !snap.isEmpty()) {
-                        return;
-                    }
+                    if (snap != null && !snap.isEmpty()) return;
                     createTransactionAndUpdateBalance(uid, rule);
                 });
     }
 
     private void createTransactionAndUpdateBalance(String uid, RecurringRule rule) {
+        if (rule.getDateEnd() != null && new java.util.Date().after(rule.getDateEnd().toDate())) {
+            rule.setEnabled(false);
+            update(uid, rule);
+            return;
+        }
+
         Transaction t = new Transaction();
         t.setType(rule.getType());
         t.setAmount(rule.getAmount());
         t.setCategoryId(rule.getCategoryId());
         t.setWalletId(rule.getWalletId());
+        t.setRecurringRuleId(rule.getId());
         t.setNote(rule.getNote() != null ? rule.getNote() : "Giao dịch định kỳ");
         t.setDate(Timestamp.now());
 
-        txRepo.add(uid, t);
-
-        db.collection("users").document(uid).collection("wallets")
-                .document(rule.getWalletId())
-                .get()
-                .addOnSuccessListener(walletDoc -> {
-                    if (walletDoc.exists()) {
-                        Wallet wallet = walletDoc.toObject(Wallet.class);
-                        if (wallet != null) {
-                            double change = Transaction.TYPE_INCOME.equals(rule.getType())
-                                    ? rule.getAmount() : -rule.getAmount();
-                            wallet.setCurrentBalance(wallet.getCurrentBalance() + change);
-                            walletRepo.update(uid, wallet);
-                        }
-                    }
-                });
+        txRepo.add(uid, t, walletRepo);
     }
 
     public void add(String uid, RecurringRule rule) {

@@ -85,12 +85,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         binding.editQuick.setOnFocusChangeListener((v, has) -> {
             if (!has && binding.editQuick.getText() != null) {
-                QuickParseUtil.ParseResult r = QuickParseUtil.parse(binding.editQuick.getText().toString());
-                if (r.amount != null) binding.editAmount.setText(String.valueOf(r.amount.longValue()));
-                if (r.note != null) binding.editNote.setText(r.note);
-                if (r.date != null) parsedDate = new Timestamp(r.date);
-                String catId = CategorySuggester.suggestCategoryId(r.note != null ? r.note : "");
-                if (catId != null) selectCategory(catId);
+                applyQuickParse();
             }
         });
 
@@ -101,7 +96,10 @@ public class AddTransactionActivity extends AppCompatActivity {
             }
         });
 
-        binding.btnSave.setOnClickListener(v -> save());
+        binding.btnSave.setOnClickListener(v -> {
+            applyQuickParse();
+            save();
+        });
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirm());
         binding.btnCancel.setOnClickListener(v -> finish());
     }
@@ -110,6 +108,29 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (editTxId != null && categoriesLoaded && walletsLoaded) {
             loadTransaction(authRepo.getUid(), editTxId);
         }
+    }
+
+    private void applyQuickParse() {
+        String text = binding.editQuick.getText() != null
+                ? binding.editQuick.getText().toString() : "";
+        if (text.trim().isEmpty()) return;
+
+        QuickParseUtil.ParseResult r = QuickParseUtil.parse(text);
+        if (r.amount != null) {
+            binding.editAmount.setText(String.valueOf(r.amount.longValue()));
+        }
+        if (r.note != null && !r.note.isEmpty()) {
+            binding.editNote.setText(r.note);
+        }
+        if (r.date != null) {
+            java.util.Date now = new java.util.Date();
+            if (!r.date.after(now)) {
+                parsedDate = new Timestamp(r.date);
+            }
+        }
+        String catId = CategorySuggester.suggestCategoryId(
+                r.note != null ? r.note : "");
+        if (catId != null) selectCategory(catId);
     }
 
     private void setupCategorySpinner(String type) {

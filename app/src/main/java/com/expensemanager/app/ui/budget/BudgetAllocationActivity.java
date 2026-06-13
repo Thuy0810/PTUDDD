@@ -1,10 +1,14 @@
 package com.expensemanager.app.ui.budget;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -43,7 +47,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     private boolean isNextMonth = false;
     private String selectedMonthKey = null;
     private double monthlyIncome = 0;
+    private double expectedIncomeOverride = -1;
     private String uid = null;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,8 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
         uid = authRepo.getUid();
         if (uid == null) { finish(); return; }
+
+        prefs = getSharedPreferences("budget_" + uid, Context.MODE_PRIVATE);
 
         selectedMonthKey = getIntent().getStringExtra(EXTRA_MONTH_KEY);
         if (selectedMonthKey != null) {
@@ -92,6 +100,8 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
         binding.btnAddEssential.setOnClickListener(v -> showAddCategoryDialog());
         binding.btnCreateGroup.setOnClickListener(v -> showCreateGroupDialog());
+
+        binding.btnEditExpectedIncome.setOnClickListener(v -> showExpectedIncomeDialog());
     }
 
     private void updateTabsUI() {
@@ -134,6 +144,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         if (uid == null) return;
 
         String monthKey = getMonthKey();
+
+        expectedIncomeOverride = prefs.getLong("income_" + monthKey, -1);
+        if (expectedIncomeOverride == -1) expectedIncomeOverride = monthlyIncome;
 
         txRepo.observeMonth(uid, monthKey).observe(this, list -> {
             monthlyIncome = 0;
@@ -188,13 +201,55 @@ public class BudgetAllocationActivity extends AppCompatActivity {
             totalAllocated += d;
         }
 
-        double remaining = monthlyIncome - totalAllocated;
+        double effectiveIncome = getEffectiveIncome();
+        double remaining = effectiveIncome - totalAllocated;
         if (remaining < 0) remaining = 0;
 
         binding.textAllocated.setText(MoneyFormat.format(totalAllocated));
         binding.textUnallocated.setText(MoneyFormat.format(remaining));
+        binding.textExpectedIncome.setText(MoneyFormat.format(effectiveIncome));
 
         updateEssentialItems();
+    }
+
+    private double getEffectiveIncome() {
+        if (expectedIncomeOverride >= 0) return expectedIncomeOverride;
+        return monthlyIncome;
+    }
+
+    private void showExpectedIncomeDialog() {
+        if (uid == null) return;
+        String monthKey = getMonthKey();
+
+        EditText input = new EditText(this);
+        input.setHint("Ví dụ: 15000000");
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        if (expectedIncomeOverride >= 0) {
+            input.setText(String.valueOf((long) expectedIncomeOverride));
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Thu nhập dự kiến")
+                .setView(input)
+                .setPositiveButton("Lưu", (d, w) -> {
+                    String text = input.getText().toString().trim().replace(",", "");
+                    try {
+                        double val = Double.parseDouble(text);
+                        if (val < 0) throw new Exception();
+                        expectedIncomeOverride = val;
+                        prefs.edit().putLong("income_" + monthKey, (long) val).apply();
+                        updateUI();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Hủy", null)
+                .setNeutralButton("Xóa", (d, w) -> {
+                    expectedIncomeOverride = -1;
+                    prefs.edit().remove("income_" + monthKey).apply();
+                    updateUI();
+                })
+                .show();
     }
 
     private void updateEssentialItems() {
@@ -331,25 +386,51 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     private void showCreateGroupDialog() {
         if (uid == null) return;
 
-        EditText input = new EditText(this);
-        input.setHint("Ten nhom");
+        final EditText input = new EditText(this);
+        input.setHint("Tên nhóm");
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+
+        final String[] groupLabels = {"Thiết yếu", "Nhu cầu", "Khoản muốn có", "Khác"};
+        final String[] groupValues = {"essential", "need", "want", "other"};
+        final int[] selectedGroup = {3};
+
+        View radioView = getLayoutInflater().inflate(R.layout.dialog_group_picker, null);
+        RadioButton rb0 = radioView.findViewById(R.id.rbEssential);
+        RadioButton rb1 = radioView.findViewById(R.id.rbNeed);
+        RadioButton rb2 = radioView.findViewById(R.id.rbWant);
+        RadioButton rb3 = radioView.findViewById(R.id.rbOther);
+
+        rb3.setChecked(true);
+        rb0.setOnClickListener(v -> selectedGroup[0] = 0);
+        rb1.setOnClickListener(v -> selectedGroup[0] = 1);
+        rb2.setOnClickListener(v -> selectedGroup[0] = 2);
+        rb3.setOnClickListener(v -> selectedGroup[0] = 3);
+
+        // Combine the EditText and RadioGroup in a vertical layout
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(48, 16, 48, 16);
+        container.addView(input);
+        container.addView(radioView);
 
         new AlertDialog.Builder(this)
-                .setTitle("Tao nhom")
-                .setView(input)
-                .setPositiveButton("Tao", (d, w) -> {
+                .setTitle("Tạo nhóm")
+                .setView(container)
+                .setPositiveButton("Tạo", (d, w) -> {
                     String name = input.getText().toString().trim();
-                    if (!name.isEmpty()) {
-                        Category group = new Category();
-                        group.setName(name);
-                        group.setType(Category.TYPE_EXPENSE);
-                        group.setGroup("other");
-                        new CategoryRepository().add(uid, group);
-                        Toast.makeText(this, "Da tao nhom: " + name, Toast.LENGTH_SHORT).show();
-                        loadData();
+                    if (name.isEmpty()) {
+                        Toast.makeText(this, "Nhập tên nhóm", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    Category group = new Category();
+                    group.setName(name);
+                    group.setType(Category.TYPE_EXPENSE);
+                    group.setGroup(groupValues[selectedGroup[0]]);
+                    new CategoryRepository().add(uid, group);
+                    Toast.makeText(this, "Đã tạo nhóm: " + name, Toast.LENGTH_SHORT).show();
+                    loadData();
                 })
-                .setNegativeButton("Huy", null)
+                .setNegativeButton("Hủy", null)
                 .show();
     }
 

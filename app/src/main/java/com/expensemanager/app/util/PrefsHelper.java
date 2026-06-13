@@ -24,8 +24,20 @@ public final class PrefsHelper {
     private static final String KEY_PIN_HASH = "pin_hash";
     private static final String KEY_DARK_MODE = "dark_mode";
     private static final String KEY_REMINDER = "reminder_enabled";
+    private static final String KEY_REMINDER_HOUR = "reminder_hour";
+    private static final String KEY_REMINDER_MIN = "reminder_min";
     private static final String KEY_PENDING_LOGOUT = "pending_logout";
     private static final String KEY_SALT = "pin_salt";
+    private static final String KEY_PIN_FAILS = "pin_fail_count";
+    private static final String KEY_PIN_LOCK_UNTIL = "pin_lock_until";
+    private static final String KEY_BIOMETRIC_ENABLED = "biometric_enabled";
+    private static final String KEY_CURRENCY_SYMBOL = "currency_symbol";
+    private static final String KEY_CURRENCY_POSITION = "currency_position";
+    private static final String KEY_CURRENCY_DECIMALS = "currency_decimals";
+    private static final String KEY_CURRENCY_LOCALE = "currency_locale";
+
+    private static final int MAX_PIN_ATTEMPTS = 5;
+    private static final long LOCK_DURATION_MS = 5 * 60 * 1000L; // 5 minutes
 
     private PrefsHelper() {}
 
@@ -118,5 +130,101 @@ public final class PrefsHelper {
 
     public static void clearPendingLogout(Context ctx) {
         prefs(ctx).edit().putBoolean(KEY_PENDING_LOGOUT, false).apply();
+    }
+
+    // --- PIN fail counter ---
+
+    public static int getPinFailCount(Context ctx) {
+        return prefs(ctx).getInt(KEY_PIN_FAILS, 0);
+    }
+
+    public static void incrementPinFailCount(Context ctx) {
+        prefs(ctx).edit().putInt(KEY_PIN_FAILS, getPinFailCount(ctx) + 1).apply();
+    }
+
+    public static void resetPinFailCount(Context ctx) {
+        prefs(ctx).edit().putInt(KEY_PIN_FAILS, 0).apply();
+    }
+
+    public static int getRemainingAttempts(Context ctx) {
+        return Math.max(0, MAX_PIN_ATTEMPTS - getPinFailCount(ctx));
+    }
+
+    public static boolean isPinLockedOut(Context ctx) {
+        long lockUntil = prefs(ctx).getLong(KEY_PIN_LOCK_UNTIL, 0);
+        return lockUntil > 0 && System.currentTimeMillis() < lockUntil;
+    }
+
+    public static long getLockRemainingMs(Context ctx) {
+        long lockUntil = prefs(ctx).getLong(KEY_PIN_LOCK_UNTIL, 0);
+        return Math.max(0, lockUntil - System.currentTimeMillis());
+    }
+
+    public static void setPinLockout(Context ctx) {
+        long lockUntil = System.currentTimeMillis() + LOCK_DURATION_MS;
+        prefs(ctx).edit().putLong(KEY_PIN_LOCK_UNTIL, lockUntil).apply();
+    }
+
+    public static void clearPinLockout(Context ctx) {
+        prefs(ctx).edit().putLong(KEY_PIN_LOCK_UNTIL, 0).apply();
+    }
+
+    // --- Biometric ---
+
+    public static boolean isBiometricEnabled(Context ctx) {
+        return prefs(ctx).getBoolean(KEY_BIOMETRIC_ENABLED, false);
+    }
+
+    public static void setBiometricEnabled(Context ctx, boolean enabled) {
+        prefs(ctx).edit().putBoolean(KEY_BIOMETRIC_ENABLED, enabled).apply();
+    }
+
+    // --- Currency settings ---
+
+    public static String getCurrencySymbol(Context ctx) {
+        return prefs(ctx).getString(KEY_CURRENCY_SYMBOL, "đ");
+    }
+
+    public static void setCurrencySymbol(Context ctx, String symbol) {
+        prefs(ctx).edit().putString(KEY_CURRENCY_SYMBOL, symbol).apply();
+    }
+
+    public static boolean isCurrencySymbolBefore(Context ctx) {
+        return prefs(ctx).getBoolean(KEY_CURRENCY_POSITION, true);
+    }
+
+    public static void setCurrencyPosition(Context ctx, boolean before) {
+        prefs(ctx).edit().putBoolean(KEY_CURRENCY_POSITION, before).apply();
+    }
+
+    public static int getCurrencyDecimals(Context ctx) {
+        return prefs(ctx).getInt(KEY_CURRENCY_DECIMALS, 0);
+    }
+
+    public static void setCurrencyDecimals(Context ctx, int decimals) {
+        prefs(ctx).edit().putInt(KEY_CURRENCY_DECIMALS, decimals).apply();
+    }
+
+    public static String getCurrencyLocale(Context ctx) {
+        return prefs(ctx).getString(KEY_CURRENCY_LOCALE, "vi_VN");
+    }
+
+    public static void setCurrencyLocale(Context ctx, String localeTag) {
+        prefs(ctx).edit().putString(KEY_CURRENCY_LOCALE, localeTag).apply();
+    }
+
+    public static int getReminderHour(Context ctx) {
+        return prefs(ctx).getInt(KEY_REMINDER_HOUR, 21);
+    }
+
+    public static int getReminderMinute(Context ctx) {
+        return prefs(ctx).getInt(KEY_REMINDER_MIN, 0);
+    }
+
+    public static void setReminderTime(Context ctx, int hour, int minute) {
+        prefs(ctx).edit()
+                .putInt(KEY_REMINDER_HOUR, hour)
+                .putInt(KEY_REMINDER_MIN, minute)
+                .apply();
     }
 }

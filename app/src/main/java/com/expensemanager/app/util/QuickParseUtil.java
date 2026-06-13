@@ -31,10 +31,28 @@ public final class QuickParseUtil {
                 "tuan\\s*truoc", Pattern.CASE_INSENSITIVE));
         RELATIVE_DATE_PATTERNS.put("thang truoc", Pattern.compile(
                 "thang\\s*truoc", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thang nay", Pattern.compile(
+                "thang\\s*nay", Pattern.CASE_INSENSITIVE));
         RELATIVE_DATE_PATTERNS.put("thang sau", Pattern.compile(
                 "thang\\s*sau", Pattern.CASE_INSENSITIVE));
         RELATIVE_DATE_PATTERNS.put("ngay mai", Pattern.compile(
                 "ngay\\s*mai", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu hai", Pattern.compile(
+                "thứ?\\s*hai", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu ba", Pattern.compile(
+                "thứ?\\s*ba", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu tu", Pattern.compile(
+                "thứ?\\s*tư", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu nam", Pattern.compile(
+                "thứ?\\s*năm", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu sau", Pattern.compile(
+                "thứ?\\s*sáu", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thu bay", Pattern.compile(
+                "thứ?\\s*bảy", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("cn", Pattern.compile(
+                "chủ?\\s*nhật", Pattern.CASE_INSENSITIVE));
+        RELATIVE_DATE_PATTERNS.put("thang ", Pattern.compile(
+                "thang\\s+(\\d{1,2})", Pattern.CASE_INSENSITIVE));
     }
 
     public static class ParseResult {
@@ -70,19 +88,36 @@ public final class QuickParseUtil {
         String result = input;
 
         String[] relativeKeys = {"hom nay", "hom qua", "hom kia", "tuan nay",
-                "tuan truoc", "thang truoc", "thang sau", "ngay mai"};
+                "tuan truoc", "thang truoc", "thang nay", "thang sau",
+                "ngay mai", "thu hai", "thu ba", "thu tu", "thu nam",
+                "thu sau", "thu bay", "cn"};
         for (String key : relativeKeys) {
             Pattern p = RELATIVE_DATE_PATTERNS.get(key);
             if (p != null && p.matcher(result).find()) {
-                result = result.replaceAll("(?i)" + key, "").trim();
+                result = result.replaceAll("(?i)" + Pattern.quote(key), "").trim();
                 break;
             }
         }
 
         Matcher dateMatcher = DATE_PATTERN.matcher(result);
-        if (dateMatcher.find()) {
-            result = result.replace(dateMatcher.group(), "").trim();
+        StringBuffer sb = new StringBuffer();
+        boolean found = false;
+        while (dateMatcher.find()) {
+            int start = dateMatcher.start();
+            boolean atStart = start == 0 || Character.isWhitespace(input.charAt(start - 1))
+                    || input.charAt(start - 1) == ',' || input.charAt(start - 1) == '(';
+            int end = dateMatcher.end();
+            boolean atEnd = end == input.length() || Character.isWhitespace(input.charAt(end))
+                    || input.charAt(end) == ',' || input.charAt(end) == ')' || input.charAt(end) == '.';
+            if (atStart && atEnd) {
+                dateMatcher.appendReplacement(sb, "");
+                found = true;
+            } else {
+                dateMatcher.appendReplacement(sb, dateMatcher.group());
+            }
         }
+        dateMatcher.appendTail(sb);
+        if (found) return sb.toString().trim();
         return result;
     }
 
@@ -106,6 +141,9 @@ public final class QuickParseUtil {
     private static Date parseRelativeDate(String input) {
         for (Map.Entry<String, Pattern> e : RELATIVE_DATE_PATTERNS.entrySet()) {
             if (e.getValue().matcher(input).find()) {
+                if ("thang ".equals(e.getKey())) {
+                    return parseMonthFromInput(input, e.getValue());
+                }
                 return resolveRelativeDate(e.getKey());
             }
         }
@@ -115,6 +153,25 @@ public final class QuickParseUtil {
             return parseExplicitDate(dateMatcher);
         }
 
+        return null;
+    }
+
+    private static Date parseMonthFromInput(String input, Pattern p) {
+        Matcher m = p.matcher(input);
+        if (m.find()) {
+            try {
+                int month = Integer.parseInt(m.group(1));
+                if (month >= 1 && month <= 12) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.MONTH, month - 1);
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    return cal.getTime();
+                }
+            } catch (Exception ignored) {}
+        }
         return null;
     }
 
@@ -143,15 +200,42 @@ public final class QuickParseUtil {
             case "thang truoc":
                 cal.add(Calendar.MONTH, -1);
                 return cal.getTime();
+            case "thang nay":
+                return cal.getTime();
             case "thang sau":
                 cal.add(Calendar.MONTH, 1);
                 return cal.getTime();
             case "ngay mai":
                 cal.add(Calendar.DAY_OF_MONTH, 1);
                 return cal.getTime();
+            case "thu hai":
+                return nextDayOfWeek(cal, Calendar.MONDAY);
+            case "thu ba":
+                return nextDayOfWeek(cal, Calendar.TUESDAY);
+            case "thu tu":
+                return nextDayOfWeek(cal, Calendar.WEDNESDAY);
+            case "thu nam":
+                return nextDayOfWeek(cal, Calendar.THURSDAY);
+            case "thu sau":
+                return nextDayOfWeek(cal, Calendar.FRIDAY);
+            case "thu bay":
+                return nextDayOfWeek(cal, Calendar.SATURDAY);
+            case "cn":
+                return nextDayOfWeek(cal, Calendar.SUNDAY);
+            case "thang ":
+                return null;
             default:
                 return null;
         }
+    }
+
+    private static Date nextDayOfWeek(Calendar cal, int targetDayOfWeek) {
+        Calendar c = (Calendar) cal.clone();
+        int diff = targetDayOfWeek - c.get(Calendar.DAY_OF_WEEK);
+        if (diff < 0) diff += 7;
+        if (diff == 0) diff = 7;
+        c.add(Calendar.DAY_OF_MONTH, diff);
+        return c.getTime();
     }
 
     private static Date parseExplicitDate(Matcher m) {

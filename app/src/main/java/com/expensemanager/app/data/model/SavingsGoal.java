@@ -12,6 +12,7 @@ public class SavingsGoal {
     private String title;
     private double targetAmount;
     private double savedAmount;
+    private String walletId;
     private boolean completed;
     private Timestamp deadline;
 
@@ -29,6 +30,9 @@ public class SavingsGoal {
     public double getSavedAmount() { return savedAmount; }
     public void setSavedAmount(double savedAmount) { this.savedAmount = savedAmount; }
 
+    public String getWalletId() { return walletId; }
+    public void setWalletId(String walletId) { this.walletId = walletId; }
+
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
 
@@ -40,11 +44,31 @@ public class SavingsGoal {
         return (float) Math.min(1.0, savedAmount / targetAmount);
     }
 
+    public boolean isOverdue() {
+        if (deadline == null || completed) return false;
+        return new java.util.Date().after(deadline.toDate());
+    }
+
+    public long getRemainingDays() {
+        if (deadline == null) return -1;
+        long diff = deadline.toDate().getTime() - new java.util.Date().getTime();
+        return diff / (24 * 3600 * 1000);
+    }
+
+    public double getMonthlyRequired() {
+        if (deadline == null || completed) return 0;
+        long daysLeft = getRemainingDays();
+        if (daysLeft <= 0) return targetAmount - savedAmount;
+        long monthsLeft = Math.max(1, daysLeft / 30);
+        return (targetAmount - savedAmount) / monthsLeft;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
         map.put("targetAmount", targetAmount);
         map.put("savedAmount", savedAmount);
+        map.put("walletId", walletId);
         map.put("completed", completed);
         if (deadline != null) map.put("deadline", deadline);
         return map;

@@ -1,11 +1,15 @@
 package com.expensemanager.app.ui.challenge;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -25,10 +29,15 @@ import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.ActivityChallengeListBinding;
 import com.expensemanager.app.ui.adapter.RecurringAdapter;
+import com.google.firebase.Timestamp;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ChallengeListActivity extends AppCompatActivity {
@@ -99,7 +108,13 @@ public class ChallengeListActivity extends AppCompatActivity {
         EditText editAmount = view.findViewById(R.id.editRecurringAmount);
         Spinner spinnerCat = view.findViewById(R.id.spinnerRecurringCategory);
         Spinner spinnerWallet = view.findViewById(R.id.spinnerRecurringWallet);
+        Spinner spinnerCycle = view.findViewById(R.id.spinnerRecurringCycle);
         Spinner spinnerDay = view.findViewById(R.id.spinnerRecurringDay);
+        Spinner spinnerMonth = view.findViewById(R.id.spinnerRecurringMonth);
+        TextView labelDay = view.findViewById(R.id.labelRecurringDay);
+        TextView labelMonth = view.findViewById(R.id.labelRecurringMonth);
+        Button btnDateStart = view.findViewById(R.id.btnRecurringDateStart);
+        Button btnDateEnd = view.findViewById(R.id.btnRecurringDateEnd);
 
         List<String> catNames = new ArrayList<>();
         for (Category c : categories) catNames.add(c.getName());
@@ -115,12 +130,74 @@ public class ChallengeListActivity extends AppCompatActivity {
         walletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerWallet.setAdapter(walletAdapter);
 
-        String[] days = new String[31];
-        for (int i = 0; i < 31; i++) days[i] = "Ngày " + (i + 1);
+        String[] cycleLabels = {"Ngày", "Tuần", "Tháng", "Năm"};
+        ArrayAdapter<String> cycleAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, java.util.Arrays.asList(cycleLabels));
+        cycleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCycle.setAdapter(cycleAdapter);
+
+        String[] monthNames = {
+                "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
+                "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
+                "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+        };
+        ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, java.util.Arrays.asList(monthNames));
+        monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMonth.setAdapter(monthAdapter);
+
+        final Timestamp[] dateStart = {null};
+        final Timestamp[] dateEnd = {null};
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        btnDateStart.setOnClickListener(v -> {
+            Calendar c = Calendar.getInstance();
+            new DatePickerDialog(this, (dp, year, month, day) -> {
+                c.set(year, month, day, 0, 0, 0);
+                dateStart[0] = new Timestamp(c.getTime());
+                btnDateStart.setText(dateFormat.format(c.getTime()));
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        btnDateEnd.setOnClickListener(v -> {
+            Calendar c = Calendar.getInstance();
+            new DatePickerDialog(this, (dp, year, month, day) -> {
+                c.set(year, month, day, 23, 59, 59);
+                dateEnd[0] = new Timestamp(c.getTime());
+                btnDateEnd.setText(dateFormat.format(c.getTime()));
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        final String[] dayLabels = buildDayLabels(RecurringRule.CYCLE_MONTHLY);
         ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, java.util.Arrays.asList(days));
+                android.R.layout.simple_spinner_item, java.util.Arrays.asList(dayLabels));
         dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDay.setAdapter(dayAdapter);
+
+        spinnerCycle.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                String cycle = getCycleTypeFromPosition(pos);
+                String[] labels = buildDayLabels(cycle);
+                dayAdapter.clear();
+                dayAdapter.addAll(labels);
+                dayAdapter.notifyDataSetChanged();
+
+                labelDay.setText(getDayLabelForCycle(cycle));
+                labelDay.setVisibility(View.VISIBLE);
+                spinnerDay.setVisibility(View.VISIBLE);
+
+                labelMonth.setVisibility(View.GONE);
+                spinnerMonth.setVisibility(View.GONE);
+                if (RecurringRule.CYCLE_YEARLY.equals(cycle)) {
+                    labelMonth.setVisibility(View.VISIBLE);
+                    spinnerMonth.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         new AlertDialog.Builder(this)
                 .setTitle("Giao dịch định kỳ mới")
@@ -137,11 +214,32 @@ public class ChallengeListActivity extends AppCompatActivity {
                         Toast.makeText(this, "Số tiền > 0", Toast.LENGTH_SHORT).show();
                         return;
                     }
+
                     int catPos = spinnerCat.getSelectedItemPosition();
                     int walletPos = spinnerWallet.getSelectedItemPosition();
+                    int cyclePos = spinnerCycle.getSelectedItemPosition();
                     int dayPos = spinnerDay.getSelectedItemPosition();
+                    int monthPos = spinnerMonth.getSelectedItemPosition();
                     Category cat = categories.get(catPos);
                     Wallet wallet = wallets.get(walletPos);
+
+                    String cycleType = getCycleTypeFromPosition(cyclePos);
+                    int dayOfMonth = 0, dayOfWeek = 0, monthOfYear = 0;
+
+                    switch (cycleType) {
+                        case RecurringRule.CYCLE_DAILY:
+                            break;
+                        case RecurringRule.CYCLE_WEEKLY:
+                            dayOfWeek = dayPos + 1;
+                            break;
+                        case RecurringRule.CYCLE_MONTHLY:
+                            dayOfMonth = dayPos + 1;
+                            break;
+                        case RecurringRule.CYCLE_YEARLY:
+                            dayOfMonth = dayPos + 1;
+                            monthOfYear = monthPos + 1;
+                            break;
+                    }
 
                     RecurringRule r = new RecurringRule();
                     r.setType(Transaction.TYPE_EXPENSE);
@@ -149,13 +247,55 @@ public class ChallengeListActivity extends AppCompatActivity {
                     r.setCategoryId(cat.getId());
                     r.setWalletId(wallet.getId());
                     r.setNote(note);
-                    r.setDayOfMonth(dayPos + 1);
+                    r.setCycleType(cycleType);
+                    r.setDayOfMonth(dayOfMonth);
+                    r.setDayOfWeek(dayOfWeek);
+                    r.setMonthOfYear(monthOfYear);
+                    r.setDateStart(dateStart[0]);
+                    r.setDateEnd(dateEnd[0]);
                     r.setEnabled(true);
                     recurringRepo.add(uid, r);
                     Toast.makeText(this, "Đã tạo giao dịch định kỳ!", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+
+    private String getCycleTypeFromPosition(int pos) {
+        switch (pos) {
+            case 0: return RecurringRule.CYCLE_DAILY;
+            case 1: return RecurringRule.CYCLE_WEEKLY;
+            case 3: return RecurringRule.CYCLE_YEARLY;
+            default: return RecurringRule.CYCLE_MONTHLY;
+        }
+    }
+
+    private String getDayLabelForCycle(String cycle) {
+        switch (cycle) {
+            case RecurringRule.CYCLE_WEEKLY: return "Thứ trong tuần";
+            case RecurringRule.CYCLE_YEARLY: return "Ngày trong tháng";
+            default: return "Ngày trong tháng";
+        }
+    }
+
+    private String[] buildDayLabels(String cycle) {
+        switch (cycle) {
+            case RecurringRule.CYCLE_WEEKLY:
+                return new String[]{
+                        "Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4",
+                        "Thứ 5", "Thứ 6", "Thứ 7"
+                };
+            case RecurringRule.CYCLE_YEARLY:
+                String[] days = new String[31];
+                for (int i = 0; i < 31; i++) days[i] = "Ngày " + (i + 1);
+                return days;
+            case RecurringRule.CYCLE_MONTHLY:
+            default:
+                String[] monthly = new String[32];
+                for (int i = 0; i < 31; i++) monthly[i] = "Ngày " + (i + 1);
+                monthly[31] = "Ngày cuối tháng";
+                return monthly;
+        }
     }
 
     private void showEditDialog(String uid, RecurringRule r) {

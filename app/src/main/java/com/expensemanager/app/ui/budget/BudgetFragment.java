@@ -84,7 +84,9 @@ public class BudgetFragment extends Fragment {
         binding.tabExpense.setOnClickListener(v -> updateTabUI(false));
 
         binding.btnAllocate.setOnClickListener(v -> {
-            startActivity(new Intent(requireContext(), BudgetAllocationActivity.class));
+            Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
+            i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, DateUtils.currentMonthKey());
+            startActivity(i);
         });
     }
 

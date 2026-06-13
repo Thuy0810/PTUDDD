@@ -1,50 +1,70 @@
 package com.expensemanager.app.util;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MoneyFormat {
-    private static String currencySymbol = "đ";
-    private static NumberFormat format = NumberFormat.getInstance(new Locale("vi", "VN"));
-    private static final ConcurrentHashMap<String, NumberFormat> formatCache = new ConcurrentHashMap<>();
+    private static volatile String currencySymbol = "đ";
+    private static volatile boolean symbolBefore = true;
+    private static volatile int decimals = 0;
+    private static volatile Locale locale = new Locale("vi", "VN");
+    private static final ConcurrentHashMap<Locale, DecimalFormat> formatCache = new ConcurrentHashMap<>();
 
     private MoneyFormat() {}
 
-    public static void setCurrency(String symbol) {
+    public static void applySettings(String symbol, boolean before, int decimalPlaces, Locale loc) {
         currencySymbol = symbol != null ? symbol : "đ";
-    }
-
-    public static void setLocale(String languageTag) {
-        Locale locale;
-        if (languageTag == null || languageTag.isEmpty()) {
-            locale = new Locale("vi", "VN");
-        } else {
-            String[] parts = languageTag.split("[-_]");
-            if (parts.length >= 2) {
-                locale = new Locale(parts[0], parts[1]);
-            } else {
-                locale = new Locale(languageTag);
-            }
-        }
-        format = NumberFormat.getInstance(locale);
-    }
-
-    public static String format(double amount) {
-        return format.format(amount) + " " + currencySymbol;
-    }
-
-    public static String formatCompact(double amount) {
-        if (amount >= 1_000_000) {
-            return String.format(Locale.US, "%.1fM", amount / 1_000_000) + " " + currencySymbol;
-        } else if (amount >= 1_000) {
-            return String.format(Locale.US, "%.1fK", amount / 1_000) + " " + currencySymbol;
-        }
-        return format.format(amount) + " " + currencySymbol;
+        symbolBefore = before;
+        decimals = Math.max(0, decimalPlaces);
+        locale = loc != null ? loc : new Locale("vi", "VN");
+        formatCache.clear();
     }
 
     public static void reset() {
-        currencySymbol = "đ";
-        format = NumberFormat.getInstance(new Locale("vi", "VN"));
+        applySettings("đ", true, 0, new Locale("vi", "VN"));
+    }
+
+    private static DecimalFormat getFormat() {
+        DecimalFormat df = formatCache.get(locale);
+        if (df == null) {
+            df = (DecimalFormat) NumberFormat.getInstance(locale);
+            DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+            symbols.setDecimalSeparator(',');
+            symbols.setGroupingSeparator('.');
+            df.setDecimalFormatSymbols(symbols);
+            df.setMaximumFractionDigits(decimals);
+            df.setMinimumFractionDigits(0);
+            df.setGroupingUsed(true);
+            formatCache.put(locale, df);
+        }
+        return df;
+    }
+
+    public static String format(double amount) {
+        String number = getFormat().format(amount);
+        if (symbolBefore) {
+            return currencySymbol + " " + number;
+        } else {
+            return number + " " + currencySymbol;
+        }
+    }
+
+    public static String formatCompact(double amount) {
+        String number;
+        if (amount >= 1_000_000) {
+            number = String.format(locale, "%.1fM", amount / 1_000_000);
+        } else if (amount >= 1_000) {
+            number = String.format(locale, "%.1fK", amount / 1_000);
+        } else {
+            number = getFormat().format(amount);
+        }
+        if (symbolBefore) {
+            return currencySymbol + " " + number;
+        } else {
+            return number + " " + currencySymbol;
+        }
     }
 }

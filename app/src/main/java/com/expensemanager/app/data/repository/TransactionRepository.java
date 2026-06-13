@@ -28,11 +28,9 @@ public class TransactionRepository {
             Calendar cal = Calendar.getInstance();
             cal.set(year, month, 1, 0, 0, 0);
             Date start = cal.getTime();
-            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH) + 1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            Date end = cal.getTime();
+            Calendar endCal = (Calendar) cal.clone();
+            endCal.add(Calendar.MONTH, 1);
+            Date end = endCal.getTime();
 
             db.collection("users").document(uid).collection("transactions")
                     .whereGreaterThanOrEqualTo("date", new Timestamp(start))
@@ -73,15 +71,17 @@ public class TransactionRepository {
         return live;
     }
 
-    public void add(String uid, Transaction t) {
-        db.collection("users").document(uid).collection("transactions")
-                .add(t.toMap());
+    public void add(String uid, Transaction t, WalletRepository walletRepo) {
+        if (t.getWalletId() == null || t.getWalletId().isEmpty()) {
+            db.collection("users").document(uid).collection("transactions").add(t.toMap());
+            return;
+        }
+        addAtomic(uid, t, walletRepo, t.getWalletId());
     }
 
-    public void update(String uid, Transaction t) {
+    public void update(String uid, Transaction t, WalletRepository walletRepo) {
         if (t.getId() == null) return;
-        db.collection("users").document(uid).collection("transactions")
-                .document(t.getId()).set(t.toMap());
+        updateAtomic(uid, t, t, walletRepo, t.getWalletId(), t.getWalletId());
     }
 
     public void delete(String uid, String txId) {
@@ -179,7 +179,8 @@ public class TransactionRepository {
         String q = query.toLowerCase();
         List<Transaction> out = new ArrayList<>();
         for (Transaction t : list) {
-            if (t.getNote().toLowerCase().contains(q)
+            String note = t.getNote();
+            if ((note != null && note.toLowerCase().contains(q))
                     || String.valueOf((long) t.getAmount()).contains(q)) {
                 out.add(t);
             }
@@ -193,5 +194,25 @@ public class TransactionRepository {
             if (Transaction.TYPE_EXPENSE.equals(t.getType())) out.add(t);
         }
         return out;
+    }
+
+    public LiveData<List<Transaction>> observeRange(String uid, Date start, Date end) {
+        MutableLiveData<List<Transaction>> live = new MutableLiveData<>();
+        db.collection("users").document(uid).collection("transactions")
+                .whereGreaterThanOrEqualTo("date", new Timestamp(start))
+                .whereLessThan("date", new Timestamp(end))
+                .orderBy("date", Query.Direction.DESCENDING)
+                .addSnapshotListener((snap, e) -> {
+                    List<Transaction> list = new ArrayList<>();
+                    if (snap != null) {
+                        for (QueryDocumentSnapshot doc : snap) {
+                            Transaction t = doc.toObject(Transaction.class);
+                            t.setId(doc.getId());
+                            list.add(t);
+                        }
+                    }
+                    live.setValue(list);
+                });
+        return live;
     }
 }

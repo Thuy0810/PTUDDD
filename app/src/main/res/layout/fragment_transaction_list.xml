@@ -5,17 +5,135 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- Filter bar -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp">
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/card_bg"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editSearch"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/search_hint" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/search_hint" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Date range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/btnDateRange"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="Tháng này"
+                    android:textSize="12sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerWallet"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_spinner_dropdown"
+                    android:padding="4dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerSort"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_spinner_dropdown"
+                    android:padding="4dp" />
+            </LinearLayout>
+
+            <!-- Type + Amount range -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <RadioGroup
+                    android:id="@+id/radioGroupType"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radioAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Tất cả"
+                        android:textSize="12sp" />
+
+                    <RadioButton
+                        android:id="@+id/radioIncome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Thu"
+                        android:textSize="12sp" />
+
+                    <RadioButton
+                        android:id="@+id/radioExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Chi"
+                        android:textSize="12sp" />
+                </RadioGroup>
+
+                <EditText
+                    android:id="@+id/editMinAmount"
+                    android:layout_width="72dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_spinner_dropdown"
+                    android:gravity="center"
+                    android:hint="Từ"
+                    android:inputType="number"
+                    android:paddingHorizontal="8dp"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/editMaxAmount"
+                    android:layout_width="72dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_spinner_dropdown"
+                    android:gravity="center"
+                    android:hint="Đến"
+                    android:inputType="number"
+                    android:paddingHorizontal="8dp"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerTransactions"

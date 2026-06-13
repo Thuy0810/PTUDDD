@@ -53,12 +53,7 @@ public class RecurringAdapter extends RecyclerView.Adapter<RecurringAdapter.VH> 
         Category cat = categoryMap.get(r.getCategoryId());
         holder.binding.textCategory.setText(cat != null ? cat.getName() : "");
 
-        String repeatLabel;
-        if (r.getDayOfMonth() > 0) {
-            repeatLabel = "Ngày " + r.getDayOfMonth() + " mỗi tháng";
-        } else {
-            repeatLabel = "Hàng tháng";
-        }
+        String repeatLabel = buildRepeatLabel(r);
         holder.binding.textRepeat.setText(repeatLabel);
         holder.binding.switchEnabled.setChecked(r.isEnabled());
 
@@ -73,6 +68,38 @@ public class RecurringAdapter extends RecyclerView.Adapter<RecurringAdapter.VH> 
 
     @Override
     public int getItemCount() { return items.size(); }
+
+    private String buildRepeatLabel(RecurringRule r) {
+        String cycle = r.getCycleType();
+        if (cycle == null) cycle = RecurringRule.CYCLE_MONTHLY;
+
+        String dayPart;
+        switch (cycle) {
+            case RecurringRule.CYCLE_DAILY:
+                return "Hàng ngày";
+            case RecurringRule.CYCLE_WEEKLY:
+                dayPart = getDayOfWeekName(r.getDayOfWeek());
+                return "Mỗi " + dayPart;
+            case RecurringRule.CYCLE_YEARLY:
+                dayPart = "ngày " + r.getDayOfMonth() + " tháng " + r.getMonthOfYear();
+                return dayPart;
+            case RecurringRule.CYCLE_MONTHLY:
+            default:
+                if (r.getDayOfMonth() == 0) {
+                    return "Hàng tháng";
+                } else if (r.getDayOfMonth() == 31) {
+                    return "Ngày cuối mỗi tháng";
+                } else {
+                    return "Ngày " + r.getDayOfMonth() + " mỗi tháng";
+                }
+        }
+    }
+
+    private String getDayOfWeekName(int day) {
+        String[] days = {"", "Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
+        if (day >= 1 && day <= 7) return days[day];
+        return "";
+    }
 
     static class VH extends RecyclerView.ViewHolder {
         final ItemRecurringBinding binding;

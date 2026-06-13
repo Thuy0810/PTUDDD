@@ -24,6 +24,7 @@ public class Transaction {
     private Timestamp date;
     private String mood;
     private String regretFlag;
+    private String recurringRuleId;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -66,6 +67,9 @@ public class Transaction {
     public String getRegretFlag() { return regretFlag; }
     public void setRegretFlag(String regretFlag) { this.regretFlag = regretFlag; }
 
+    public String getRecurringRuleId() { return recurringRuleId; }
+    public void setRecurringRuleId(String recurringRuleId) { this.recurringRuleId = recurringRuleId; }
+
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
@@ -83,7 +87,8 @@ public class Transaction {
         map.put("note", getNote());
         map.put("date", date != null ? date : Timestamp.now());
         if (mood != null) map.put("mood", mood);
-        if (regretFlag != null) map.put("regretFlag", regretFlag);
+        if (regretFlag != null)         map.put("regretFlag", regretFlag);
+        if (recurringRuleId != null) map.put("recurringRuleId", recurringRuleId);
         map.put("createdAt", createdAt != null ? createdAt : Timestamp.now());
         map.put("updatedAt", Timestamp.now());
         return map;

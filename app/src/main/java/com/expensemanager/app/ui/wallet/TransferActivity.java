@@ -107,7 +107,7 @@ public class TransferActivity extends AppCompatActivity {
 
         binding.btnConfirm.setEnabled(false);
 
-        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+        db.runTransaction(transaction -> {
             DocumentSnapshot fromSnap = transaction.get(
                     db.collection("users").document(uid).collection("wallets").document(fromWallet.getId()));
             DocumentSnapshot toSnap = transaction.get(

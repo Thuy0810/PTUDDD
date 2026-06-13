@@ -1,5 +1,8 @@
 package com.expensemanager.app.ui.transaction;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -7,6 +10,13 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,13 +26,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.expensemanager.app.databinding.FragmentTransactionListBinding;
 import com.expensemanager.app.data.model.Category;
 import com.expensemanager.app.data.model.Transaction;
+import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
+import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.util.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +47,20 @@ public class TransactionListFragment extends Fragment {
     private final TransactionRepository txRepo = new TransactionRepository();
     private final CategoryRepository catRepo = new CategoryRepository();
     private TransactionAdapter adapter;
-    private List<Transaction> allMonth = new ArrayList<>();
+    private List<Transaction> allTxs = new ArrayList<>();
     private Map<String, Category> catMap;
+    private List<Wallet> wallets = new ArrayList<>();
+    private Map<String, Wallet> walletMap;
+
+    private SharedPreferences prefs;
+    private String uid;
+    private int selectedSort = 0; // 0=moi nhat, 1=lon nhat
+
+    // Date range state
+    private String selectedMonthKey;
+    private DateRangeMode dateMode = DateRangeMode.MONTH;
+
+    private enum DateRangeMode { MONTH, RANGE }
 
     @Nullable
     @Override
@@ -46,8 +73,11 @@ public class TransactionListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String uid = authRepo.getUid();
+        uid = authRepo.getUid();
         if (uid == null) return;
+
+        prefs = requireContext().getSharedPreferences("txlist_" + uid, Context.MODE_PRIVATE);
+        selectedSort = prefs.getInt("sort", 0);
 
         adapter = new TransactionAdapter();
         binding.recyclerTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -64,27 +94,226 @@ public class TransactionListFragment extends Fragment {
             adapter.setCategoryMap(catMap);
         });
 
-        txRepo.observeMonth(uid, DateUtils.currentMonthKey())
-                .observe(getViewLifecycleOwner(), list -> {
-                    allMonth = list != null ? list : new ArrayList<>();
-                    applyFilter();
-                });
+        new WalletRepository().observeAll(uid).observe(getViewLifecycleOwner(), list -> {
+            wallets = list != null ? list : new ArrayList<>();
+            walletMap = new java.util.HashMap<>();
+            for (Wallet w : wallets) {
+                if (w.getId() != null) walletMap.put(w.getId(), w);
+            }
+            adapter.setWalletMap(walletMap);
+            setupWalletSpinner();
+        });
 
-        binding.editSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+        setupDateRangeButton();
+        setupSortSpinner();
+        setupTypeFilter();
+        setupAmountFilter();
+        setupSearch();
+
+        loadTransactions();
+    }
+
+    private void loadTransactions() {
+        if (dateMode == DateRangeMode.RANGE) {
+            txRepo.observeRange(uid, parseDateRangeStart(selectedMonthKey),
+                    parseDateRangeEnd(selectedMonthKey))
+                    .observe(getViewLifecycleOwner(), list -> {
+                        allTxs = list != null ? list : new ArrayList<>();
+                        applyFilter();
+                    });
+        } else {
+            txRepo.observeMonth(uid, selectedMonthKey != null ? selectedMonthKey : DateUtils.currentMonthKey())
+                    .observe(getViewLifecycleOwner(), list -> {
+                        allTxs = list != null ? list : new ArrayList<>();
+                        applyFilter();
+                    });
+        }
+    }
+
+    private java.util.Date parseDateRangeStart(String key) {
+        try {
+            String[] parts = key.split("_");
+            int y = Integer.parseInt(parts[0]);
+            int m = Integer.parseInt(parts[1]);
+            int d = Integer.parseInt(parts[2]);
+            Calendar c = Calendar.getInstance();
+            c.set(y, m - 1, d, 0, 0, 0);
+            return c.getTime();
+        } catch (Exception e) {
+            return new java.util.Date();
+        }
+    }
+
+    private java.util.Date parseDateRangeEnd(String key) {
+        try {
+            String[] parts = key.split("_");
+            int y = Integer.parseInt(parts[3]);
+            int m = Integer.parseInt(parts[4]);
+            int d = Integer.parseInt(parts[5]);
+            Calendar c = Calendar.getInstance();
+            c.set(y, m - 1, d, 23, 59, 59);
+            return c.getTime();
+        } catch (Exception e) {
+            return new java.util.Date();
+        }
+    }
+
+    private void setupDateRangeButton() {
+        selectedMonthKey = DateUtils.currentMonthKey();
+        binding.btnDateRange.setText("Tháng này");
+
+        binding.btnDateRange.setOnClickListener(v -> {
+            DatePickerDialog dpd = new DatePickerDialog(requireContext(),
+                    (dp, year, month, day) -> {
+                        Calendar startCal = Calendar.getInstance();
+                        startCal.set(year, month, 1, 0, 0, 0);
+                        Calendar endCal = Calendar.getInstance();
+                        endCal.set(year, month, startCal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+                        selectedMonthKey = String.format("%04d_%02d_%02d_%04d_%02d_%02d",
+                                year, month + 1, 1,
+                                year, month + 1, endCal.get(Calendar.DAY_OF_MONTH));
+                        dateMode = DateRangeMode.RANGE;
+                        binding.btnDateRange.setText("Từ ngày " + day + "/" + (month + 1));
+                        loadTransactions();
+                    }, Calendar.getInstance().get(Calendar.YEAR),
+                    Calendar.getInstance().get(Calendar.MONTH), 1);
+            dpd.show();
+        });
+
+        binding.btnDateRange.setOnLongClickListener(v -> {
+            selectedMonthKey = DateUtils.currentMonthKey();
+            dateMode = DateRangeMode.MONTH;
+            binding.btnDateRange.setText("Tháng này");
+            loadTransactions();
+            return true;
+        });
+    }
+
+    private void setupSortSpinner() {
+        String[] sortLabels = {"Mới nhất", "Lớn nhất"};
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, java.util.Arrays.asList(sortLabels));
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerSort.setAdapter(adapter2);
+        binding.spinnerSort.setSelection(selectedSort);
+
+        binding.spinnerSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                selectedSort = pos;
+                prefs.edit().putInt("sort", pos).apply();
                 applyFilter();
             }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void setupWalletSpinner() {
+        List<String> names = new ArrayList<>();
+        names.add("Tất cả ví");
+        for (Wallet w : wallets) names.add(w.getName());
+
+        ArrayAdapter<String> adapter3 = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, names);
+        adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerWallet.setAdapter(adapter3);
+
+        binding.spinnerWallet.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                applyFilter();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void setupTypeFilter() {
+        binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> applyFilter());
+    }
+
+    private void setupAmountFilter() {
+        TextWatcher amountWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { applyFilter(); }
+            @Override public void afterTextChanged(Editable s) {}
+        };
+        binding.editMinAmount.addTextChangedListener(amountWatcher);
+        binding.editMaxAmount.addTextChangedListener(amountWatcher);
+    }
+
+    private void setupSearch() {
+        binding.editSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { applyFilter(); }
             @Override public void afterTextChanged(Editable s) {}
         });
     }
 
     private void applyFilter() {
-        String q = binding.editSearch.getText() != null
+        String query = binding.editSearch != null && binding.editSearch.getText() != null
                 ? binding.editSearch.getText().toString() : "";
-        List<Transaction> filtered = TransactionRepository.filterBySearch(allMonth, q);
+        List<Transaction> filtered = TransactionRepository.filterBySearch(allTxs, query);
+
+        // Type filter
+        String typeFilter = getSelectedType();
+        if (!"all".equals(typeFilter)) {
+            List<Transaction> typed = new ArrayList<>();
+            for (Transaction t : filtered) {
+                if (typeFilter.equals(t.getType())) typed.add(t);
+            }
+            filtered = typed;
+        }
+
+        // Wallet filter
+        int walletPos = binding.spinnerWallet.getSelectedItemPosition();
+        if (walletPos > 0) {
+            int idx = walletPos - 1;
+            if (idx < wallets.size()) {
+                String walletId = wallets.get(idx).getId();
+                List<Transaction> walletFiltered = new ArrayList<>();
+                for (Transaction t : filtered) {
+                    if (walletId.equals(t.getWalletId())
+                            || walletId.equals(t.getFromWalletId())
+                            || walletId.equals(t.getToWalletId())) {
+                        walletFiltered.add(t);
+                    }
+                }
+                filtered = walletFiltered;
+            }
+        }
+
+        // Amount range filter
+        String minStr = binding.editMinAmount != null && binding.editMinAmount.getText() != null
+                ? binding.editMinAmount.getText().toString() : "";
+        String maxStr = binding.editMaxAmount != null && binding.editMaxAmount.getText() != null
+                ? binding.editMaxAmount.getText().toString() : "";
+        try {
+            if (!minStr.isEmpty() || !maxStr.isEmpty()) {
+                double min = minStr.isEmpty() ? 0 : Double.parseDouble(minStr);
+                double max = maxStr.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxStr);
+                List<Transaction> amountFiltered = new ArrayList<>();
+                for (Transaction t : filtered) {
+                    double amt = t.getAmount();
+                    if (amt >= min && amt <= max) amountFiltered.add(t);
+                }
+                filtered = amountFiltered;
+            }
+        } catch (NumberFormatException ignored) {}
+
+        // Sort
+        if (selectedSort == 1) {
+            Collections.sort(filtered, (a, b) -> Double.compare(b.getAmount(), a.getAmount()));
+        }
+
         adapter.setItems(filtered);
         binding.textEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private String getSelectedType() {
+        int checked = binding.radioGroupType.getCheckedRadioButtonId();
+        if (checked == R.id.radioIncome) return Transaction.TYPE_INCOME;
+        if (checked == R.id.radioExpense) return Transaction.TYPE_EXPENSE;
+        return "all";
     }
 
     @Override

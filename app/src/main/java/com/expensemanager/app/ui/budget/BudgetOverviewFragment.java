@@ -138,7 +138,6 @@ public class BudgetOverviewFragment extends Fragment {
                 }
             }
             adapter.setAllocatedMap(allocatedMap);
-            updateSummary();
         });
 
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
