@@ -281,7 +281,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         b.setCategoryId(cat.getId());
         b.setMonth(monthKey);
         b.setLimitAmount(amount);
-        budgetRepo.add(uid, b);
+        budgetRepo.addOrUpdate(uid, b);
         Toast.makeText(this, "Đã lưu", Toast.LENGTH_SHORT).show();
     }
 

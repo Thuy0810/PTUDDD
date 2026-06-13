@@ -20,13 +20,18 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            AuthRepository auth = new AuthRepository();
-            if (auth.getCurrentUser() == null) {
+            if (PrefsHelper.isPendingLogout(this)) {
+                PrefsHelper.clearPendingLogout(this);
                 startActivity(new Intent(this, LoginActivity.class));
-            } else if (PrefsHelper.isPinEnabled(this)) {
-                startActivity(new Intent(this, LockActivity.class));
             } else {
-                startActivity(new Intent(this, MainActivity.class));
+                AuthRepository auth = new AuthRepository();
+                if (auth.getCurrentUser() == null) {
+                    startActivity(new Intent(this, LoginActivity.class));
+                } else if (PrefsHelper.isPinEnabled(this)) {
+                    startActivity(new Intent(this, LockActivity.class));
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
             }
             finish();
         }, 1200);

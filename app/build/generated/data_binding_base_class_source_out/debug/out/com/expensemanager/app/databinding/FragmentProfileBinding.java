@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.expensemanager.app.R;
+import com.google.android.material.button.MaterialButton;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
@@ -21,25 +22,25 @@ public final class FragmentProfileBinding implements ViewBinding {
   private final ScrollView rootView;
 
   @NonNull
-  public final LinearLayout btnBudgets;
+  public final LinearLayout btnContact;
 
   @NonNull
-  public final LinearLayout btnCategories;
+  public final MaterialButton btnEditProfile;
 
   @NonNull
-  public final LinearLayout btnChallenges;
+  public final LinearLayout btnHelp;
 
   @NonNull
-  public final LinearLayout btnGoals;
+  public final LinearLayout btnLanguage;
 
   @NonNull
   public final LinearLayout btnLogout;
 
   @NonNull
-  public final LinearLayout btnSettings;
+  public final LinearLayout btnSecurity;
 
   @NonNull
-  public final LinearLayout btnWallets;
+  public final LinearLayout btnUser;
 
   @NonNull
   public final TextView textAvatarInitial;
@@ -50,20 +51,20 @@ public final class FragmentProfileBinding implements ViewBinding {
   @NonNull
   public final TextView textUserName;
 
-  private FragmentProfileBinding(@NonNull ScrollView rootView, @NonNull LinearLayout btnBudgets,
-      @NonNull LinearLayout btnCategories, @NonNull LinearLayout btnChallenges,
-      @NonNull LinearLayout btnGoals, @NonNull LinearLayout btnLogout,
-      @NonNull LinearLayout btnSettings, @NonNull LinearLayout btnWallets,
+  private FragmentProfileBinding(@NonNull ScrollView rootView, @NonNull LinearLayout btnContact,
+      @NonNull MaterialButton btnEditProfile, @NonNull LinearLayout btnHelp,
+      @NonNull LinearLayout btnLanguage, @NonNull LinearLayout btnLogout,
+      @NonNull LinearLayout btnSecurity, @NonNull LinearLayout btnUser,
       @NonNull TextView textAvatarInitial, @NonNull TextView textUserEmail,
       @NonNull TextView textUserName) {
     this.rootView = rootView;
-    this.btnBudgets = btnBudgets;
-    this.btnCategories = btnCategories;
-    this.btnChallenges = btnChallenges;
-    this.btnGoals = btnGoals;
+    this.btnContact = btnContact;
+    this.btnEditProfile = btnEditProfile;
+    this.btnHelp = btnHelp;
+    this.btnLanguage = btnLanguage;
     this.btnLogout = btnLogout;
-    this.btnSettings = btnSettings;
-    this.btnWallets = btnWallets;
+    this.btnSecurity = btnSecurity;
+    this.btnUser = btnUser;
     this.textAvatarInitial = textAvatarInitial;
     this.textUserEmail = textUserEmail;
     this.textUserName = textUserName;
@@ -96,27 +97,27 @@ public final class FragmentProfileBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.btnBudgets;
-      LinearLayout btnBudgets = ViewBindings.findChildViewById(rootView, id);
-      if (btnBudgets == null) {
+      id = R.id.btnContact;
+      LinearLayout btnContact = ViewBindings.findChildViewById(rootView, id);
+      if (btnContact == null) {
         break missingId;
       }
 
-      id = R.id.btnCategories;
-      LinearLayout btnCategories = ViewBindings.findChildViewById(rootView, id);
-      if (btnCategories == null) {
+      id = R.id.btnEditProfile;
+      MaterialButton btnEditProfile = ViewBindings.findChildViewById(rootView, id);
+      if (btnEditProfile == null) {
         break missingId;
       }
 
-      id = R.id.btnChallenges;
-      LinearLayout btnChallenges = ViewBindings.findChildViewById(rootView, id);
-      if (btnChallenges == null) {
+      id = R.id.btnHelp;
+      LinearLayout btnHelp = ViewBindings.findChildViewById(rootView, id);
+      if (btnHelp == null) {
         break missingId;
       }
 
-      id = R.id.btnGoals;
-      LinearLayout btnGoals = ViewBindings.findChildViewById(rootView, id);
-      if (btnGoals == null) {
+      id = R.id.btnLanguage;
+      LinearLayout btnLanguage = ViewBindings.findChildViewById(rootView, id);
+      if (btnLanguage == null) {
         break missingId;
       }
 
@@ -126,15 +127,15 @@ public final class FragmentProfileBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.btnSettings;
-      LinearLayout btnSettings = ViewBindings.findChildViewById(rootView, id);
-      if (btnSettings == null) {
+      id = R.id.btnSecurity;
+      LinearLayout btnSecurity = ViewBindings.findChildViewById(rootView, id);
+      if (btnSecurity == null) {
         break missingId;
       }
 
-      id = R.id.btnWallets;
-      LinearLayout btnWallets = ViewBindings.findChildViewById(rootView, id);
-      if (btnWallets == null) {
+      id = R.id.btnUser;
+      LinearLayout btnUser = ViewBindings.findChildViewById(rootView, id);
+      if (btnUser == null) {
         break missingId;
       }
 
@@ -156,9 +157,9 @@ public final class FragmentProfileBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentProfileBinding((ScrollView) rootView, btnBudgets, btnCategories,
-          btnChallenges, btnGoals, btnLogout, btnSettings, btnWallets, textAvatarInitial,
-          textUserEmail, textUserName);
+      return new FragmentProfileBinding((ScrollView) rootView, btnContact, btnEditProfile, btnHelp,
+          btnLanguage, btnLogout, btnSecurity, btnUser, textAvatarInitial, textUserEmail,
+          textUserName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

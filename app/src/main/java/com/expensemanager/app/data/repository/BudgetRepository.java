@@ -35,6 +35,12 @@ public class BudgetRepository {
         db.collection("users").document(uid).collection("budgets").add(b.toMap());
     }
 
+    public void addOrUpdate(String uid, Budget b) {
+        String docId = uid + "_" + b.getMonth() + "_" + b.getCategoryId();
+        db.collection("users").document(uid).collection("budgets")
+                .document(docId).set(b.toMap());
+    }
+
     public void delete(String uid, String id) {
         db.collection("users").document(uid).collection("budgets").document(id).delete();
     }

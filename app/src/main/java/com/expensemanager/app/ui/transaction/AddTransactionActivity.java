@@ -21,7 +21,9 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AddTransactionActivity extends AppCompatActivity {
     public static final String EXTRA_TX_ID = "tx_id";
@@ -34,6 +36,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     private List<Wallet> wallets = new ArrayList<>();
     private String editTxId;
     private Wallet selectedWallet;
+    private Transaction originalTransaction;
+    private Map<String, Wallet> walletMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +64,14 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
         new WalletRepository().observeAll(uid).observe(this, list -> {
             wallets = list != null ? list : new ArrayList<>();
+            walletMap.clear();
+            for (Wallet w : wallets) {
+                if (w.getId() != null) walletMap.put(w.getId(), w);
+            }
             setupWalletSpinner();
+            if (editTxId != null) {
+                loadTransaction(uid, editTxId);
+            }
         });
 
         binding.radioType.setOnCheckedChangeListener((g, id) -> {
@@ -120,21 +131,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
-    private void loadTransaction(String uid, String txId) {
-        FirebaseFirestore.getInstance()
-                .collection("users").document(uid).collection("transactions")
-                .document(txId).get()
-                .addOnSuccessListener(doc -> {
-                    Transaction t = doc.toObject(Transaction.class);
-                    if (t == null) return;
-                    if (Transaction.TYPE_INCOME.equals(t.getType())) binding.radioIncome.setChecked(true);
-                    else binding.radioExpense.setChecked(true);
-                    binding.editAmount.setText(String.valueOf((long) t.getAmount()));
-                    binding.editNote.setText(t.getNote());
-                    selectWalletById(t.getWalletId());
-                });
-    }
-
     private void selectWalletById(String walletId) {
         ArrayAdapter adapter = (ArrayAdapter) binding.spinnerWallet.getAdapter();
         if (adapter == null || walletId == null) return;
@@ -142,6 +138,45 @@ public class AddTransactionActivity extends AppCompatActivity {
             Wallet w = (Wallet) adapter.getItem(i);
             if (w != null && walletId.equals(w.getId())) {
                 binding.spinnerWallet.setSelection(i);
+                break;
+            }
+        }
+    }
+
+    private void loadTransaction(String uid, String txId) {
+        FirebaseFirestore.getInstance()
+                .collection("users").document(uid).collection("transactions")
+                .document(txId).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    Transaction t = doc.toObject(Transaction.class);
+                    if (t == null) return;
+
+                    originalTransaction = t;
+
+                    if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                        binding.radioIncome.setChecked(true);
+                    } else {
+                        binding.radioExpense.setChecked(true);
+                    }
+                    binding.editAmount.setText(String.valueOf((long) t.getAmount()));
+                    binding.editNote.setText(t.getNote() != null ? t.getNote() : "");
+                    selectWalletById(t.getWalletId());
+                    selectCategoryById(t.getCategoryId());
+
+                    setupCategorySpinner(t.getType());
+                    selectWalletById(t.getWalletId());
+                });
+    }
+
+    private void selectCategoryById(String catId) {
+        if (catId == null) return;
+        ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCategory.getAdapter();
+        if (adapter == null) return;
+        for (int i = 0; i < adapter.getCount(); i++) {
+            Category c = (Category) adapter.getItem(i);
+            if (c != null && catId.equals(c.getId())) {
+                binding.spinnerCategory.setSelection(i);
                 break;
             }
         }
@@ -186,11 +221,14 @@ public class AddTransactionActivity extends AppCompatActivity {
         t.setNote(binding.editNote.getText() != null ? binding.editNote.getText().toString() : "");
         t.setDate(Timestamp.now());
 
-        if (editTxId != null) {
+        if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);
             txRepo.update(uid, t);
-            // Neu sua, can xu ly dao chieu thu/chi
-            updateWalletBalanceAfterEdit(uid, t, wallet);
+            updateWalletBalanceAfterEdit(uid);
+        } else if (editTxId != null) {
+            t.setId(editTxId);
+            txRepo.update(uid, t);
+            updateWalletBalance(uid, wallet, amount, isIncome);
         } else {
             txRepo.add(uid, t);
             updateWalletBalance(uid, wallet, amount, isIncome);
@@ -211,15 +249,46 @@ public class AddTransactionActivity extends AppCompatActivity {
         walletRepo.update(uid, wallet);
     }
 
-    private void updateWalletBalanceAfterEdit(String uid, Transaction t, Wallet wallet) {
-        double newBalance = wallet.getCurrentBalance();
-        if (Transaction.TYPE_INCOME.equals(t.getType())) {
-            newBalance += t.getAmount();
+    private void updateWalletBalanceAfterEdit(String uid) {
+        if (originalTransaction == null) return;
+
+        String originalWalletId = originalTransaction.getWalletId();
+        String newWalletId = originalTransaction.getWalletId();
+        Wallet originalWallet = walletMap.get(originalWalletId);
+        Wallet newWallet = (Wallet) binding.spinnerWallet.getSelectedItem();
+
+        double originalAmount = originalTransaction.getAmount();
+        boolean originalIsIncome = Transaction.TYPE_INCOME.equals(originalTransaction.getType());
+        boolean newIsIncome = binding.radioIncome.isChecked();
+        double newAmount = 0;
+        try {
+            newAmount = Double.parseDouble(binding.editAmount.getText().toString().replace(",", ""));
+        } catch (Exception ignored) {}
+
+        boolean sameWallet = originalWalletId != null && originalWalletId.equals(newWalletId);
+
+        if (sameWallet) {
+            double originalEffect = originalIsIncome ? originalAmount : -originalAmount;
+            double newEffect = newIsIncome ? newAmount : -newAmount;
+            double balanceChange = newEffect - originalEffect;
+
+            if (originalWallet != null) {
+                originalWallet.setCurrentBalance(originalWallet.getCurrentBalance() + balanceChange);
+                walletRepo.update(uid, originalWallet);
+            }
         } else {
-            newBalance -= t.getAmount();
+            if (originalWallet != null) {
+                double originalEffect = originalIsIncome ? originalAmount : -originalAmount;
+                originalWallet.setCurrentBalance(originalWallet.getCurrentBalance() - originalEffect);
+                walletRepo.update(uid, originalWallet);
+            }
+
+            if (newWallet != null) {
+                double newEffect = newIsIncome ? newAmount : -newAmount;
+                newWallet.setCurrentBalance(newWallet.getCurrentBalance() + newEffect);
+                walletRepo.update(uid, newWallet);
+            }
         }
-        wallet.setCurrentBalance(newBalance);
-        walletRepo.update(uid, wallet);
     }
 
     private void showDeleteConfirm() {
@@ -236,19 +305,29 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (uid == null || editTxId == null) return;
 
         Wallet wallet = (Wallet) binding.spinnerWallet.getSelectedItem();
-        Transaction t = new Transaction();
-        t.setType(binding.radioIncome.isChecked() ? Transaction.TYPE_INCOME : Transaction.TYPE_EXPENSE);
-        try {
-            t.setAmount(Double.parseDouble(
-                    binding.editAmount.getText().toString().replace(",", "")));
-        } catch (Exception ignored) {}
 
-        if (wallet != null && binding.editAmount.getText() != null) {
+        if (originalTransaction != null) {
+            String walletId = originalTransaction.getWalletId();
+            Wallet w = walletMap.get(walletId);
+            double amt = originalTransaction.getAmount();
+            boolean isIncome = Transaction.TYPE_INCOME.equals(originalTransaction.getType());
+
+            if (w != null) {
+                double newBalance = w.getCurrentBalance();
+                if (isIncome) {
+                    newBalance -= amt;
+                } else {
+                    newBalance += amt;
+                }
+                w.setCurrentBalance(newBalance);
+                walletRepo.update(uid, w);
+            }
+        } else if (wallet != null && binding.editAmount.getText() != null) {
             double amt = 0;
             try { amt = Double.parseDouble(binding.editAmount.getText().toString().replace(",", "")); } catch (Exception ignored) {}
             if (amt > 0) {
                 double newBalance = wallet.getCurrentBalance();
-                if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                if (binding.radioIncome.isChecked()) {
                     newBalance -= amt;
                 } else {
                     newBalance += amt;

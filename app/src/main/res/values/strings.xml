@@ -135,6 +135,13 @@
     <string name="notifications">Thông báo</string>
     <string name="pin_lock">Khóa PIN / Vân tay</string>
     <string name="dark_mode">Chế độ tối</string>
+    <string name="account">Tài khoản</string>
+    <string name="user">Người dùng</string>
+    <string name="security">Bảo mật</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="support">Hỗ trợ</string>
+    <string name="help_center">Trung tâm hỗ trợ</string>
+    <string name="contact">Liên hệ</string>
 
     <!-- Messages -->
     <string name="error_empty_email">Vui lòng nhập email</string>

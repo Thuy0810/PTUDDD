@@ -19,7 +19,6 @@ import com.expensemanager.app.data.repository.GoalRepository;
 import com.expensemanager.app.databinding.ActivityGoalListBinding;
 import com.expensemanager.app.ui.adapter.GoalAdapter;
 import com.expensemanager.app.util.DateUtils;
-import com.expensemanager.app.util.MoneyFormat;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
@@ -69,12 +68,17 @@ public class GoalListActivity extends AppCompatActivity {
         EditText editTarget = view.findViewById(R.id.editGoalTarget);
         EditText editDeadline = view.findViewById(R.id.editGoalDeadline);
 
+        final Calendar[] selectedCal = {Calendar.getInstance()};
+        selectedCal[0].add(Calendar.MONTH, 1);
+
+        editDeadline.setText(DateUtils.formatDisplay(selectedCal[0].getTime()));
+
         editDeadline.setOnClickListener(v -> {
-            Calendar cal = Calendar.getInstance();
             new DatePickerDialog(this, (dp, year, month, day) -> {
-                cal.set(year, month, day);
-                editDeadline.setText(DateUtils.formatDisplay(cal.getTime()));
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+                selectedCal[0].set(year, month, day, 0, 0, 0);
+                editDeadline.setText(DateUtils.formatDisplay(selectedCal[0].getTime()));
+            }, selectedCal[0].get(Calendar.YEAR), selectedCal[0].get(Calendar.MONTH),
+               selectedCal[0].get(Calendar.DAY_OF_MONTH)).show();
         });
 
         new AlertDialog.Builder(this)
@@ -94,12 +98,7 @@ public class GoalListActivity extends AppCompatActivity {
                         g.setTargetAmount(target);
                         g.setSavedAmount(0);
                         g.setCompleted(false);
-                        if (!editDeadline.getText().toString().isEmpty()) {
-                            Calendar cal = Calendar.getInstance();
-                            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-                            cal.add(Calendar.MONTH, 1);
-                            g.setDeadline(Timestamp.now());
-                        }
+                        g.setDeadline(new Timestamp(selectedCal[0].getTime()));
                         goalRepo.add(uid, g);
                         Toast.makeText(this, "Đã tạo mục tiêu!", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {

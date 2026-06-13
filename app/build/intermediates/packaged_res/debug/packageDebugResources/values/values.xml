@@ -30,6 +30,7 @@
     <color name="text_secondary">#6B7280</color>
     <color name="warning">#F59E0B</color>
     <color name="white">#FFFFFF</color>
+    <string name="account">Tài khoản</string>
     <string name="add_budget">Đặt ngân sách</string>
     <string name="add_category">Thêm danh mục</string>
     <string name="add_goal">Thêm mục tiêu</string>
@@ -59,6 +60,7 @@
     <string name="change_password">Đổi mật khẩu</string>
     <string name="confirm">Xác nhận</string>
     <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="contact">Liên hệ</string>
     <string name="daily_budget">Ngân sách hàng ngày</string>
     <string name="dark_mode">Chế độ tối</string>
     <string name="date">Ngày</string>
@@ -98,7 +100,9 @@
     <string name="google_storage_bucket" translatable="false">quan-ly-chi-tieu-18e0c.firebasestorage.app</string>
     <string name="has_account">Đã có tài khoản? Đăng nhập</string>
     <string name="health_score">Điểm sức khỏe</string>
+    <string name="help_center">Trung tâm hỗ trợ</string>
     <string name="income">Thu nhập</string>
+    <string name="language">Ngôn ngữ</string>
     <string name="login">Đăng nhập</string>
     <string name="login_failed">Đăng nhập thất bại</string>
     <string name="logout">Đăng xuất</string>
@@ -148,6 +152,7 @@
     <string name="reset_password_desc">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</string>
     <string name="save">Lưu</string>
     <string name="search_hint">Tìm kiếm giao dịch…</string>
+    <string name="security">Bảo mật</string>
     <string name="see_all">Xem tất cả</string>
     <string name="select_category">Chọn danh mục</string>
     <string name="select_wallet">Chọn ví</string>
@@ -160,10 +165,12 @@
     <string name="success_register">Đăng ký thành công!</string>
     <string name="success_reset_sent">Đã gửi email đặt lại mật khẩu</string>
     <string name="success_save">Đã lưu</string>
+    <string name="support">Hỗ trợ</string>
     <string name="today_expense">Chi tiêu hôm nay</string>
     <string name="top_category">Danh mục chi nhiều nhất</string>
     <string name="transfer">Chuyển tiền</string>
     <string name="unnecessary">Không cần thiết</string>
+    <string name="user">Người dùng</string>
     <string name="wallet">Ví</string>
     <string name="wallet_balance">Số dư</string>
     <string name="wallet_bank">Ngân hàng</string>

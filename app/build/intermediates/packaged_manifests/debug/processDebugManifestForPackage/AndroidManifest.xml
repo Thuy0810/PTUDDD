@@ -100,6 +100,10 @@
             android:exported="false"
             android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity
+            android:name="com.expensemanager.app.ui.profile.SecurityActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ExpenseManager.WithActionBar" />
+        <activity
             android:name="com.expensemanager.app.ui.security.LockActivity"
             android:exported="false" />
 

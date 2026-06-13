@@ -32,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
 
         binding.bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_placeholder) return false;
             if (navController != null) {
                 if (id == R.id.nav_home) navController.navigate(R.id.homeFragment);
                 else if (id == R.id.nav_budget) navController.navigate(R.id.budgetFragment);
+                else if (id == R.id.nav_transactions) navController.navigate(R.id.transactionListFragment);
                 else if (id == R.id.nav_report) navController.navigate(R.id.reportFragment);
                 else if (id == R.id.nav_profile) navController.navigate(R.id.profileFragment);
+                else return false;
             }
             return true;
         });

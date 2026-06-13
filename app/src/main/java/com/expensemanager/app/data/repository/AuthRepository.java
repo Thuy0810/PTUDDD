@@ -60,12 +60,6 @@ public class AuthRepository {
                     p.setDisplayName(displayName);
                     p.setEmail(email);
                     return db.collection("users").document(uid).set(p.toMap());
-                })
-                .continueWithTask(task -> {
-                    if (!task.isSuccessful()) {
-                        throw task.getException() != null ? task.getException() : new Exception("Lưu thông tin người dùng thất bại");
-                    }
-                    return seedForCurrentUser();
                 });
     }
 
@@ -105,6 +99,10 @@ public class AuthRepository {
         String uid = getUid();
         if (uid == null) return live;
         db.collection("users").document(uid).addSnapshotListener((snap, e) -> {
+            if (e != null) {
+                live.setValue(null);
+                return;
+            }
             if (snap != null && snap.exists()) {
                 UserProfile p = snap.toObject(UserProfile.class);
                 live.setValue(p);

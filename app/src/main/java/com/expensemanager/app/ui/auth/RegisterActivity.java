@@ -8,7 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.expensemanager.app.databinding.ActivityRegisterBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
-import com.expensemanager.app.ui.main.MainActivity;
+import com.expensemanager.app.ui.auth.LoginActivity;
+import com.expensemanager.app.util.PrefsHelper;
 
 public class RegisterActivity extends AppCompatActivity {
     private ActivityRegisterBinding binding;
@@ -61,8 +62,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         authRepo.register(email, password, name)
                 .addOnSuccessListener(v -> {
-                    Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, MainActivity.class));
+                    authRepo.logout();
+                    PrefsHelper.setPendingLogout(this, true);
+                    Toast.makeText(this, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    intent.putExtra("email", email);
+                    startActivity(intent);
                     finishAffinity();
                 })
                 .addOnFailureListener(e -> {

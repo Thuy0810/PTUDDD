@@ -1,7 +1,6 @@
 package com.expensemanager.app.ui.report;
 
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +31,6 @@ import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +39,9 @@ public class ReportFragment extends Fragment {
     private FragmentReportBinding binding;
     private final AuthRepository authRepo = new AuthRepository();
     private Map<String, Category> categoryMap = new HashMap<>();
-    private double lastMonthExpense = 0;
+    private Map<String, Double> lastMonthByCat = new HashMap<>();
+    private List<Transaction> currentMonthTxs = new ArrayList<>();
+    private boolean lastMonthLoaded = false;
 
     @Nullable
     @Override
@@ -67,21 +66,31 @@ public class ReportFragment extends Fragment {
 
             txRepo.observeMonth(uid, DateUtils.currentMonthKey())
                     .observe(getViewLifecycleOwner(), txs -> {
-                        if (txs == null) txs = new ArrayList<>();
-                        bindMonthData(txs);
+                        currentMonthTxs = (txs != null) ? txs : new ArrayList<>();
+                        if (lastMonthLoaded) {
+                            bindMonthData(currentMonthTxs);
+                        }
                     });
 
             String lastMonth = getLastMonthKey();
             txRepo.observeMonth(uid, lastMonth)
                     .observe(getViewLifecycleOwner(), lastTxs -> {
-                        if (lastTxs == null) lastTxs = new ArrayList<>();
+                        lastMonthByCat = new HashMap<>();
                         double expense = 0;
-                        for (Transaction t : lastTxs) {
-                            if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
-                                expense += t.getAmount();
+                        if (lastTxs != null) {
+                            for (Transaction t : lastTxs) {
+                                if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
+                                    expense += t.getAmount();
+                                    String catId = t.getCategoryId();
+                                    if (catId != null && !catId.isEmpty()) {
+                                        lastMonthByCat.put(catId,
+                                                lastMonthByCat.getOrDefault(catId, 0.0) + t.getAmount());
+                                    }
+                                }
                             }
                         }
-                        lastMonthExpense = expense;
+                        lastMonthLoaded = true;
+                        bindMonthData(currentMonthTxs);
                     });
         });
 
@@ -90,7 +99,9 @@ public class ReportFragment extends Fragment {
             for (Wallet w : wallets) {
                 totalBalance += w.getCurrentBalance();
             }
-            binding.textTotalBalance.setText(MoneyFormat.format(totalBalance));
+            if (binding != null) {
+                binding.textTotalBalance.setText(MoneyFormat.format(totalBalance));
+            }
         });
     }
 
@@ -101,6 +112,8 @@ public class ReportFragment extends Fragment {
     }
 
     private void bindMonthData(List<Transaction> txs) {
+        if (binding == null) return;
+
         double income = 0, expense = 0;
         Map<String, Double> byCat = new HashMap<>();
         for (Transaction t : txs) {
@@ -116,44 +129,42 @@ public class ReportFragment extends Fragment {
 
         binding.textTotalIncome.setText(MoneyFormat.format(income));
         binding.textTotalExpense.setText(MoneyFormat.format(expense));
-        binding.textTotalBalance.setText(MoneyFormat.format(income - expense));
 
-        // Comparison
+        double lastMonthExpense = 0;
+        for (Double v : lastMonthByCat.values()) {
+            lastMonthExpense += v;
+        }
+
         if (lastMonthExpense > 0) {
             double diff = expense - lastMonthExpense;
             String sign = diff > 0 ? "+" : "";
             String pct = String.format("%s%.0f%% so với tháng trước",
-                    sign, (diff / lastMonthExpense * 100));
+                    sign, Math.abs(diff / lastMonthExpense * 100));
             binding.textComparison.setText(pct);
+            binding.textComparison.setVisibility(View.VISIBLE);
+        } else {
+            binding.textComparison.setVisibility(View.GONE);
         }
 
-        // Top category
         String topCat = findTopCategory(byCat);
         if (topCat != null) {
             double topAmount = byCat.get(topCat);
             Category cat = categoryMap.get(topCat);
             String catName = cat != null ? cat.getName() : topCat;
             binding.textTopCategory.setText(catName + ": " + MoneyFormat.format(topAmount));
+        } else {
+            binding.textTopCategory.setText("Chưa có dữ liệu");
         }
 
-        // Pie chart
         bindPieChart(byCat);
-
-        // Bar chart (thu vs chi)
         bindBarChart(income, expense);
 
-        // Monthly analysis
-        binding.textMonthlyAnalysis.setText("Chi tiêu trung bình: "
-                + MoneyFormat.format(txCount(txs, Transaction.TYPE_EXPENSE) > 0
-                    ? expense / txCount(txs, Transaction.TYPE_EXPENSE) : 0));
-    }
-
-    private int txCount(List<Transaction> txs, String type) {
-        int count = 0;
+        int txCount = 0;
         for (Transaction t : txs) {
-            if (type.equals(t.getType())) count++;
+            if (Transaction.TYPE_EXPENSE.equals(t.getType())) txCount++;
         }
-        return count;
+        double avgExpense = txCount > 0 ? expense / txCount : 0;
+        binding.textMonthlyAnalysis.setText("Chi tiêu trung bình: " + MoneyFormat.format(avgExpense));
     }
 
     private String findTopCategory(Map<String, Double> byCat) {

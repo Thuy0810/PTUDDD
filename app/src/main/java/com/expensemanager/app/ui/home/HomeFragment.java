@@ -1,6 +1,5 @@
 package com.expensemanager.app.ui.home;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,11 +9,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
+import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentHomeBinding;
 import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.data.model.HomeSummary;
-import com.expensemanager.app.ui.transaction.TransactionListFragment;
 import com.expensemanager.app.util.MoneyFormat;
 import com.expensemanager.app.viewmodel.HomeViewModel;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
@@ -44,10 +44,7 @@ public class HomeFragment extends Fragment {
         viewModel.getBudgetAlerts().observe(getViewLifecycleOwner(), this::bindAlerts);
 
         binding.textSeeAll.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                com.expensemanager.app.ui.main.MainActivity act =
-                        (com.expensemanager.app.ui.main.MainActivity) getActivity();
-            }
+            Navigation.findNavController(v).navigate(R.id.transactionListFragment);
         });
     }
 

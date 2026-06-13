@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.expensemanager.app.databinding.ActivityLoginBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.main.MainActivity;
+import com.expensemanager.app.util.PrefsHelper;
 import com.expensemanager.app.util.ReminderScheduler;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +29,11 @@ public class LoginActivity extends AppCompatActivity {
         binding.textRegister.setOnClickListener(v ->
                 startActivity(new Intent(this, RegisterActivity.class)));
         binding.textForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+
+        String prefillEmail = getIntent().getStringExtra("email");
+        if (prefillEmail != null && !prefillEmail.isEmpty()) {
+            binding.editEmail.setText(prefillEmail);
+        }
     }
 
     private void login() {
@@ -50,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
         authRepo.login(email, password)
                 .addOnSuccessListener(v -> {
+                    PrefsHelper.clearPendingLogout(this);
                     ReminderScheduler.scheduleDaily(this);
                     new com.expensemanager.app.data.repository.RecurringRepository()
                             .catchUp(authRepo.getUid());

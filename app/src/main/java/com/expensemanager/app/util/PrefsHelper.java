@@ -12,6 +12,7 @@ public final class PrefsHelper {
     private static final String KEY_PIN_HASH = "pin_hash";
     private static final String KEY_DARK_MODE = "dark_mode";
     private static final String KEY_REMINDER = "reminder_enabled";
+    private static final String KEY_PENDING_LOGOUT = "pending_logout";
 
     private PrefsHelper() {}
 
@@ -35,7 +36,7 @@ public final class PrefsHelper {
         prefs(ctx).edit()
                 .putBoolean(KEY_PIN_ENABLED, enabled)
                 .putString(KEY_PIN_HASH, pinHash)
-                .apply();
+                .commit();
     }
 
     public static boolean verifyPin(Context ctx, String pin) {
@@ -48,7 +49,7 @@ public final class PrefsHelper {
     }
 
     public static void setDarkMode(Context ctx, boolean dark) {
-        prefs(ctx).edit().putBoolean(KEY_DARK_MODE, dark).apply();
+        prefs(ctx).edit().putBoolean(KEY_DARK_MODE, dark).commit();
     }
 
     public static boolean isReminderEnabled(Context ctx) {
@@ -56,6 +57,18 @@ public final class PrefsHelper {
     }
 
     public static void setReminderEnabled(Context ctx, boolean enabled) {
-        prefs(ctx).edit().putBoolean(KEY_REMINDER, enabled).apply();
+        prefs(ctx).edit().putBoolean(KEY_REMINDER, enabled).commit();
+    }
+
+    public static void setPendingLogout(Context ctx, boolean pending) {
+        prefs(ctx).edit().putBoolean(KEY_PENDING_LOGOUT, pending).commit();
+    }
+
+    public static boolean isPendingLogout(Context ctx) {
+        return prefs(ctx).getBoolean(KEY_PENDING_LOGOUT, false);
+    }
+
+    public static void clearPendingLogout(Context ctx) {
+        prefs(ctx).edit().putBoolean(KEY_PENDING_LOGOUT, false).commit();
     }
 }
