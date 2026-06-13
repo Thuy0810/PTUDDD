@@ -100,10 +100,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_primary" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_primary" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_wallet_menu"
+                            app:tint="@color/primary" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -118,7 +128,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <View
@@ -137,10 +147,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_purple" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_purple" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_category_menu"
+                            app:tint="#8B5CF6" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -155,7 +175,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <View
@@ -174,10 +194,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_green" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_green" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_budget"
+                            app:tint="@color/income_green" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -192,7 +222,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <View
@@ -211,10 +241,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_blue" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_blue" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_goal_menu"
+                            app:tint="@color/saving_blue" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -229,7 +269,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <View
@@ -248,10 +288,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_red" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_red" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_recurring_menu"
+                            app:tint="@color/expense_red" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -266,7 +316,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -303,10 +353,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_hint" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_hint" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_settings"
+                            app:tint="@color/text_secondary" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
@@ -321,7 +381,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_expand"
-                        android:tint="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <View
@@ -340,10 +400,20 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_logout" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_logout" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_logout"
+                            app:tint="@color/expense_red" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"

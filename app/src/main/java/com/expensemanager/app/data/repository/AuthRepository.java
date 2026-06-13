@@ -31,7 +31,9 @@ public class AuthRepository {
     public Task<Void> login(String email, String password) {
         return auth.signInWithEmailAndPassword(email, password)
                 .continueWithTask(task -> {
-                    if (!task.isSuccessful()) throw task.getException();
+                    if (!task.isSuccessful()) {
+                        throw task.getException() != null ? task.getException() : new Exception("Đăng nhập thất bại");
+                    }
                     return seedForCurrentUser();
                 });
     }
@@ -39,22 +41,32 @@ public class AuthRepository {
     public Task<Void> register(String email, String password, String displayName) {
         return auth.createUserWithEmailAndPassword(email, password)
                 .continueWithTask(task -> {
-                    if (!task.isSuccessful()) throw task.getException();
+                    if (!task.isSuccessful()) {
+                        throw task.getException() != null ? task.getException() : new Exception("Đăng ký thất bại");
+                    }
                     FirebaseUser user = auth.getCurrentUser();
-                    if (user == null) throw new Exception("User null");
+                    if (user == null) throw new Exception("Không tìm thấy thông tin người dùng");
                     UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
                             .setDisplayName(displayName).build();
                     return user.updateProfile(profile);
                 })
                 .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException() != null ? task.getException() : new Exception("Cập nhật hồ sơ thất bại");
+                    }
                     String uid = getUid();
-                    if (uid == null) throw new Exception("No uid");
+                    if (uid == null) throw new Exception("Không tìm thấy ID người dùng");
                     UserProfile p = new UserProfile();
                     p.setDisplayName(displayName);
                     p.setEmail(email);
                     return db.collection("users").document(uid).set(p.toMap());
                 })
-                .continueWithTask(task -> seedForCurrentUser());
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException() != null ? task.getException() : new Exception("Lưu thông tin người dùng thất bại");
+                    }
+                    return seedForCurrentUser();
+                });
     }
 
     private Task<Void> seedForCurrentUser() {

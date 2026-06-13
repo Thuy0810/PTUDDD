@@ -62,50 +62,27 @@ public final class SeedData {
         return list;
     }
 
-    public static void seedIfNeeded(String uid, Runnable onComplete, Runnable onError) {
-        FirebaseFirestore.getInstance()
-                .collection("users").document(uid).collection("categories")
+    public static Task<Void> seedIfNeeded(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        return db.collection("users").document(uid).collection("categories")
                 .limit(1)
                 .get()
-                .addOnSuccessListener(snap -> {
-                    if (!snap.isEmpty()) {
-                        onComplete.run();
-                        return;
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException() != null ? task.getException() : new Exception("Firestore error");
                     }
+                    if (!task.getResult().isEmpty()) return Tasks.forResult(null);
+
+                    List<Task<Void>> tasks = new ArrayList<>();
                     for (Category c : defaultCategories()) {
-                        FirebaseFirestore.getInstance()
-                                .collection("users").document(uid).collection("categories")
-                                .document(c.getId()).set(c.toMap());
+                        tasks.add(db.collection("users").document(uid).collection("categories")
+                                .document(c.getId()).set(c.toMap()));
                     }
                     for (Wallet w : defaultWallets()) {
-                        FirebaseFirestore.getInstance()
-                                .collection("users").document(uid).collection("wallets")
-                                .document(w.getId()).set(w.toMap());
+                        tasks.add(db.collection("users").document(uid).collection("wallets")
+                                .document(w.getId()).set(w.toMap()));
                     }
-                    onComplete.run();
-                })
-                .addOnFailureListener(e -> onError.run());
-    }
-
-    public static Task<Void> seedIfNeeded(String uid) {
-        return Tasks.call(() -> {
-            final Object lock = new Object();
-            final boolean[] done = {false};
-            final Exception[] err = {null};
-            seedIfNeeded(uid, () -> {
-                synchronized (lock) { done[0] = true; lock.notify(); }
-            }, () -> {
-                synchronized (lock) {
-                    err[0] = new Exception("Seed failed");
-                    done[0] = true;
-                    lock.notify();
-                }
-            });
-            synchronized (lock) {
-                while (!done[0]) lock.wait(15000);
-            }
-            if (err[0] != null) throw err[0];
-            return null;
-        });
+                    return Tasks.whenAll(tasks);
+                });
     }
 }

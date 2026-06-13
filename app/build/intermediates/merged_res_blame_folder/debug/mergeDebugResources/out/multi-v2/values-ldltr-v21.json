@@ -4,7 +4,7 @@
             "outputFile": "com.expensemanager.app-mergeDebugResources-53:/values-ldltr-v21/values-ldltr-v21.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nguye\\.gradle\\caches\\transforms-3\\5fcdcb5065f240e8a5871f672b57dde3\\transformed\\appcompat-1.7.0\\res\\values-ldltr-v21\\values-ldltr-v21.xml",
+                    "source": "/Users/tuna/.gradle/caches/transforms-3/5fcdcb5065f240e8a5871f672b57dde3/transformed/appcompat-1.7.0/res/values-ldltr-v21/values-ldltr-v21.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

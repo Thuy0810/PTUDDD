@@ -23,57 +23,81 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/primary"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:paddingHorizontal="24dp"
                 android:paddingTop="28dp"
                 android:paddingBottom="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/balance"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="13sp" />
-
-                <TextView
-                    android:id="@+id/textBalance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0 đ"
-                    android:textColor="@color/white"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
-
-                <!-- Budget remaining chip -->
                 <LinearLayout
-                    android:id="@+id/layoutBudgetRemaining"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_chip_white"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:visibility="gone">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ngân sách còn lại: "
+                        android:text="@string/balance"
                         android:textColor="#B3FFFFFF"
-                        android:textSize="12sp" />
+                        android:textSize="13sp" />
 
                     <TextView
-                        android:id="@+id/textBudgetRemaining"
+                        android:id="@+id/textBalance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="0 đ"
                         android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <!-- Budget remaining chip -->
+                    <LinearLayout
+                        android:id="@+id/layoutBudgetRemaining"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_chip_white"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ngân sách còn lại: "
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/textBudgetRemaining"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 đ"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical">
+                    <View
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:alpha="0.15"
+                        android:background="@drawable/bg_circle_login" />
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_balance_white"
+                        android:contentDescription="@string/balance" />
+                </FrameLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -99,10 +123,20 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_green" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_green" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_income_green"
+                            android:contentDescription="@string/month_income" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -140,10 +174,20 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <View
+                    <FrameLayout
                         android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_circle_red" />
+                        android:layout_height="36dp">
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_circle_red" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_expense_red"
+                            android:contentDescription="@string/month_expense" />
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
