@@ -22,6 +22,7 @@ import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.ui.adapter.WalletAdapter;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,11 +80,11 @@ public class WalletListActivity extends AppCompatActivity {
     }
 
     private void updateTotalBalance() {
-        double total = 0;
+        long total = 0L;
         for (Wallet w : wallets) {
             total += w.getCurrentBalance();
         }
-        textTotalBalance.setText(MoneyFormat.format(total));
+        textTotalBalance.setText(MoneyFormat.formatLong(total));
     }
 
     private void showAddDialog(String uid) {
@@ -113,11 +114,8 @@ public class WalletListActivity extends AppCompatActivity {
             }
             int pos = spinnerType.getSelectedItemPosition();
             String typeKey = typeKeys[pos];
-            double balance = 0;
-            String balStr = editBalance.getText().toString().trim();
-            if (!balStr.isEmpty()) {
-                try { balance = Double.parseDouble(balStr); } catch (Exception ignored) {}
-            }
+            long balance = MoneyValueParser.tryParse(
+                    editBalance.getText().toString().trim(), 0L);
             Wallet wallet = new Wallet(null, name, typeKey, balance);
             wallet.setCurrentBalance(balance);
             view.findViewById(R.id.btnCreate).setEnabled(false);
@@ -143,7 +141,7 @@ public class WalletListActivity extends AppCompatActivity {
 
         editName.setText(wallet.getName());
         if (wallet.getCurrentBalance() > 0) {
-            editBalance.setText(String.valueOf((long) wallet.getCurrentBalance()));
+            editBalance.setText(String.valueOf(wallet.getCurrentBalance()));
         }
         editBalance.setVisibility(View.GONE);
         view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText("Luu");
@@ -166,20 +164,16 @@ public class WalletListActivity extends AppCompatActivity {
                 .setTitle(R.string.edit_wallet)
                 .setView(view)
                 .setPositiveButton(R.string.delete, (d, w) -> {
-                    new AlertDialog.Builder(this)
-                            .setTitle("Xoa vi")
-                            .setMessage("Ban co chat muon xoa vi \"" + wallet.getName() + "\"?")
-                            .setPositiveButton("Xoa", (dl, wl) -> {
-                                walletRepo.delete(uid, wallet.getId())
-                                        .addOnSuccessListener(unused -> {
-                                            Toast.makeText(this, "Da xoa vi", Toast.LENGTH_SHORT).show();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(this, "Khong the xoa: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        });
+                    // Nếu ví đang có giao dịch thì chỉ cho phép archive thay vì xoá (ràng buộc 6).
+                    walletRepo.countTransactions(uid, wallet.getId())
+                            .addOnSuccessListener(count -> {
+                                if (count > 0L) {
+                                    showArchiveConfirm(uid, wallet, dialog);
+                                } else {
+                                    showDeleteConfirm(uid, wallet);
+                                }
                             })
-                            .setNegativeButton("Huy", null)
-                            .show();
+                            .addOnFailureListener(e -> showDeleteConfirm(uid, wallet));
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .create();
@@ -206,6 +200,43 @@ public class WalletListActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private void showArchiveConfirm(String uid, Wallet wallet, AlertDialog parent) {
+        new AlertDialog.Builder(this)
+                .setTitle("Luu tru vi")
+                .setMessage("Vi \"" + wallet.getName()
+                        + "\" dang co giao dich. Vi se duoc luu tru (khong xoa).")
+                .setPositiveButton("Luu tru", (dl, wl) -> {
+                    walletRepo.archive(uid, wallet.getId())
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(this, "Da luu tru vi", Toast.LENGTH_SHORT).show();
+                                parent.dismiss();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this,
+                                            "Loi: " + e.getMessage(),
+                                            Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton("Huy", null)
+                .show();
+    }
+
+    private void showDeleteConfirm(String uid, Wallet wallet) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xoa vi")
+                .setMessage("Ban co chat muon xoa vi \"" + wallet.getName() + "\"?")
+                .setPositiveButton("Xoa", (dl, wl) -> {
+                    walletRepo.delete(uid, wallet.getId())
+                            .addOnSuccessListener(unused ->
+                                    Toast.makeText(this, "Da xoa vi", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this,
+                                            "Khong the xoa: " + e.getMessage(),
+                                            Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton("Huy", null)
+                .show();
     }
 
     @Override

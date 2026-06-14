@@ -11,11 +11,14 @@ public class Challenge {
     private String id;
     private String title;
     private String description;
-    private double targetSavings;
+    private long targetSavings;
     private int totalDays;
     private int completedDays;
     private Timestamp startDate;
     private boolean active;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
+    private boolean isArchived;
 
     public Challenge() {}
 
@@ -28,8 +31,8 @@ public class Challenge {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public double getTargetSavings() { return targetSavings; }
-    public void setTargetSavings(double targetSavings) { this.targetSavings = targetSavings; }
+    public long getTargetSavings() { return targetSavings; }
+    public void setTargetSavings(long targetSavings) { this.targetSavings = targetSavings; }
 
     public int getTotalDays() { return totalDays; }
     public void setTotalDays(int totalDays) { this.totalDays = totalDays; }
@@ -43,8 +46,17 @@ public class Challenge {
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public Timestamp getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+
+    public boolean isArchived() { return isArchived; }
+    public void setArchived(boolean archived) { isArchived = archived; }
+
     public float getProgress() {
-        if (totalDays <= 0) return 0;
+        if (totalDays <= 0) return 0f;
         return Math.min(1f, (float) completedDays / totalDays);
     }
 
@@ -57,6 +69,9 @@ public class Challenge {
         map.put("completedDays", completedDays);
         map.put("startDate", startDate != null ? startDate : Timestamp.now());
         map.put("active", active);
+        map.put("createdAt", createdAt != null ? createdAt : Timestamp.now());
+        map.put("updatedAt", updatedAt != null ? updatedAt : Timestamp.now());
+        map.put("isArchived", isArchived);
         return map;
     }
 }

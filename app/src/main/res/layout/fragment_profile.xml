@@ -188,7 +188,7 @@
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_security"
-                            app:tint="#8B5CF6" />
+                            app:tint="@color/primary" />
                     </FrameLayout>
 
                     <TextView
@@ -358,7 +358,7 @@
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_category_menu"
-                            app:tint="#8B5CF6" />
+                            app:tint="@color/primary" />
                     </FrameLayout>
 
                     <TextView

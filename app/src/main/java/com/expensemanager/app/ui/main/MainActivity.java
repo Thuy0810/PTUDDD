@@ -2,56 +2,69 @@ package com.expensemanager.app.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.GoalRepository;
-import com.expensemanager.app.databinding.ActivityMainBinding;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
 import com.expensemanager.app.util.MoneyFormat;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.expensemanager.app.worker.RecurringTransactionWorker;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private ActivityMainBinding binding;
     private NavController navController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        setContentView(R.layout.activity_main);
 
         NavHostFragment navHost = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
         if (navHost != null) {
             navController = navHost.getNavController();
-            NavigationUI.setupWithNavController(binding.bottomNav, navController);
         }
 
-        binding.bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (navController != null) {
-                if (id == R.id.nav_home) navController.navigate(R.id.homeFragment);
-                else if (id == R.id.nav_budget) navController.navigate(R.id.budgetFragment);
-                else if (id == R.id.nav_report) navController.navigate(R.id.reportFragment);
-                else if (id == R.id.nav_profile) navController.navigate(R.id.profileFragment);
-                else return false;
-            }
-            return true;
-        });
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav
+                = findViewById(R.id.bottomNav);
+        if (bottomNav != null) {
+            bottomNav.setOnItemSelectedListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.nav_home) {
+                    if (navController != null) navController.navigate(R.id.homeFragment);
+                    return true;
+                } else if (id == R.id.nav_budget) {
+                    if (navController != null) navController.navigate(R.id.budgetFragment);
+                    return true;
+                } else if (id == R.id.nav_add) {
+                    startActivity(new Intent(this, AddTransactionActivity.class));
+                    return true;
+                } else if (id == R.id.nav_report) {
+                    if (navController != null) navController.navigate(R.id.reportFragment);
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    if (navController != null) navController.navigate(R.id.profileFragment);
+                    return true;
+                }
+                return false;
+            });
+        }
 
-        binding.fabAdd.setOnClickListener(v ->
-                startActivity(new Intent(this, AddTransactionActivity.class)));
+        // Lên lịch worker cho giao dịch định kỳ
+        RecurringTransactionWorker.schedule(this);
+
+        // Chạy bù khi mở app
+        String uid = new AuthRepository().getUid();
+        if (uid != null) {
+            new com.expensemanager.app.data.repository.RecurringRepository().catchUp(uid);
+        }
 
         checkOverdueGoals();
     }
@@ -65,16 +78,17 @@ public class MainActivity extends AppCompatActivity {
 
             StringBuilder sb = new StringBuilder();
             for (SavingsGoal g : overdue) {
-                double shortfall = g.getTargetAmount() - g.getSavedAmount();
+                long shortfall = g.getTargetAmount() - g.getSavedAmount();
                 sb.append("• ").append(g.getTitle())
                         .append(": thiếu ").append(MoneyFormat.format(shortfall))
                         .append("\n");
             }
 
             new AlertDialog.Builder(this)
-                    .setTitle("Cảnh báo mục tiêu quá hạn")
-                    .setMessage("Bạn có " + overdue.size() + " mục tiêu đang quá hạn:\n\n" + sb)
-                    .setPositiveButton("Đóng", null)
+                    .setTitle(R.string.alert_overdue_goals_title)
+                    .setMessage(getString(R.string.alert_overdue_goals_body,
+                            overdue.size(), sb))
+                    .setPositiveButton(R.string.confirm, null)
                     .show();
         });
     }

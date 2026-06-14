@@ -1,13 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#0D9488"
-        android:pathData="M54,20 L88,40 L88,68 L54,88 L20,68 L20,40 Z" />
+
+    <!-- Wallet body: rounded rectangle -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M40,50 L54,42 L68,50 L68,62 L54,70 L40,62 Z" />
+        android:pathData="M54,28
+            C39,28 27,37 27,50
+            C27,63 39,72 54,72
+            C69,72 81,63 81,50
+            C81,37 69,28 54,28 Z" />
+
+    <!-- Wallet fold/zipper line -->
+    <path
+        android:fillColor="#FFD080"
+        android:pathData="M27,47 L81,47 L81,53 L27,53 Z" />
+
+    <!-- Coin stack on top-right corner -->
+    <path
+        android:fillColor="#FFD080"
+        android:pathData="M70,36
+            C77,36 82,41 82,48
+            C82,55 77,60 70,60
+            C63,60 58,55 58,48
+            C58,41 63,36 70,36 Z" />
+
+    <!-- Coin inner detail (VND symbol area) -->
+    <path
+        android:fillColor="#FFB84D"
+        android:pathData="M70,40
+            C74,40 77,43 77,47
+            C77,51 74,54 70,54
+            C66,54 63,51 63,47
+            C63,43 66,40 70,40 Z" />
+
+    <!-- Coin V letter -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M67,45 L70,51 L73,45 L72,45 L70,49 L68,45 Z" />
+
+    <!-- Growth arrow bottom-left -->
+    <path
+        android:fillColor="#FFD080"
+        android:pathData="M35,62 L49,48 L49,52 L56,52 L56,58 L49,58 L49,62 Z" />
 </vector>

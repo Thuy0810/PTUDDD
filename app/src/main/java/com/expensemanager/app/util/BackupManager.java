@@ -33,7 +33,7 @@ public final class BackupManager {
 
     private static final String[] COLLECTIONS = {
             "transactions", "wallets", "categories",
-            "budgets", "savings_goals", "savings_challenges", "recurring"
+            "budgets", "savings_goals", "recurring"
     };
 
     private BackupManager() {}
@@ -284,7 +284,8 @@ public final class BackupManager {
         if (value instanceof JSONArray) {
             return jsonArrayToList((JSONArray) value);
         }
-        return value == JSONObject.NULL ? null : value;
+        if (value == JSONObject.NULL) return null;
+        return value;
     }
 
     @SuppressWarnings("unchecked")
@@ -295,7 +296,27 @@ public final class BackupManager {
             String key = keys.next();
             map.put(key, deserializeJsonValue(obj.get(key)));
         }
+        // Migration an toàn: chuẩn hoá các trường tiền cũ (Double) thành Long khi đọc.
+        // KHÔNG cập nhật Firestore — chỉ chuẩn hoá khi đưa vào map để save.
+        normalizeMoneyFields(map);
         return map;
+    }
+
+    private static final java.util.Set<String> MONEY_KEYS = new java.util.HashSet<>(java.util.Arrays.asList(
+            "currentBalance", "initialBalance", "limitAmount",
+            "targetAmount", "savedAmount", "targetSavings",
+            "amount", "delta", "oldBalance", "newBalance"
+    ));
+
+    private static void normalizeMoneyFields(Map<String, Object> map) {
+        for (String key : MONEY_KEYS) {
+            if (!map.containsKey(key)) continue;
+            Object v = map.get(key);
+            Long asLong = MoneyValueParser.toLong(v);
+            if (asLong != null) {
+                map.put(key, asLong);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

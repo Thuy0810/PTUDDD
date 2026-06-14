@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.expensemanager.app.databinding.FragmentProfileBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.auth.LoginActivity;
-import com.expensemanager.app.ui.challenge.ChallengeListActivity;
+import com.expensemanager.app.ui.recurring.RecurringListActivity;
 import com.expensemanager.app.ui.wallet.WalletListActivity;
 import com.expensemanager.app.ui.category.CategoryListActivity;
 import com.expensemanager.app.ui.goal.GoalListActivity;
@@ -84,7 +84,7 @@ public class ProfileFragment extends Fragment {
         }
         if (binding.btnManageRecurring != null) {
             binding.btnManageRecurring.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), ChallengeListActivity.class)));
+                    startActivity(new Intent(requireContext(), RecurringListActivity.class)));
         }
 
         // Hỗ trợ

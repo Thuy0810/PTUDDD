@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Expense Manager</string>
+
+    <!-- Auth -->
+    <string name="login">Log in</string>
+    <string name="register">Sign up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="display_name">Full name</string>
+    <string name="no_account">No account? Sign up</string>
+    <string name="has_account">Have an account? Log in</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="reset_password">Reset password</string>
+    <string name="reset_password_desc">Enter your registered email and we will send a password reset link.</string>
+    <string name="send_reset_link">Send reset link</string>
+    <string name="logout">Log out</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Overview</string>
+    <string name="nav_budget">Budget</string>
+    <string name="nav_transactions">Transactions</string>
+    <string name="nav_report">Report</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Transaction -->
+    <string name="search_hint">Search transactions…</string>
+    <string name="empty_transactions">No transactions yet</string>
+    <string name="add_transaction">Add transaction</string>
+    <string name="edit_transaction">Edit transaction</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="transfer">Transfer</string>
+    <string name="amount">Amount</string>
+    <string name="amount_hint">0</string>
+    <string name="note">Note</string>
+    <string name="note_hint">Add a note…</string>
+    <string name="date">Date</string>
+    <string name="category">Category</string>
+    <string name="select_category">Select category</string>
+    <string name="wallet">Wallet</string>
+    <string name="select_wallet">Select wallet</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="quick_input_hint">Quick input: Coffee 25k</string>
+
+    <!-- Home -->
+    <string name="balance">Current balance</string>
+    <string name="month_income">Monthly income</string>
+    <string name="month_expense">Monthly expense</string>
+    <string name="today_expense">Today\'s expense</string>
+    <string name="budget_remaining">Budget remaining</string>
+    <string name="recent_transactions">Recent transactions</string>
+    <string name="see_all">See all</string>
+    <string name="no_transactions">No transactions yet</string>
+
+    <!-- Wallet -->
+    <string name="wallets">Manage wallets</string>
+    <string name="add_wallet">Add wallet</string>
+    <string name="edit_wallet">Edit wallet</string>
+    <string name="wallet_name">Wallet name</string>
+    <string name="wallet_balance">Balance</string>
+    <string name="wallet_type">Wallet type</string>
+    <string name="wallet_cash">Cash</string>
+    <string name="wallet_bank">Bank account</string>
+    <string name="wallet_saving">Savings</string>
+    <string name="wallet_other">Other</string>
+    <string name="delete_wallet_confirm">Delete this wallet?</string>
+
+    <!-- Category -->
+    <string name="categories">Categories</string>
+    <string name="add_category">Add category</string>
+    <string name="edit_category">Edit category</string>
+    <string name="category_name">Category name</string>
+    <string name="category_type">Type</string>
+    <string name="category_icon">Icon</string>
+    <string name="category_color">Color</string>
+
+    <!-- Budget -->
+    <string name="budgets">Budgets</string>
+    <string name="budget_settings">Budget settings</string>
+    <string name="budget_allocation">Budget allocation</string>
+    <string name="add_budget">Set budget</string>
+    <string name="edit_budget">Edit budget</string>
+    <string name="budget_limit">Limit</string>
+    <string name="budget_spent">Spent</string>
+    <string name="budget_remaining_short">Remaining</string>
+    <string name="budget_alert_80">You have used 80%% of budget %1$s</string>
+    <string name="budget_alert_100">Budget %1$s is exhausted!</string>
+    <string name="no_budgets">No budgets yet</string>
+    <string name="set_budget_hint">Set a budget to track your spending</string>
+
+    <!-- Goal -->
+    <string name="goals">Savings goals</string>
+    <string name="add_goal">Add goal</string>
+    <string name="goal_name">Goal name</string>
+    <string name="goal_target">Target amount</string>
+    <string name="goal_current">Current</string>
+    <string name="goal_deadline">Deadline</string>
+    <string name="goal_progress">Progress</string>
+    <string name="no_goals">No goals yet</string>
+
+    <!-- Recurring -->
+    <string name="recurring">Recurring transactions</string>
+    <string name="add_recurring">Add recurring transaction</string>
+    <string name="recurring_name">Name</string>
+    <string name="recurring_amount">Amount</string>
+    <string name="recurring_repeat">Repeat</string>
+    <string name="repeat_daily">Daily</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+    <string name="repeat_yearly">Yearly</string>
+    <string name="no_recurring">No recurring transactions yet</string>
+
+    <!-- Report -->
+    <string name="reports">Reports</string>
+    <string name="report_income">Total income</string>
+    <string name="report_expense">Total expense</string>
+    <string name="report_balance">Balance</string>
+    <string name="report_this_month">This month</string>
+    <string name="report_last_month">Last month</string>
+    <string name="report_vs_last">Compared to last month</string>
+    <string name="top_category">Top expense category</string>
+
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="change_password">Change password</string>
+    <string name="export_data">Backup data</string>
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="pin_lock">PIN / Fingerprint lock</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="account">Account</string>
+    <string name="user">User</string>
+    <string name="security">Security</string>
+    <string name="language">Language</string>
+    <string name="support">Support</string>
+    <string name="help_center">Help center</string>
+    <string name="contact">Contact</string>
+
+    <!-- Messages -->
+    <string name="error_empty_email">Please enter your email</string>
+    <string name="error_empty_password">Please enter your password</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_password_short">Password must be at least 6 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_empty_amount">Enter an amount greater than 0</string>
+    <string name="error_invalid_amount">Invalid amount</string>
+    <string name="error_select_category">Select a category</string>
+    <string name="error_select_wallet">Select a wallet</string>
+    <string name="error_select_category_wallet">Please select category and wallet</string>
+    <string name="error_no_category">No categories. Please create a category first.</string>
+    <string name="error_no_wallet">No wallets. Please create a wallet first.</string>
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_permission_denied">Data access denied</string>
+    <string name="error_unknown">An unknown error occurred</string>
+    <string name="success_login">Login successful!</string>
+    <string name="success_register">Registration successful!</string>
+    <string name="success_saved">Saved</string>
+    <string name="success_delete">Deleted</string>
+    <string name="success_created">Created</string>
+    <string name="success_recurring_created">Recurring transaction created!</string>
+    <string name="success_logout">Logged out</string>
+    <string name="success_reset_sent">Password reset email sent</string>
+    <string name="success_backup">Backup successful</string>
+    <string name="success_restore">Restore successful</string>
+    <string name="success_logout_confirm">Are you sure you want to log out?</string>
+    <string name="login_failed">Login failed</string>
+    <string name="register_failed">Registration failed</string>
+    <string name="error_backup_failed">Backup failed</string>
+    <string name="error_restore_failed">Restore failed</string>
+    <string name="error_loading_failed">Failed to load data</string>
+    <string name="error_saving_failed">Failed to save</string>
+    <string name="error_insufficient_balance">Insufficient balance</string>
+    <string name="error_same_wallet">Two wallets must be different</string>
+
+    <!-- Security / PIN -->
+    <string name="pin_hint">PIN code</string>
+    <string name="pin_enter_prompt">Enter PIN to open app</string>
+    <string name="pin_empty">Please enter PIN code</string>
+    <string name="pin_wrong">Incorrect PIN</string>
+    <string name="pin_wrong_attempts">Wrong PIN. %1$d attempts remaining.</string>
+    <string name="attempts_remaining">%1$d attempts remaining</string>
+    <string name="pin_locked">Account temporarily locked</string>
+    <string name="pin_locked_message">Account temporarily locked. Try again after %1$d minutes.</string>
+    <string name="pin_too_many_attempts">Too many wrong attempts. Locked for 5 minutes.</string>
+    <string name="pin_enabled">PIN lock enabled</string>
+    <string name="pin_disabled">PIN lock disabled</string>
+    <string name="pin_setup_hint">Enter PIN code 4-6 digits</string>
+    <string name="pin_invalid_format">PIN must be 4-6 digits</string>
+    <string name="pin_save_failed">Failed to save PIN. Please try again.</string>
+    <string name="setup_pin_title">Set PIN code</string>
+    <string name="disable_pin_confirm_title">Disable PIN lock?</string>
+    <string name="disable_pin_confirm_message">Disabling PIN lock will remove all security settings. Are you sure?</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Unlock</string>
+    <string name="biometric_subtitle">Fingerprint authentication</string>
+    <string name="biometric_locked">Fingerprint temporarily locked. Use PIN.</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="label_display_name">Full name</string>
+    <string name="hint_display_name">Enter your full name</string>
+    <string name="label_email">Login email</string>
+    <string name="note_email_immutable">* Login email cannot be changed</string>
+    <string name="error_name_empty">Please enter your name</string>
+    <string name="error_name_too_short">Name must be at least 2 characters</string>
+    <string name="error_name_too_long">Name must not exceed 50 characters</string>
+    <string name="error_save_failed">Failed to save</string>
+    <string name="save_changes">Save changes</string>
+    <string name="saving">Saving…</string>
+
+    <!-- Transaction display -->
+    <string name="wallet_label">Wallet: %1$s</string>
+    <string name="wallet_deleted">Deleted wallet</string>
+    <string name="category_deleted">Deleted category</string>
+    <string name="transfer_route">%1$s → %2$s</string>
+    <string name="transaction_income">Income</string>
+    <string name="transaction_expense">Expense</string>
+    <string name="transaction_transfer">Transfer</string>
+
+    <!-- Transaction Detail BottomSheet -->
+    <string name="time">Time</string>
+    <string name="wallet_from">From wallet</string>
+    <string name="wallet_to">To wallet</string>
+    <string name="created_at">Created at</string>
+    <string name="delete_confirm_title">Delete transaction?</string>
+    <string name="delete_transaction_confirm">Are you sure you want to delete this transaction?</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">Expense reminder</string>
+    <string name="notification_reminder_body">Have you recorded today\'s expenses? It only takes a few seconds!</string>
+    <string name="notification_reminder_body_long">Don\'t miss recording today\'s expenses. Open the app and tap + to add a transaction quickly. Regular recording helps you manage your finances better.</string>
+    <string name="notification_channel_name">Daily reminders</string>
+    <string name="notification_channel_description">Daily expense recording reminders</string>
+    <string name="hint_note">Note</string>
+    <string name="create">Create</string>
+
+    <!-- Financial Health -->
+    <string name="financial_health">Financial health</string>
+    <string name="health_score">Health score</string>
+    <string name="health_excellent">Excellent</string>
+    <string name="health_good">Good</string>
+    <string name="health_warning">Needs attention</string>
+    <string name="health_critical">Critical</string>
+    <string name="daily_budget">Daily budget</string>
+    <string name="month_prediction">This month prediction</string>
+    <string name="saving_rate">Savings</string>
+    <string name="budget_usage">Budget</string>
+    <string name="vs_last_month">vs last month</string>
+    <string name="budget_remaining_label">Budget remaining: </string>
+    <string name="today_expense_value">Today\'s expense: %1$s</string>
+    <string name="top_category_value">Top: %1$s - %2$s</string>
+
+    <!-- Alert types -->
+    <string name="alert_over_budget">Near budget limit</string>
+    <string name="alert_near_budget">80%% of budget used</string>
+    <string name="alert_expense_increased">Spending increased compared to last month</string>
+    <string name="alert_missing_records">You may have missed recording expenses</string>
+    <string name="alert_abnormal_spending">Unusual spending today</string>
+
+    <!-- Mood -->
+    <string name="mood">Feeling</string>
+    <string name="regret">Was this expense necessary?</string>
+    <string name="necessary">Necessary</string>
+    <string name="unnecessary">Not necessary</string>
+</resources>

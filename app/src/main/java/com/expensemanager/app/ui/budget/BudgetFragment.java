@@ -23,8 +23,10 @@ import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.databinding.FragmentBudgetBinding;
+import com.expensemanager.app.domain.usecase.BudgetService;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,15 +134,15 @@ public class BudgetFragment extends Fragment {
     private void observeExpenses(String uid) {
         String monthKey = DateUtils.currentMonthKey();
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
-            Map<String, Double> spentMap = new HashMap<>();
-            double totalSpent = 0;
+            Map<String, Long> spentMap = new HashMap<>();
+            long totalSpent = 0L;
             if (txs != null) {
                 for (Transaction t : txs) {
                     if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
                         totalSpent += t.getAmount();
                         String catId = t.getCategoryId();
                         if (catId != null && !catId.isEmpty()) {
-                            double prev = spentMap.containsKey(catId) ? spentMap.get(catId) : 0;
+                            long prev = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
                             spentMap.put(catId, prev + t.getAmount());
                         }
                     }
@@ -152,24 +154,25 @@ public class BudgetFragment extends Fragment {
     }
 
     private void updateTotalSummary() {
-        double totalBudget = 0;
+        long totalBudget = 0L;
         for (Budget b : currentBudgets) {
             totalBudget += b.getLimitAmount();
         }
-        binding.textTotalBudget.setText(MoneyFormat.format(totalBudget));
+        binding.textTotalBudget.setText(MoneyFormat.formatLong(totalBudget));
     }
 
-    private void updateTotalSummaryWithSpent(Map<String, Double> spentMap, double totalSpent) {
-        double totalBudget = 0;
+    private void updateTotalSummaryWithSpent(Map<String, Long> spentMap, long totalSpent) {
+        long totalBudget = 0L;
         for (Budget b : currentBudgets) {
             totalBudget += b.getLimitAmount();
         }
-        double totalRemaining = totalBudget - totalSpent;
-        int percent = totalBudget > 0 ? (int) (totalSpent / totalBudget * 100) : 0;
+        long totalRemaining = totalBudget - totalSpent;
+        int percent = totalBudget > 0 ? (int) (totalSpent * 100 / totalBudget) : 0;
 
-        binding.textTotalBudget.setText(MoneyFormat.format(totalBudget));
-        binding.textTotalSpent.setText(MoneyFormat.format(totalSpent));
-        binding.textTotalRemaining.setText(MoneyFormat.format(Math.max(totalRemaining, 0)));
+        binding.textTotalBudget.setText(MoneyFormat.formatLong(totalBudget));
+        binding.textTotalSpent.setText(MoneyFormat.formatLong(totalSpent));
+        binding.textTotalRemaining.setText(
+                MoneyFormat.formatLong(Math.max(totalRemaining, 0L)));
         binding.progressTotal.setProgress(Math.min(percent, 100));
 
         if (totalRemaining < 0) {
@@ -206,13 +209,13 @@ public class BudgetFragment extends Fragment {
                         Toast.makeText(requireContext(), "Chọn danh mục", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    try {
-                        double limit = Double.parseDouble(inputAmount.getText().toString().trim());
-                        if (limit <= 0) throw new Exception();
-                        saveBudget(selectedCat[0], limit);
-                    } catch (Exception e) {
+                    Long parsed = MoneyValueParser.tryParseStrict(
+                            inputAmount.getText().toString().trim());
+                    if (parsed == null) {
                         Toast.makeText(requireContext(), "Nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    saveBudget(selectedCat[0], parsed);
                 })
                 .setNegativeButton("Hủy", null);
         builder.show();
@@ -222,26 +225,22 @@ public class BudgetFragment extends Fragment {
         final EditText input = new EditText(requireContext());
         input.setHint("Hạn mức mới");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf((long) budget.getLimitAmount()));
+        input.setText(String.valueOf(budget.getLimitAmount()));
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Sửa ngân sách: " + (cat != null ? cat.getName() : ""))
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
-                    try {
-                        double limit = Double.parseDouble(input.getText().toString().trim());
-                        if (limit > 0) {
-                            budget.setLimitAmount(limit);
-                            String uid = authRepo.getUid();
-                            if (uid != null) {
-                                com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                                        .collection("users").document(uid)
-                                        .collection("budgets").document(budget.getId())
-                                        .update("limitAmount", limit);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Long parsed = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (parsed == null) {
+                        Toast.makeText(requireContext(), "Số tiền không hợp lệ",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String uid = authRepo.getUid();
+                    if (uid != null) {
+                        budgetRepo.updateLimitAmount(uid, budget.getId(), parsed);
                     }
                 })
                 .setNegativeButton("Hủy", null)
@@ -252,7 +251,7 @@ public class BudgetFragment extends Fragment {
                 .show();
     }
 
-    private void saveBudget(Category cat, double limit) {
+    private void saveBudget(Category cat, long limit) {
         String uid = authRepo.getUid();
         if (uid == null) return;
 

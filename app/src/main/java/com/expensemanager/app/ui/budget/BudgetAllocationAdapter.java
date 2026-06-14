@@ -23,12 +23,12 @@ import java.util.Map;
 public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocationAdapter.VH> {
 
     public interface OnEditClick {
-        void onEdit(Category category, double currentAmount);
+        void onEdit(Category category, long currentAmount);
     }
 
     private List<Category> categories = new ArrayList<>();
     private List<Budget> budgets = new ArrayList<>();
-    private Map<String, Double> spentMap = new HashMap<>();
+    private Map<String, Long> spentMap = new HashMap<>();
     private OnEditClick listener;
 
     public void setCategories(List<Category> categories) {
@@ -41,7 +41,7 @@ public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocati
         notifyDataSetChanged();
     }
 
-    public void setSpentMap(Map<String, Double> spentMap) {
+    public void setSpentMap(Map<String, Long> spentMap) {
         this.spentMap = spentMap;
         notifyDataSetChanged();
     }
@@ -50,13 +50,13 @@ public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocati
         this.listener = listener;
     }
 
-    private double getBudgetAmountForCategory(String categoryId) {
+    private long getBudgetAmountForCategory(String categoryId) {
         for (Budget b : budgets) {
             if (categoryId.equals(b.getCategoryId())) {
                 return b.getLimitAmount();
             }
         }
-        return 0;
+        return 0L;
     }
 
     @NonNull
@@ -70,13 +70,13 @@ public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocati
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Category cat = categories.get(position);
-        double budgetAmount = getBudgetAmountForCategory(cat.getId());
-        double spent = spentMap.containsKey(cat.getId()) ? spentMap.get(cat.getId()) : 0;
-        int progress = budgetAmount > 0 ? (int) (spent / budgetAmount * 100) : 0;
+        long budgetAmount = getBudgetAmountForCategory(cat.getId());
+        long spent = spentMap.containsKey(cat.getId()) ? spentMap.get(cat.getId()) : 0L;
+        int progress = budgetAmount > 0 ? (int) (spent * 100 / budgetAmount) : 0;
         progress = Math.min(progress, 100);
 
         holder.binding.textCategoryName.setText(cat.getName());
-        holder.binding.textAllocatedAmount.setText(MoneyFormat.format(budgetAmount));
+        holder.binding.textAllocatedAmount.setText(MoneyFormat.formatLong(budgetAmount));
         holder.binding.textPercent.setText(progress + "%");
         holder.binding.progressBar.setProgress(progress);
 

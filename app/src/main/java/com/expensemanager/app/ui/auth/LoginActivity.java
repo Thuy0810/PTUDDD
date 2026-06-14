@@ -58,8 +58,11 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> {
                     PrefsHelper.clearPendingLogout(this);
                     ReminderScheduler.scheduleDaily(this);
-                    new com.expensemanager.app.data.repository.RecurringRepository()
-                            .catchUp(authRepo.getUid());
+                    String uid = authRepo.getUid();
+                    if (uid != null) {
+                        new com.expensemanager.app.domain.usecase.RecurringService()
+                                .runOnLogin(uid);
+                    }
                     startActivity(new Intent(this, MainActivity.class));
                     finish();
                 })

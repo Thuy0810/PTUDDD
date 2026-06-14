@@ -100,7 +100,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tổng ngân sách tháng"
-                        android:textColor="#B3FFFFFF"
+                        android:textColor="@color/text_on_dark"
                         android:textSize="13sp" />
 
                     <TextView
@@ -129,7 +129,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/budget_spent"
-                                android:textColor="#B3FFFFFF"
+                                android:textColor="@color/text_on_dark"
                                 android:textSize="12sp" />
 
                             <TextView
@@ -152,7 +152,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/budget_remaining_short"
-                                android:textColor="#B3FFFFFF"
+                                android:textColor="@color/text_on_dark"
                                 android:textSize="12sp" />
 
                             <TextView
@@ -172,7 +172,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         app:indicatorColor="@color/white"
-                        app:trackColor="#33FFFFFF"
+                        app:trackTint="@color/text_hint"
                         app:trackCornerRadius="6dp"
                         app:trackThickness="10dp" />
                 </LinearLayout>

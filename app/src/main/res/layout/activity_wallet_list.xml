@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tổng số dư"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/text_on_dark"
                 android:textSize="13sp" />
 
             <TextView

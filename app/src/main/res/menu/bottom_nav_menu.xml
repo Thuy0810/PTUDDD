@@ -12,6 +12,11 @@
         android:title="@string/nav_budget" />
 
     <item
+        android:id="@+id/nav_add"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add" />
+
+    <item
         android:id="@+id/nav_report"
         android:icon="@drawable/ic_report"
         android:title="@string/nav_report" />

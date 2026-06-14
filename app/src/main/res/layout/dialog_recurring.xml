@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -9,11 +10,43 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Loai giao dich -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reccurring_type"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioExpense"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/expense" />
+
+            <RadioButton
+                android:id="@+id/radioIncome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="@string/income" />
+        </RadioGroup>
+
+        <!-- Ghi chu / ten khoan -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.ExpenseManager.TextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Tên khoản (VD: Tiền phòng)">
+            android:layout_marginTop="12dp"
+            android:hint="@string/recurring_name_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editRecurringNote"
@@ -22,36 +55,24 @@
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- So tien -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.ExpenseManager.TextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="@string/amount">
+            android:hint="@string/amount"
+            app:suffixText="VND">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editRecurringAmount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
+                android:inputType="number"
+                android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/wallet"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <Spinner
-            android:id="@+id/spinnerRecurringWallet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/bg_spinner_dropdown"
-            android:padding="12dp" />
-
+        <!-- Danh muc -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,11 +89,29 @@
             android:background="@drawable/bg_spinner_dropdown"
             android:padding="12dp" />
 
+        <!-- Vi -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Chu kỳ"
+            android:text="@string/wallet"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <Spinner
+            android:id="@+id/spinnerRecurringWallet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_spinner_dropdown"
+            android:padding="12dp" />
+
+        <!-- Chu ky -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/recurring_cycle"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -84,12 +123,13 @@
             android:background="@drawable/bg_spinner_dropdown"
             android:padding="12dp" />
 
+        <!-- Ngay / Thu (thay doi theo chu ky) -->
         <TextView
             android:id="@+id/labelRecurringDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Ngày trong tháng"
+            android:text="@string/recurring_day_of_month"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -101,12 +141,13 @@
             android:background="@drawable/bg_spinner_dropdown"
             android:padding="12dp" />
 
+        <!-- Thang (chi cho yearly) -->
         <TextView
             android:id="@+id/labelRecurringMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Tháng"
+            android:text="@string/recurring_month"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:visibility="gone" />
@@ -120,6 +161,7 @@
             android:padding="12dp"
             android:visibility="gone" />
 
+        <!-- Ngay bat dau / ket thuc -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -135,7 +177,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ngày bắt đầu"
+                    android:text="@string/reccurring_start_date"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
@@ -145,13 +187,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Chọn ngày"
+                    android:text="@string/reccurring_select_date"
                     android:textSize="12sp" />
             </LinearLayout>
 
-            <View
-                android:layout_width="12dp"
-                android:layout_height="0dp" />
+            <View android:layout_width="12dp" android:layout_height="0dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -162,7 +202,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ngày kết thúc"
+                    android:text="@string/reccurring_end_date"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
@@ -172,10 +212,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Không giới hạn"
+                    android:text="@string/reccurring_no_end"
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

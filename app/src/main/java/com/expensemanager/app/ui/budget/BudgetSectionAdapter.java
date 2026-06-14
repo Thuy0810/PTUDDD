@@ -29,7 +29,7 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
         public List<CategoryItem> categories = new ArrayList<>();
         public boolean isExpanded = true;
         public boolean isOtherSection = false;
-        public double totalBalance = 0;
+        public long totalBalance = 0L;
 
         public Section(String title) {
             this.title = title;
@@ -38,40 +38,40 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
 
     public static class CategoryItem {
         public Category category;
-        public double allocated = 0;
-        public double spent = 0;
+        public long allocated = 0L;
+        public long spent = 0L;
 
-        public double getRemaining() {
+        public long getRemaining() {
             return allocated - spent;
         }
 
         public int getProgressPercent() {
             if (allocated <= 0) return 0;
-            return (int) Math.min((spent / allocated) * 100, 100);
+            return (int) Math.min((spent * 100) / allocated, 100L);
         }
     }
 
     public interface OnCategoryEdit {
-        void onEdit(Category category, double currentAmount);
+        void onEdit(Category category, long currentAmount);
     }
 
     private List<Section> sections = new ArrayList<>();
-    private Map<String, Double> allocatedMap = new HashMap<>();
-    private Map<String, Double> spentMap = new HashMap<>();
+    private Map<String, Long> allocatedMap = new HashMap<>();
+    private Map<String, Long> spentMap = new HashMap<>();
     private OnCategoryEdit editListener;
-    private double totalBalance = 0;
+    private long totalBalance = 0L;
 
     public void setSections(List<Section> sections) {
         this.sections = sections;
         notifyDataSetChanged();
     }
 
-    public void setAllocatedMap(Map<String, Double> map) {
+    public void setAllocatedMap(Map<String, Long> map) {
         this.allocatedMap = map;
         notifyDataSetChanged();
     }
 
-    public void setSpentMap(Map<String, Double> map) {
+    public void setSpentMap(Map<String, Long> map) {
         this.spentMap = map;
         notifyDataSetChanged();
     }
@@ -80,7 +80,7 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
         this.editListener = listener;
     }
 
-    public void setTotalBalance(double balance) {
+    public void setTotalBalance(long balance) {
         this.totalBalance = balance;
         notifyDataSetChanged();
     }
@@ -116,15 +116,15 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             binding.textSectionTitle.setText(section.title);
 
             // Calculate total progress
-            double totalAllocated = 0, totalSpent = 0;
+            long totalAllocated = 0L, totalSpent = 0L;
             for (CategoryItem item : section.categories) {
                 String catId = item.category.getId();
-                item.allocated = allocatedMap.containsKey(catId) ? allocatedMap.get(catId) : 0;
-                item.spent = spentMap.containsKey(catId) ? spentMap.get(catId) : 0;
+                item.allocated = allocatedMap.containsKey(catId) ? allocatedMap.get(catId) : 0L;
+                item.spent = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
                 totalAllocated += item.allocated;
                 totalSpent += item.spent;
             }
-            int progress = totalAllocated > 0 ? (int) (totalSpent / totalAllocated * 100) : 0;
+            int progress = totalAllocated > 0 ? (int) (totalSpent * 100 / totalAllocated) : 0;
             binding.textProgress.setText(progress + "%");
 
             binding.layoutCards.removeAllViews();
@@ -153,9 +153,10 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             Category cat = item.category;
             cardBinding.textCategoryName.setText(cat.getName());
             cardBinding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
-            cardBinding.textAllocated.setText(MoneyFormat.format(item.allocated));
-            cardBinding.textSpent.setText(MoneyFormat.format(item.spent));
-            cardBinding.textRemaining.setText(MoneyFormat.format(Math.max(item.getRemaining(), 0)));
+            cardBinding.textAllocated.setText(MoneyFormat.formatLong(item.allocated));
+            cardBinding.textSpent.setText(MoneyFormat.formatLong(item.spent));
+            cardBinding.textRemaining.setText(
+                    MoneyFormat.formatLong(Math.max(item.getRemaining(), 0L)));
 
             int progress = item.getProgressPercent();
             cardBinding.progressBar.setProgress(progress);
@@ -199,7 +200,7 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             TextView textBalance = balanceView.findViewById(R.id.textBalance);
             TextView textBalanceLabel = balanceView.findViewById(R.id.textBalanceLabel);
 
-            textBalance.setText(MoneyFormat.format(totalBalance));
+            textBalance.setText(MoneyFormat.formatLong(totalBalance));
             textBalance.setTextColor(itemView.getContext().getColor(R.color.income_green));
 
             if (totalBalance >= 0) {

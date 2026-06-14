@@ -33,6 +33,7 @@ import com.expensemanager.app.databinding.FragmentBudgetOverviewBinding;
 import com.expensemanager.app.ui.budget.BudgetAllocationActivity;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,8 +52,8 @@ public class BudgetOverviewFragment extends Fragment {
 
     private BudgetSectionAdapter adapter;
     private List<BudgetSectionAdapter.Section> sections = new ArrayList<>();
-    private Map<String, Double> allocatedMap = new HashMap<>();
-    private Map<String, Double> spentMap = new HashMap<>();
+    private Map<String, Long> allocatedMap = new HashMap<>();
+    private Map<String, Long> spentMap = new HashMap<>();
 
     private int selectedYear = Calendar.getInstance().get(Calendar.YEAR);
     private int selectedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -135,7 +136,7 @@ public class BudgetOverviewFragment extends Fragment {
         // Load wallet balance
         WalletRepository walletRepo = new WalletRepository();
         walletRepo.observeAll(uid).observe(getViewLifecycleOwner(), wallets -> {
-            double totalBalance = 0;
+            long totalBalance = 0L;
             if (wallets != null) {
                 for (Wallet w : wallets) {
                     totalBalance += w.getCurrentBalance();
@@ -176,14 +177,14 @@ public class BudgetOverviewFragment extends Fragment {
 
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
             spentMap = new HashMap<>();
-            double totalExpense = 0, totalIncome = 0;
+            long totalExpense = 0L, totalIncome = 0L;
             if (txs != null) {
                 for (Transaction t : txs) {
                     String catId = t.getCategoryId();
                     if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
                         totalExpense += t.getAmount();
                         if (catId != null) {
-                            double prev = spentMap.containsKey(catId) ? spentMap.get(catId) : 0;
+                            long prev = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
                             spentMap.put(catId, prev + t.getAmount());
                         }
                     } else if (Transaction.TYPE_INCOME.equals(t.getType())) {
@@ -198,7 +199,7 @@ public class BudgetOverviewFragment extends Fragment {
 
     private void calculateAndUpdateSummary() {
         // Calculate recurring expenses for the month
-        double recurringExpense = 0;
+        long recurringExpense = 0L;
         for (RecurringRule rule : recurringRules) {
             if (rule.isEnabled() && Transaction.TYPE_EXPENSE.equals(rule.getType())) {
                 String cycle = rule.getCycleType();
@@ -215,19 +216,19 @@ public class BudgetOverviewFragment extends Fragment {
                         recurringExpense += rule.getAmount();
                         break;
                     case RecurringRule.CYCLE_YEARLY:
-                        recurringExpense += rule.getAmount() / 12.0;
+                        recurringExpense += rule.getAmount() / 12;
                         break;
                 }
             }
         }
 
         // Calculate savings goal contributions needed
-        double savingsNeeded = 0;
+        long savingsNeeded = 0L;
         for (SavingsGoal goal : savingsGoals) {
             if (!goal.isCompleted()) {
-                double remaining = goal.getTargetAmount() - goal.getSavedAmount();
+                long remaining = goal.getTargetAmount() - goal.getSavedAmount();
                 if (remaining > 0) {
-                    Calendar deadline = Calendar.getInstance();
+                    Calendar deadline = DateUtils.newCalendar();
                     if (goal.getDeadline() != null) {
                         deadline.setTime(goal.getDeadline().toDate());
                     }
@@ -243,8 +244,8 @@ public class BudgetOverviewFragment extends Fragment {
         }
 
         // Update UI with calculated values
-        binding.textTotalExpense.setText(MoneyFormat.format(recurringExpense));
-        binding.textExtraSaving.setText(MoneyFormat.format(savingsNeeded));
+        binding.textTotalExpense.setText(MoneyFormat.formatLong(recurringExpense));
+        binding.textExtraSaving.setText(MoneyFormat.formatLong(savingsNeeded));
     }
 
     private void buildSections() {
@@ -289,27 +290,27 @@ public class BudgetOverviewFragment extends Fragment {
         adapter.setSections(sections);
     }
 
-    private void updateSummaryWithAmounts(double totalIncome, double totalExpense) {
-        binding.textTotalExpense.setText(MoneyFormat.format(totalExpense));
-        binding.textTotalIncome.setText(MoneyFormat.format(totalIncome));
+    private void updateSummaryWithAmounts(long totalIncome, long totalExpense) {
+        binding.textTotalExpense.setText(MoneyFormat.formatLong(totalExpense));
+        binding.textTotalIncome.setText(MoneyFormat.formatLong(totalIncome));
 
-        double saved = totalIncome - totalExpense;
-        binding.textTotalSaving.setText(MoneyFormat.format(Math.max(saved, 0)));
+        long saved = totalIncome - totalExpense;
+        binding.textTotalSaving.setText(MoneyFormat.formatLong(Math.max(saved, 0L)));
 
-        double extraSaving = totalIncome - totalExpense;
+        long extraSaving = totalIncome - totalExpense;
         if (extraSaving > 0) {
-            binding.textExtraSaving.setText(MoneyFormat.format(extraSaving));
+            binding.textExtraSaving.setText(MoneyFormat.formatLong(extraSaving));
         } else {
             binding.textExtraSaving.setText("0đ");
         }
     }
 
-    private void showEditDialog(Category cat, double currentAmount) {
+    private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(requireContext());
         input.setHint("Số tiền phân bổ");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         if (currentAmount > 0) {
-            input.setText(String.valueOf((long) currentAmount));
+            input.setText(String.valueOf(currentAmount));
         }
 
         String monthKey = String.format("%04d-%02d", selectedYear, selectedMonth);
@@ -318,19 +319,20 @@ public class BudgetOverviewFragment extends Fragment {
                 .setTitle("Phân bổ: " + cat.getName())
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
-                    try {
-                        double amount = Double.parseDouble(input.getText().toString().trim());
-                        if (amount < 0) throw new Exception();
-                        saveBudget(cat, amount, monthKey);
-                    } catch (Exception e) {
-                        Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Long parsed = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (parsed == null) {
+                        Toast.makeText(requireContext(), "Số tiền không hợp lệ",
+                                Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    saveBudget(cat, parsed, monthKey);
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
     }
 
-    private void saveBudget(Category cat, double amount, String monthKey) {
+    private void saveBudget(Category cat, long amount, String monthKey) {
         String uid = authRepo.getUid();
         if (uid == null) return;
 

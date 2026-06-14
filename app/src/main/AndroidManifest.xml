@@ -37,6 +37,7 @@
         <activity android:name=".ui.budget.BudgetAllocationActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.budget.BudgetEditActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.goal.GoalListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
+        <activity android:name=".ui.recurring.RecurringListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.challenge.ChallengeListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.profile.EditProfileActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.profile.SettingsActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />

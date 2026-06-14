@@ -1,6 +1,7 @@
 package com.expensemanager.app.ui.budget;
 
 import android.content.Context;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -27,6 +28,7 @@ import com.expensemanager.app.databinding.ActivityBudgetAllocationBinding;
 import com.expensemanager.app.databinding.ItemBudgetAllocSimpleBinding;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import android.util.Log;
 import java.util.ArrayList;
@@ -48,11 +50,12 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     private final TransactionRepository txRepo = new TransactionRepository();
 
     private List<Category> expenseCategories = new ArrayList<>();
-    private Map<String, Double> allocatedMap = new HashMap<>();
+    private Map<String, Long> allocatedMap = new HashMap<>();
+    private Map<String, Long> spentMap = new HashMap<>();
     private boolean isNextMonth = false;
     private String selectedMonthKey = null;
-    private double monthlyIncome = 0;
-    private double expectedIncomeOverride = -1;
+    private long monthlyIncome = 0L;
+    private long expectedIncomeOverride = -1;
     private String uid = null;
     private SharedPreferences prefs;
 
@@ -180,11 +183,17 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         if (expectedIncomeOverride == -1) expectedIncomeOverride = monthlyIncome;
 
         txObserver = list -> {
-            monthlyIncome = 0;
+            monthlyIncome = 0L;
+            spentMap.clear();
             if (list != null) {
                 for (Transaction t : list) {
                     if (Transaction.TYPE_INCOME.equals(t.getType())) {
                         monthlyIncome += t.getAmount();
+                    } else if (Transaction.TYPE_EXPENSE.equals(t.getType())
+                            && t.getCategoryId() != null) {
+                        Long cur = spentMap.get(t.getCategoryId());
+                        spentMap.put(t.getCategoryId(),
+                                (cur != null ? cur : 0L) + t.getAmount());
                     }
                 }
             }
@@ -237,13 +246,13 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        double totalAllocated = 0;
-        for (Double d : allocatedMap.values()) {
+        long totalAllocated = 0L;
+        for (Long d : allocatedMap.values()) {
             totalAllocated += d;
         }
 
-        double effectiveIncome = getEffectiveIncome();
-        double remaining = effectiveIncome - totalAllocated;
+        long effectiveIncome = getEffectiveIncome();
+        long remaining = effectiveIncome - totalAllocated;
         if (remaining < 0) remaining = 0;
 
         Log.d("BudgetAlloc", "updateUI: allocatedMap size=" + allocatedMap.size()
@@ -251,14 +260,14 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 + ", remaining=" + remaining
                 + ", expenseCategories=" + expenseCategories.size());
 
-        binding.textAllocated.setText(MoneyFormat.format(totalAllocated));
-        binding.textUnallocated.setText(MoneyFormat.format(remaining));
-        binding.textExpectedIncome.setText(MoneyFormat.format(effectiveIncome));
+        binding.textAllocated.setText(MoneyFormat.formatLong(totalAllocated));
+        binding.textUnallocated.setText(MoneyFormat.formatLong(remaining));
+        binding.textExpectedIncome.setText(MoneyFormat.formatLong(effectiveIncome));
 
         updateEssentialItems();
     }
 
-    private double getEffectiveIncome() {
+    private long getEffectiveIncome() {
         if (expectedIncomeOverride >= 0) return expectedIncomeOverride;
         return monthlyIncome;
     }
@@ -271,23 +280,22 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         input.setHint("Ví dụ: 15000000");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         if (expectedIncomeOverride >= 0) {
-            input.setText(String.valueOf((long) expectedIncomeOverride));
+            input.setText(String.valueOf(expectedIncomeOverride));
         }
 
         new AlertDialog.Builder(this)
                 .setTitle("Thu nhập dự kiến")
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
-                    String text = input.getText().toString().trim().replace(",", "");
-                    try {
-                        double val = Double.parseDouble(text);
-                        if (val < 0) throw new Exception();
-                        expectedIncomeOverride = val;
-                        prefs.edit().putLong("income_" + monthKey, (long) val).apply();
-                        updateUI();
-                    } catch (Exception e) {
+                    Long val = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (val == null) {
                         Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    expectedIncomeOverride = val;
+                    prefs.edit().putLong("income_" + monthKey, val).apply();
+                    updateUI();
                 })
                 .setNegativeButton("Hủy", null)
                 .setNeutralButton("Xóa", (d, w) -> {
@@ -303,8 +311,8 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         Log.d("BudgetAlloc", "updateEssentialItems: expenseCategories=" + expenseCategories.size() + ", allocatedMap=" + allocatedMap.size());
 
         for (Category cat : expenseCategories) {
-            double allocated = allocatedMap.containsKey(cat.getId())
-                    ? allocatedMap.get(cat.getId()) : 0;
+            long allocated = allocatedMap.containsKey(cat.getId())
+                    ? allocatedMap.get(cat.getId()) : 0L;
             Log.d("BudgetAlloc", "  item: cat=" + cat.getId() + " (" + cat.getName() + "), allocated=" + allocated);
 
             addEssentialItem(cat, allocated);
@@ -315,29 +323,70 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         }
     }
 
-    private void addPlaceholderItem(String name, double allocated) {
+    private void addPlaceholderItem(String name, long allocated) {
         ItemBudgetAllocSimpleBinding card = ItemBudgetAllocSimpleBinding.inflate(
                 LayoutInflater.from(this), binding.layoutEssentialItems, false);
-
         card.textCategoryName.setText(name);
         card.textCategoryIcon.setText("📦");
-        card.textAllocated.setText(MoneyFormat.format(allocated));
-        card.textAmount.setText(MoneyFormat.format(allocated) + " / --");
-
+        card.progressBudget.setProgress(0);
+        card.textStatus.setVisibility(View.GONE);
+        card.textSpent.setText(getString(R.string.budget_spent) + ": 0 / --");
+        card.textRemaining.setText(getString(R.string.budget_remaining) + " 0");
+        card.textRemaining.setTextColor(ContextCompat.getColor(this, R.color.text_hint));
+        card.btnReallocate.setVisibility(View.GONE);
         binding.layoutEssentialItems.addView(card.getRoot());
     }
 
-    private void addEssentialItem(Category cat, double allocated) {
+    private void addEssentialItem(Category cat, long allocated) {
+        long spent = spentMap.containsKey(cat.getId()) ? spentMap.get(cat.getId()) : 0L;
+        long remaining = Math.max(0L, allocated - spent);
+        long deficit = Math.max(0L, spent - allocated);
+        int pct = allocated > 0 ? (int) Math.min(100L * spent / allocated, 100L) : 0;
+
         ItemBudgetAllocSimpleBinding card = ItemBudgetAllocSimpleBinding.inflate(
                 LayoutInflater.from(this), binding.layoutEssentialItems, false);
 
         card.textCategoryName.setText(cat.getName());
-
-
-
         card.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
-        card.textAllocated.setText(MoneyFormat.format(allocated));
-        card.textAmount.setText(MoneyFormat.format(allocated) + " / --");
+
+        // Progress
+        card.progressBudget.setProgress(pct);
+
+        // Status chip
+        String statusText;
+        int statusBgColor;
+        if (deficit > 0) {
+            statusText = getString(R.string.budget_exceeded_amount, MoneyFormat.format(deficit));
+            statusBgColor = ContextCompat.getColor(this, R.color.expense_red);
+        } else if (pct >= 100) {
+            statusText = getString(R.string.budget_status_reached);
+            statusBgColor = ContextCompat.getColor(this, R.color.expense_red);
+        } else if (pct >= 80) {
+            statusText = getString(R.string.budget_status_warning);
+            statusBgColor = ContextCompat.getColor(this, R.color.warning);
+        } else {
+            statusText = getString(R.string.budget_status_safe);
+            statusBgColor = ContextCompat.getColor(this, R.color.income_green);
+        }
+        card.textStatus.setText(statusText);
+        card.textStatus.setBackgroundColor(statusBgColor);
+
+        // Spent + remaining
+        card.textSpent.setText(getString(R.string.budget_spent) + ": " + MoneyFormat.format(spent)
+                + " / " + MoneyFormat.format(allocated));
+
+        if (deficit > 0) {
+            card.textRemaining.setText(getString(R.string.budget_exceeded_amount,
+                    MoneyFormat.format(deficit)));
+            card.textRemaining.setTextColor(ContextCompat.getColor(this, R.color.expense_red));
+            card.btnReallocate.setVisibility(View.VISIBLE);
+            card.btnReallocate.setOnClickListener(v -> showReallocationDialog(cat, deficit));
+        } else {
+            card.textRemaining.setText(getString(R.string.budget_remaining) + " "
+                    + MoneyFormat.format(remaining));
+            card.textRemaining.setTextColor(ContextCompat.getColor(this, R.color.income_green));
+            card.btnReallocate.setVisibility(View.GONE);
+        }
 
         if (cat.getColorHex() != null) {
             try {
@@ -349,16 +398,19 @@ public class BudgetAllocationActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
         }
 
-        // Click on card or yellow chip to edit
         card.getRoot().setOnClickListener(v -> showEditDialog(cat, allocated));
-
-        // Menu button for edit/delete
         card.btnMenu.setOnClickListener(v -> showItemMenu(v, cat, allocated));
 
         binding.layoutEssentialItems.addView(card.getRoot());
     }
 
-    private void showItemMenu(View anchor, Category cat, double allocated) {
+    private void showReallocationDialog(Category cat, long deficitAmount) {
+        // TODO: implement reallocation dialog
+        Toast.makeText(this, getString(R.string.reallocation_title) + " - " + cat.getName(),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void showItemMenu(View anchor, Category cat, long allocated) {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.menu_item_edit_delete, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
@@ -391,12 +443,12 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showEditDialog(Category cat, double currentAmount) {
+    private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(this);
         input.setHint("So tien phan bo");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         if (currentAmount > 0) {
-            input.setText(String.valueOf((long) currentAmount));
+            input.setText(String.valueOf(currentAmount));
         }
 
         String monthKey = getMonthKey();
@@ -405,19 +457,20 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 .setTitle("Phan bo: " + cat.getName())
                 .setView(input)
                 .setPositiveButton("Luu", (d, w) -> {
-                    try {
-                        double amount = Double.parseDouble(input.getText().toString().trim());
-                        if (amount < 0) throw new Exception();
-                        saveBudget(cat, amount, monthKey);
-                    } catch (Exception e) {
-                        Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
+                    Long amount = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (amount == null) {
+                        Toast.makeText(this, "So tien khong hop le",
+                                Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    saveBudget(cat, amount, monthKey);
                 })
                 .setNegativeButton("Huy", null)
                 .show();
     }
 
-    private void saveBudget(Category cat, double amount, String monthKey) {
+    private void saveBudget(Category cat, long amount, String monthKey) {
         if (uid == null) return;
         Log.d("BudgetAlloc", "saveBudget: cat=" + cat.getId() + ", amount=" + amount + ", month=" + monthKey);
 
@@ -454,9 +507,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
         final int[] done = {0};
         final boolean[] anyError = {false};
-        for (Map.Entry<String, Double> entry : allocatedMap.entrySet()) {
+        for (Map.Entry<String, Long> entry : allocatedMap.entrySet()) {
             String catId = entry.getKey();
-            Double amount = entry.getValue();
+            Long amount = entry.getValue();
             if (catId == null || amount == null) continue;
             Log.d("BudgetAlloc", "  saving: catId=" + catId + ", amount=" + amount);
             Budget b = new Budget();

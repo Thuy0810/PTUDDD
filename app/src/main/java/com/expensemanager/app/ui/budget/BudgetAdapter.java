@@ -25,7 +25,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
 
     private List<Budget> items = new ArrayList<>();
     private Map<String, Category> categoryMap = new HashMap<>();
-    private Map<String, Double> spentMap = new HashMap<>();
+    private Map<String, Long> spentMap = new HashMap<>();
     private OnItemClick listener;
 
     public void setItems(List<Budget> items) {
@@ -38,7 +38,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
         notifyDataSetChanged();
     }
 
-    public void setSpentMap(Map<String, Double> map) {
+    public void setSpentMap(Map<String, Long> map) {
         this.spentMap = map != null ? map : new HashMap<>();
         notifyDataSetChanged();
     }
@@ -57,15 +57,15 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Budget b = items.get(position);
         Category cat = categoryMap.get(b.getCategoryId());
-        double spent = spentMap.containsKey(b.getCategoryId()) ? spentMap.get(b.getCategoryId()) : 0;
-        double remaining = b.getLimitAmount() - spent;
-        double percent = b.getLimitAmount() > 0 ? (spent / b.getLimitAmount() * 100) : 0;
+        long spent = spentMap.containsKey(b.getCategoryId()) ? spentMap.get(b.getCategoryId()) : 0L;
+        long remaining = b.getLimitAmount() - spent;
+        long percent = b.getLimitAmount() > 0 ? (spent * 100 / b.getLimitAmount()) : 0L;
         int progress = (int) Math.min(percent, 100);
 
         holder.binding.textCategoryName.setText(cat != null ? cat.getName() : b.getCategoryId());
         holder.binding.textSpentInfo.setText(
-                MoneyFormat.format(spent) + " / " + MoneyFormat.format(b.getLimitAmount()));
-        holder.binding.textRemaining.setText(MoneyFormat.format(Math.max(remaining, 0)));
+                MoneyFormat.formatLong(spent) + " / " + MoneyFormat.formatLong(b.getLimitAmount()));
+        holder.binding.textRemaining.setText(MoneyFormat.formatLong(Math.max(remaining, 0L)));
 
         if (remaining < 0) {
             holder.binding.textRemaining.setTextColor(
@@ -101,11 +101,11 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
         if (percent >= 90) {
             holder.binding.textAlert.setVisibility(View.VISIBLE);
             holder.binding.textAlert.setText(
-                    String.format("⚠️ Đã dùng %.0f%% ngân sách!", percent));
+                    String.format("⚠️ Đã dùng %d%% ngân sách!", percent));
         } else if (percent >= 80) {
             holder.binding.textAlert.setVisibility(View.VISIBLE);
             holder.binding.textAlert.setText(
-                    String.format("Cảnh báo: %.0f%% ngân sách đã sử dụng", percent));
+                    String.format("Cảnh báo: %d%% ngân sách đã sử dụng", percent));
         } else {
             holder.binding.textAlert.setVisibility(View.GONE);
         }

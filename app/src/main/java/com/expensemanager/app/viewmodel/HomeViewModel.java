@@ -94,7 +94,7 @@ public class HomeViewModel extends ViewModel {
 
         summary.setValue(new HomeSummary(balance, income, expense, todayExpense, topName, topAmt));
 
-        double monthlyLimit = 0;
+        long monthlyLimit = 0L;
         for (Budget b : budgets) {
             if (com.expensemanager.app.data.model.Budget.SCOPE_MONTHLY.equals(b.getScope())) {
                 monthlyLimit = b.getLimitAmount();
@@ -104,10 +104,10 @@ public class HomeViewModel extends ViewModel {
 
         List<Transaction> lastMonth = new ArrayList<>();
         List<Transaction> last7 = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = DateUtils.newCalendar();
         cal.add(Calendar.MONTH, -1);
         String lastMonthKey = DateUtils.monthKey(cal.getTime());
-        cal = Calendar.getInstance();
+        cal = DateUtils.newCalendar();
         cal.add(Calendar.DAY_OF_YEAR, -7);
         Date weekAgo = cal.getTime();
 

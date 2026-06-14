@@ -14,15 +14,10 @@ import androidx.annotation.NonNull;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.DialogBudgetSettingsBinding;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class BudgetSettingsDialog extends Dialog {
 
     private final DialogBudgetSettingsBinding binding;
-    private final String uid;
     private final SharedPreferences prefs;
 
     private String selectedLanguage = "Tiếng Việt";
@@ -32,8 +27,8 @@ public class BudgetSettingsDialog extends Dialog {
 
     public BudgetSettingsDialog(@NonNull Context context, String uid) {
         super(context);
-        this.uid = uid;
         this.binding = DialogBudgetSettingsBinding.inflate(LayoutInflater.from(context));
+        // Lưu theo uid để mỗi user có cấu hình riêng
         this.prefs = context.getSharedPreferences("budget_settings_" + uid, Context.MODE_PRIVATE);
     }
 
@@ -122,7 +117,8 @@ public class BudgetSettingsDialog extends Dialog {
     }
 
     private void saveSettings() {
-        // Lưu vào SharedPreferences trước (backup)
+        // Cài đặt chỉ lưu vào SharedPreferences (không cần Firestore).
+        // Trước đây code có lưu thêm lên Firestore gây thừa và vi phạm kiến trúc.
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("language", selectedLanguage);
         editor.putString("currency", selectedCurrency);
@@ -130,26 +126,7 @@ public class BudgetSettingsDialog extends Dialog {
         editor.putString("symbolPosition", selectedSymbolPosition);
         editor.apply();
 
-        // Thử lưu vào Firestore
-        Map<String, Object> settings = new HashMap<>();
-        settings.put("language", selectedLanguage);
-        settings.put("currency", selectedCurrency);
-        settings.put("decimalPlaces", selectedDecimal);
-        settings.put("symbolPosition", selectedSymbolPosition);
-        settings.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users").document(uid)
-                .collection("settings").document("budget")
-                .set(settings)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Đã lưu cài đặt", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                })
-                .addOnFailureListener(e -> {
-                    // Nếu Firestore lỗi, vẫn thông báo thành công vì đã lưu local
-                    Toast.makeText(getContext(), "Đã lưu cài đặt (offline)", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                });
+        Toast.makeText(getContext(), "Đã lưu cài đặt", Toast.LENGTH_SHORT).show();
+        dismiss();
     }
 }

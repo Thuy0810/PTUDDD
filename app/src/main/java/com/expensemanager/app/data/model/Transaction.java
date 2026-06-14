@@ -76,6 +76,10 @@ public class Transaction {
     public Timestamp getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
 
+    public boolean isIncome()    { return TYPE_INCOME.equals(type); }
+    public boolean isExpense()   { return TYPE_EXPENSE.equals(type); }
+    public boolean isTransfer()  { return TYPE_TRANSFER.equals(type); }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", type);

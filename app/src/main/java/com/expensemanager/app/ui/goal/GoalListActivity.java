@@ -21,10 +21,12 @@ import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.GoalRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.ActivityGoalListBinding;
+import com.expensemanager.app.domain.usecase.GoalService;
 import com.expensemanager.app.ui.adapter.GoalAdapter;
 import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +38,7 @@ public class GoalListActivity extends AppCompatActivity {
     private final AuthRepository authRepo = new AuthRepository();
     private final GoalRepository goalRepo = new GoalRepository();
     private final WalletRepository walletRepo = new WalletRepository();
+    private final GoalService goalService = new GoalService();
     private GoalAdapter adapter;
     private List<SavingsGoal> goals = new ArrayList<>();
     private List<Wallet> wallets = new ArrayList<>();
@@ -100,7 +103,7 @@ public class GoalListActivity extends AppCompatActivity {
         walletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerWallet.setAdapter(walletAdapter);
 
-        final Calendar[] selectedCal = {Calendar.getInstance()};
+        final Calendar[] selectedCal = {DateUtils.newCalendar()};
         selectedCal[0].add(Calendar.MONTH, 1);
         editDeadline.setText(DateUtils.formatDisplay(selectedCal[0].getTime()));
 
@@ -121,25 +124,24 @@ public class GoalListActivity extends AppCompatActivity {
                         Toast.makeText(this, "Nhập tên mục tiêu", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    try {
-                        double target = Double.parseDouble(editTarget.getText().toString()
-                                .trim().replace(",", ""));
-                        if (target <= 0) throw new Exception();
-                        int walletPos = spinnerWallet.getSelectedItemPosition();
-                        Wallet wallet = wallets.get(walletPos);
-
-                        SavingsGoal g = new SavingsGoal();
-                        g.setTitle(title);
-                        g.setTargetAmount(target);
-                        g.setSavedAmount(0);
-                        g.setWalletId(wallet.getId());
-                        g.setCompleted(false);
-                        g.setDeadline(new Timestamp(selectedCal[0].getTime()));
-                        goalRepo.add(uid, g);
-                        Toast.makeText(this, "Đã tạo mục tiêu!", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
+                    Long target = MoneyValueParser.tryParseStrict(
+                            editTarget.getText().toString().trim());
+                    if (target == null) {
                         Toast.makeText(this, "Nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    int walletPos = spinnerWallet.getSelectedItemPosition();
+                    Wallet wallet = wallets.get(walletPos);
+
+                    SavingsGoal g = new SavingsGoal();
+                    g.setTitle(title);
+                    g.setTargetAmount(target);
+                    g.setSavedAmount(0L);
+                    g.setWalletId(wallet.getId());
+                    g.setCompleted(false);
+                    g.setDeadline(new Timestamp(selectedCal[0].getTime()));
+                    goalRepo.add(uid, g);
+                    Toast.makeText(this, "Đã tạo mục tiêu!", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
@@ -160,7 +162,7 @@ public class GoalListActivity extends AppCompatActivity {
 
         editTitle.setText(g.getTitle());
         editTitle.setEnabled(false);
-        editTarget.setText(String.valueOf((long) g.getTargetAmount()));
+        editTarget.setText(String.valueOf(g.getTargetAmount()));
         editTarget.setEnabled(false);
 
         List<String> walletNames = new ArrayList<>();
@@ -209,29 +211,22 @@ public class GoalListActivity extends AppCompatActivity {
                 .setTitle(g.getTitle())
                 .setView(container)
                 .setPositiveButton("Lưu", (d, which) -> {
-                    String contribStr = editContribute.getText().toString().trim().replace(",", "");
-                    if (contribStr.isEmpty()) {
-                        Toast.makeText(this, "Nhập số tiền", Toast.LENGTH_SHORT).show();
+                    Long contribute = MoneyValueParser.tryParseStrict(
+                            editContribute.getText().toString().trim());
+                    if (contribute == null) {
+                        Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    try {
-                        double contribute = Double.parseDouble(contribStr);
-                        if (contribute <= 0) throw new Exception();
-                        int walletPos = spinnerWallet.getSelectedItemPosition();
-                        Wallet wallet = wallets.get(walletPos);
+                    int walletPos = spinnerWallet.getSelectedItemPosition();
+                    Wallet wallet = wallets.get(walletPos);
 
-                        deductFromWallet(uid, wallet.getId(), contribute);
-                        goalRepo.addContribution(uid, g.getId(), contribute, wallet.getId());
-
-                        double newSaved = g.getSavedAmount() + contribute;
-                        g.setSavedAmount(newSaved);
-                        g.setCompleted(newSaved >= g.getTargetAmount());
-                        goalRepo.update(uid, g);
-
-                        Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
-                    }
+                    // Sử dụng service atomic — không tự trừ ví trong Activity.
+                    goalService.contributeToGoal(uid, g.getId(), contribute, wallet.getId())
+                            .addOnSuccessListener(unused ->
+                                    Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Lỗi: " + e.getMessage(),
+                                            Toast.LENGTH_LONG).show());
                 })
                 .setNegativeButton("Hủy", null)
                 .setNeutralButton("Xóa mục tiêu", (d, which) -> {
@@ -239,21 +234,6 @@ public class GoalListActivity extends AppCompatActivity {
                     Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
                 })
                 .show();
-    }
-
-    private void deductFromWallet(String uid, String walletId, double amount) {
-        if (walletId == null || amount <= 0) return;
-        Wallet wallet = walletMap.get(walletId);
-        if (wallet == null) return;
-
-        double newBalance = wallet.getCurrentBalance() - amount;
-        wallet.setCurrentBalance(newBalance);
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("currentBalance", newBalance);
-        FirebaseFirestore.getInstance()
-                .collection("users").document(uid)
-                .collection("wallets").document(walletId)
-                .update(updates);
     }
 
     @Override

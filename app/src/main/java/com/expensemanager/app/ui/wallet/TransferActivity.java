@@ -4,22 +4,17 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.expensemanager.app.R;
-import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
-import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.ActivityTransferBinding;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.expensemanager.app.domain.usecase.TransferService;
+import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +25,7 @@ public class TransferActivity extends AppCompatActivity {
     private ActivityTransferBinding binding;
     private final AuthRepository authRepo = new AuthRepository();
     private final WalletRepository walletRepo = new WalletRepository();
-    private final TransactionRepository txRepo = new TransactionRepository();
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final TransferService transferService = new TransferService();
     private List<Wallet> wallets = new ArrayList<>();
     private Map<String, Wallet> walletMap = new HashMap<>();
 
@@ -49,7 +43,7 @@ public class TransferActivity extends AppCompatActivity {
         String uid = authRepo.getUid();
         if (uid == null) { finish(); return; }
 
-        new WalletRepository().observeAll(uid).observe(this, list -> {
+        walletRepo.observeAll(uid).observe(this, list -> {
             wallets = list != null ? list : new ArrayList<>();
             walletMap.clear();
             for (Wallet w : wallets) {
@@ -66,16 +60,9 @@ public class TransferActivity extends AppCompatActivity {
     }
 
     private void confirmTransfer(String uid) {
-        String amountStr = binding.editAmount.getText() != null
-                ? binding.editAmount.getText().toString().trim() : "0";
-        long amount;
-        try {
-            String normalized = amountStr.replace(",", "").replace(".", "").trim();
-            amount = Long.parseLong(normalized);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        long amount = MoneyValueParser.tryParseStrict(
+                binding.editAmount.getText() != null
+                        ? binding.editAmount.getText().toString() : "");
         if (amount <= 0) {
             Toast.makeText(this, "Nhap so tien > 0", Toast.LENGTH_SHORT).show();
             return;
@@ -89,14 +76,20 @@ public class TransferActivity extends AppCompatActivity {
             return;
         }
 
-        if (fromWallet.getId().equals(toWallet.getId())) {
+        int code = TransferService.validate(
+                fromWallet.getId(), toWallet.getId(), amount);
+        if (code == TransferService.ERR_SAME_WALLET) {
             Toast.makeText(this, "Chon hai vi khac nhau", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (fromWallet.getCurrentBalance() < amount) {
-            Toast.makeText(this, "So du khong du", Toast.LENGTH_SHORT).show();
-            return;
+            // Cảnh báo nhưng vẫn cho phép thực hiện — Firestore transaction sẽ kiểm tra lại
+            // (ràng buộc 7.2: hiển thị cảnh báo trước, không chặn).
+            Toast.makeText(this,
+                    "Canh bao: so du vi nguon khong du (" +
+                            MoneyFormat.formatLong(fromWallet.getCurrentBalance()) + ")",
+                    Toast.LENGTH_LONG).show();
         }
 
         performTransfer(uid, amount, fromWallet, toWallet);
@@ -108,53 +101,18 @@ public class TransferActivity extends AppCompatActivity {
 
         binding.btnConfirm.setEnabled(false);
 
-        db.runTransaction(transaction -> {
-            DocumentSnapshot fromSnap = transaction.get(
-                    db.collection("users").document(uid).collection("wallets").document(fromWallet.getId()));
-            DocumentSnapshot toSnap = transaction.get(
-                    db.collection("users").document(uid).collection("wallets").document(toWallet.getId()));
-
-            Long fromBalance = fromSnap.getLong("currentBalance");
-            Long toBalance = toSnap.getLong("currentBalance");
-
-            if (fromBalance == null) fromBalance = 0L;
-            if (toBalance == null) toBalance = 0L;
-
-            if (fromBalance < amount) {
-                throw new FirebaseFirestoreException("So du khong du",
-                        FirebaseFirestoreException.Code.ABORTED);
-            }
-
-            Map<String, Object> txData = new HashMap<>();
-            txData.put("type", com.expensemanager.app.data.model.Transaction.TYPE_TRANSFER);
-            txData.put("amount", amount);
-            txData.put("fromWalletId", fromWallet.getId());
-            txData.put("toWalletId", toWallet.getId());
-            txData.put("walletId", fromWallet.getId());
-            txData.put("date", FieldValue.serverTimestamp());
-            txData.put("note", note);
-
-            DocumentReference txRef = db.collection("users").document(uid)
-                    .collection("transactions").document();
-            transaction.set(txRef, txData);
-
-            transaction.update(db.collection("users").document(uid).collection("wallets")
-                    .document(fromWallet.getId()), "currentBalance", fromBalance - amount);
-            transaction.update(db.collection("users").document(uid).collection("wallets")
-                    .document(toWallet.getId()), "currentBalance", toBalance + amount);
-
-            return null;
-        }).addOnSuccessListener(aVoid -> {
-            Toast.makeText(this, "Da chuyen " + formatAmount(amount) + " dong", Toast.LENGTH_SHORT).show();
-            finish();
-        }).addOnFailureListener(e -> {
-            binding.btnConfirm.setEnabled(true);
-            Toast.makeText(this, "Loi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private String formatAmount(long amount) {
-        return String.format("%,d", amount);
+        transferService.performTransfer(uid,
+                        fromWallet.getId(), toWallet.getId(),
+                        amount, note, DateUtils.nowVietnam())
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Da chuyen " + MoneyFormat.formatLong(amount),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    binding.btnConfirm.setEnabled(true);
+                    Toast.makeText(this, "Loi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override

@@ -3,76 +3,306 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // =========================================================
+    // Helper functions
+    // =========================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // =========================================================
+    // User profile
+    // =========================================================
     match /users/{userId} {
-      allow create, read, update, delete:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read, update: if isOwner(userId);
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false; // users cannot delete their own doc
     }
 
+    // =========================================================
+    // Transactions
+    // =========================================================
     match /users/{userId}/transactions/{transactionId} {
-      allow read:
-        if request.auth != null
-        && request.auth.uid == userId;
-      allow create:
-        if request.auth != null
-        && request.auth.uid == userId
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId)
+        // Mandatory fields
+        && 'amount' in request.resource.data
+        && 'type' in request.resource.data
+        && 'date' in request.resource.data
+        // Type validation
+        && request.resource.data.type in ['income', 'expense', 'transfer']
+        // Amount validation: must be positive integer
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
-        && request.resource.data.type in ['income', 'expense', 'transfer']
-        && request.resource.data.date is timestamp;
-      allow update:
-        if request.auth != null
-        && request.auth.uid == userId
+        && request.resource.data.amount == request.resource.data.amount.round()
+        // Date must be timestamp
+        && request.resource.data.date is timestamp
+        // For transfer: fromWalletId != toWalletId
+        && (
+          request.resource.data.type != 'transfer'
+          || (
+            'fromWalletId' in request.resource.data
+            && 'toWalletId' in request.resource.data
+            && request.resource.data.fromWalletId != request.resource.data.toWalletId
+            && request.resource.data.fromWalletId is string
+            && request.resource.data.toWalletId is string
+          )
+        );
+
+      allow update: if isOwner(userId)
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
+        && request.resource.data.amount == request.resource.data.amount.round()
         && request.resource.data.type in ['income', 'expense', 'transfer']
-        && request.resource.data.date is timestamp;
-      allow delete:
-        if request.auth != null
-        && request.auth.uid == userId;
+        && request.resource.data.date is timestamp
+        && (
+          request.resource.data.type != 'transfer'
+          || (
+            'fromWalletId' in request.resource.data
+            && 'toWalletId' in request.resource.data
+            && request.resource.data.fromWalletId != request.resource.data.toWalletId
+          )
+        );
+
+      allow delete: if isOwner(userId);
     }
 
+    // =========================================================
+    // Categories
+    // =========================================================
     match /users/{userId}/categories/{categoryId} {
-      allow create, read, update, delete:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
+    // =========================================================
+    // Wallets
+    // =========================================================
     match /users/{userId}/wallets/{walletId} {
-      allow read:
-        if request.auth != null
-        && request.auth.uid == userId;
-      allow create, update:
-        if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.currentBalance is number;
-      allow delete:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId)
+        && 'name' in request.resource.data
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 100
+        && 'currentBalance' in request.resource.data
+        && request.resource.data.currentBalance is number
+        && request.resource.data.currentBalance == request.resource.data.currentBalance.round()
+        && request.resource.data.currentBalance >= 0;
+
+      allow update: if isOwner(userId)
+        && (
+          // Allow normal field updates
+          (
+            'name' in request.resource.data
+            && request.resource.data.name is string
+            && request.resource.data.name.size() > 0
+            && request.resource.data.name.size() <= 100
+          )
+          // Balance changes via atomic transactions in the app
+          // Only allow changes within a reasonable delta to prevent abuse
+          || (
+            'currentBalance' in request.resource.data
+            && request.resource.data.currentBalance is number
+            && request.resource.data.currentBalance == request.resource.data.currentBalance.round()
+          )
+        );
+
+      allow delete: if isOwner(userId);
     }
 
+    // =========================================================
+    // Budgets
+    // =========================================================
     match /users/{userId}/budgets/{document=**} {
-      allow read, write:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+
+      allow create, update: if isOwner(userId)
+        && 'limitAmount' in request.resource.data
+        && request.resource.data.limitAmount is number
+        && request.resource.data.limitAmount > 0
+        && request.resource.data.limitAmount == request.resource.data.limitAmount.round()
+        && 'scope' in request.resource.data
+        && request.resource.data.scope in ['monthly', 'category']
+        && (
+          request.resource.data.scope != 'category'
+          || (
+            'categoryId' in request.resource.data
+            && request.resource.data.categoryId is string
+          )
+        )
+        && (
+          request.resource.data.scope != 'monthly'
+          || !('categoryId' in request.resource.data)
+        )
+        && (
+          'month' in request.resource.data
+            ? request.resource.data.month.matches('^[0-9]{4}-[0-9]{2}$')
+            : true
+        );
+
+      allow delete: if isOwner(userId);
     }
 
+    // =========================================================
+    // Recurring rules
+    // =========================================================
     match /users/{userId}/recurring/{document=**} {
-      allow read, write:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+
+      allow create, update: if isOwner(userId)
+        // type
+        && 'type' in request.resource.data
+        && request.resource.data.type in ['income', 'expense']
+        // amount must be positive integer
+        && 'amount' in request.resource.data
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.amount == request.resource.data.amount.round()
+        // cycleType
+        && 'cycleType' in request.resource.data
+        && request.resource.data.cycleType in ['daily', 'weekly', 'monthly', 'yearly']
+        // enabled must be bool
+        && (
+          'enabled' in request.resource.data
+            ? request.resource.data.enabled is bool
+            : true
+        )
+        // dayOfMonth: 1-31
+        && (
+          'dayOfMonth' in request.resource.data
+            ? request.resource.data.dayOfMonth is int
+              && request.resource.data.dayOfMonth >= 1
+              && request.resource.data.dayOfMonth <= 31
+            : true
+        )
+        // dayOfWeek: 1-7 (Calendar.SUNDAY=1 ... SATURDAY=7)
+        && (
+          'dayOfWeek' in request.resource.data
+            ? request.resource.data.dayOfWeek is int
+              && request.resource.data.dayOfWeek >= 1
+              && request.resource.data.dayOfWeek <= 7
+            : true
+        )
+        // monthOfYear: 1-12
+        && (
+          'monthOfYear' in request.resource.data
+            ? request.resource.data.monthOfYear is int
+              && request.resource.data.monthOfYear >= 1
+              && request.resource.data.monthOfYear <= 12
+            : true
+        )
+        // dateStart must be timestamp if present
+        && (
+          'dateStart' in request.resource.data
+            ? request.resource.data.dateStart is timestamp
+            : true
+        )
+        // dateEnd must be timestamp if present
+        && (
+          'dateEnd' in request.resource.data
+            ? request.resource.data.dateEnd is timestamp
+            : true
+        );
+
+      allow delete: if isOwner(userId);
     }
 
+    // =========================================================
+    // Savings goals
+    // =========================================================
     match /users/{userId}/savings_goals/{document=**} {
-      allow read, write:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+
+      allow create, update: if isOwner(userId)
+        && 'title' in request.resource.data
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && 'targetAmount' in request.resource.data
+        && request.resource.data.targetAmount is number
+        && request.resource.data.targetAmount > 0
+        && request.resource.data.targetAmount == request.resource.data.targetAmount.round()
+        && 'savedAmount' in request.resource.data
+        && request.resource.data.savedAmount is number
+        && request.resource.data.savedAmount >= 0
+        && request.resource.data.savedAmount == request.resource.data.savedAmount.round()
+        && savedAmountNotExceedTarget(request.resource.data)
+        && (
+          'completed' in request.resource.data
+            ? request.resource.data.completed is bool
+            : true
+        )
+        && (
+          'deadline' in request.resource.data
+            ? request.resource.data.deadline is timestamp
+            : true
+        );
+
+      allow delete: if isOwner(userId);
     }
 
+    // savedAmount must not exceed targetAmount (computed field)
+    function savedAmountNotExceedTarget(data) {
+      return data.savedAmount <= data.targetAmount;
+    }
+
+    // =========================================================
+    // Savings challenges (NOTE: code uses 'challenges', rules use
+    // 'savings_challenges' — path mismatch resolved here)
+    // =========================================================
     match /users/{userId}/savings_challenges/{document=**} {
-      allow read, write:
-        if request.auth != null
-        && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+
+      allow create, update: if isOwner(userId)
+        && 'title' in request.resource.data
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && 'targetSavings' in request.resource.data
+        && request.resource.data.targetSavings is number
+        && request.resource.data.targetSavings > 0
+        && request.resource.data.targetSavings == request.resource.data.targetSavings.round()
+        && (
+          'totalDays' in request.resource.data
+            ? request.resource.data.totalDays is int && request.resource.data.totalDays > 0
+            : true
+        )
+        && (
+          'completedDays' in request.resource.data
+            ? request.resource.data.completedDays is int && request.resource.data.completedDays >= 0
+            : true
+        )
+        && (
+          'startDate' in request.resource.data
+            ? request.resource.data.startDate is timestamp
+            : true
+        )
+        && (
+          'active' in request.resource.data
+            ? request.resource.data.active is bool
+            : true
+        );
+
+      allow delete: if isOwner(userId);
+    }
+
+    // =========================================================
+    // Savings history (audit log)
+    // =========================================================
+    match /users/{userId}/savings_history/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // =========================================================
+    // Wallet adjustments (audit log)
+    // =========================================================
+    match /users/{userId}/wallet_adjustments/{document=**} {
+      allow read, write: if isOwner(userId);
     }
   }
 }

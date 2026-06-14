@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing tokens (ràng buộc 14.2) -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">24dp</dimen>
+    <dimen name="spacing_xxl">32dp</dimen>
+    <dimen name="spacing_xxxl">48dp</dimen>
+
+    <!-- Corner radius -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">14dp</dimen>
+    <dimen name="radius_xl">16dp</dimen>
+
+    <!-- Touch target minimum (ràng buộc 14.5) -->
+    <dimen name="touch_target_min">48dp</dimen>
+
+    <!-- Icon sizes -->
+    <dimen name="icon_sm">16dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_xl">48dp</dimen>
+
+    <!-- Card elevation -->
+    <dimen name="elevation_card">2dp</dimen>
+    <dimen name="elevation_dialog">8dp</dimen>
+    <dimen name="elevation_fab">6dp</dimen>
+
+    <!-- Divider -->
+    <dimen name="divider_height">1dp</dimen>
+
+    <!-- Bottom nav height -->
+    <dimen name="bottom_nav_height">56dp</dimen>
+
+    <!-- Toolbar height -->
+    <dimen name="toolbar_height">56dp</dimen>
+
+    <!-- FAB margin -->
+    <dimen name="fab_margin">16dp</dimen>
+</resources>

@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Quản Lý Chi Tiêu</string>
-
     <!-- Auth -->
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>
@@ -16,16 +15,14 @@
     <string name="reset_password_desc">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</string>
     <string name="send_reset_link">Gửi link đặt lại</string>
     <string name="logout">Đăng xuất</string>
-
     <!-- Navigation -->
     <string name="nav_home">Tổng quan</string>
     <string name="nav_budget">Ngân sách</string>
     <string name="nav_transactions">Giao dịch</string>
     <string name="nav_report">Báo cáo</string>
     <string name="nav_profile">Cá nhân</string>
-
     <!-- Transaction -->
-    <string name="search_hint">Tìm kiếm giao dịch…</string>
+    <string name="search_hint">Tìm kiếm giao dịch.</string>
     <string name="empty_transactions">Chưa có giao dịch nào</string>
     <string name="add_transaction">Thêm giao dịch</string>
     <string name="edit_transaction">Sửa giao dịch</string>
@@ -35,7 +32,7 @@
     <string name="amount">Số tiền</string>
     <string name="amount_hint">0</string>
     <string name="note">Ghi chú</string>
-    <string name="note_hint">Thêm ghi chú…</string>
+    <string name="note_hint">Thêm ghi chú.</string>
     <string name="date">Ngày</string>
     <string name="category">Danh mục</string>
     <string name="select_category">Chọn danh mục</string>
@@ -47,7 +44,6 @@
     <string name="cancel">Hủy</string>
     <string name="confirm">Xác nhận</string>
     <string name="quick_input_hint">Nhập nhanh: Cafe 25k</string>
-
     <!-- Home -->
     <string name="balance">Số dư hiện tại</string>
     <string name="month_income">Thu nhập tháng</string>
@@ -57,7 +53,6 @@
     <string name="recent_transactions">Giao dịch gần đây</string>
     <string name="see_all">Xem tất cả</string>
     <string name="no_transactions">Chưa có giao dịch nào</string>
-
     <!-- Wallet -->
     <string name="wallets">Quản lý ví</string>
     <string name="add_wallet">Thêm ví</string>
@@ -70,7 +65,6 @@
     <string name="wallet_saving">Ví tiết kiệm</string>
     <string name="wallet_other">Khác</string>
     <string name="delete_wallet_confirm">Xóa ví này?</string>
-
     <!-- Category -->
     <string name="categories">Danh mục</string>
     <string name="add_category">Thêm danh mục</string>
@@ -79,7 +73,6 @@
     <string name="category_type">Loại</string>
     <string name="category_icon">Biểu tượng</string>
     <string name="category_color">Màu sắc</string>
-
     <!-- Budget -->
     <string name="budgets">Ngân sách</string>
     <string name="budget_settings">Cài đặt ngân sách</string>
@@ -93,7 +86,6 @@
     <string name="budget_alert_100">Ngân sách %1$s đã hết!</string>
     <string name="no_budgets">Chưa có ngân sách nào</string>
     <string name="set_budget_hint">Đặt ngân sách để theo dõi chi tiêu</string>
-
     <!-- Goal -->
     <string name="goals">Mục tiêu tiết kiệm</string>
     <string name="add_goal">Thêm mục tiêu</string>
@@ -103,7 +95,6 @@
     <string name="goal_deadline">Hạn hoàn thành</string>
     <string name="goal_progress">Tiến độ</string>
     <string name="no_goals">Chưa có mục tiêu nào</string>
-
     <!-- Recurring -->
     <string name="recurring">Giao dịch định kỳ</string>
     <string name="add_recurring">Thêm giao dịch định kỳ</string>
@@ -115,7 +106,6 @@
     <string name="repeat_monthly">Hàng tháng</string>
     <string name="repeat_yearly">Hàng năm</string>
     <string name="no_recurring">Chưa có giao dịch định kỳ</string>
-
     <!-- Report -->
     <string name="reports">Báo cáo</string>
     <string name="report_income">Tổng thu</string>
@@ -125,7 +115,6 @@
     <string name="report_last_month">Tháng trước</string>
     <string name="report_vs_last">So với tháng trước</string>
     <string name="top_category">Danh mục chi nhiều nhất</string>
-
     <!-- Profile -->
     <string name="profile">Hồ sơ</string>
     <string name="edit_profile">Sửa hồ sơ</string>
@@ -142,34 +131,194 @@
     <string name="support">Hỗ trợ</string>
     <string name="help_center">Trung tâm hỗ trợ</string>
     <string name="contact">Liên hệ</string>
-
     <!-- Messages -->
     <string name="error_empty_email">Vui lòng nhập email</string>
     <string name="error_empty_password">Vui lòng nhập mật khẩu</string>
     <string name="error_invalid_email">Email không hợp lệ</string>
     <string name="error_password_short">Mật khẩu phải có ít nhất 6 ký tự</string>
     <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
-    <string name="error_empty_amount">Nhập số tiền > 0</string>
+    <string name="error_empty_amount">Nhập số tiền lớn hơn 0</string>
+    <string name="error_invalid_amount">Số tiền không hợp lệ</string>
     <string name="error_select_category">Chọn danh mục</string>
     <string name="error_select_wallet">Chọn ví</string>
+    <string name="error_select_category_wallet">Vui lòng chọn danh mục và ví</string>
+    <string name="error_no_category">Chưa có danh mục. Vui lòng tạo danh mục trước.</string>
+    <string name="error_no_wallet">Chưa có ví. Vui lòng tạo ví trước.</string>
+    <string name="error_no_internet">Không có kết nối mạng</string>
+    <string name="error_permission_denied">Không có quyền truy cập dữ liệu</string>
+    <string name="error_unknown">Đã xảy ra lỗi không xác định</string>
     <string name="success_login">Đăng nhập thành công!</string>
     <string name="success_register">Đăng ký thành công!</string>
-    <string name="success_save">Đã lưu</string>
+    <string name="success_saved">Đã lưu</string>
     <string name="success_delete">Đã xóa</string>
+    <string name="success_created">Đã tạo</string>
+    <string name="success_recurring_created">Đã tạo giao dịch định kỳ!</string>
     <string name="success_logout">Đã đăng xuất</string>
     <string name="success_reset_sent">Đã gửi email đặt lại mật khẩu</string>
+    <string name="success_backup">Sao lưu thành công</string>
+    <string name="success_restore">Khôi phục thành công</string>
+    <string name="success_logout_confirm">Bạn có chắc muốn đăng xuất?</string>
     <string name="login_failed">Đăng nhập thất bại</string>
     <string name="register_failed">Đăng ký thất bại</string>
-
+    <string name="error_backup_failed">Sao lưu thất bại</string>
+    <string name="error_restore_failed">Khôi phục thất bại</string>
+    <string name="error_loading_failed">Tải dữ liệu thất bại</string>
+    <string name="error_saving_failed">Lưu thất bại</string>
+    <string name="error_insufficient_balance">Số dư không đủ</string>
+    <string name="error_same_wallet">Hai ví phải khác nhau</string>
+    <!-- Security / PIN -->
+    <string name="pin_hint">Mã PIN</string>
+    <string name="pin_enter_prompt">Nhập mã PIN để mở app</string>
+    <string name="pin_empty">Vui lòng nhập mã PIN</string>
+    <string name="pin_wrong">PIN không đúng</string>
+    <string name="pin_wrong_attempts">PIN sai. Còn %1$d lần thử.</string>
+    <string name="attempts_remaining">Còn %1$d lần thử</string>
+    <string name="pin_locked">Tài khoản tạm khóa</string>
+    <string name="pin_locked_message">Tài khoản tạm khóa. Thử lại sau %1$d phút.</string>
+    <string name="pin_too_many_attempts">Đã nhập sai quá nhiều lần. Khóa 5 phút.</string>
+    <string name="pin_enabled">Đã bật khóa PIN</string>
+    <string name="pin_disabled">Đã tắt khóa PIN</string>
+    <string name="pin_setup_hint">Nhập mã PIN 4-6 số</string>
+    <string name="pin_invalid_format">PIN phải là 4-6 chữ số</string>
+    <string name="pin_save_failed">Lưu PIN thất bại. Vui lòng thử lại.</string>
+    <string name="setup_pin_title">Đặt mã PIN</string>
+    <string name="disable_pin_confirm_title">Tắt khóa PIN?</string>
+    <string name="disable_pin_confirm_message">Việc tắt khóa PIN sẽ xóa toàn bộ cài đặt bảo mật. Bạn có chắc muốn tiếp tục?</string>
+    <!-- Biometric -->
+    <string name="biometric_title">Mở khóa</string>
+    <string name="biometric_subtitle">Xác thực vân tay</string>
+    <string name="biometric_locked">Vân tay tạm khóa. Sử dụng PIN.</string>
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Chỉnh sửa hồ sơ</string>
+    <string name="label_display_name">Họ và tên</string>
+    <string name="hint_display_name">Nhập họ và tên của bạn</string>
+    <string name="label_email">Email đăng nhập</string>
+    <string name="note_email_immutable">* Không thể thay đổi email đăng nhập</string>
+    <string name="error_name_empty">Vui lòng nhập họ và tên</string>
+    <string name="error_name_too_short">Tên phải có ít nhất 2 ký tự</string>
+    <string name="error_name_too_long">Tên không được dài quá 50 ký tự</string>
+    <string name="error_save_failed">Lưu thất bại</string>
+    <string name="save_changes">Lưu thay đổi</string>
+    <string name="saving">Đang lưu.</string>
+    <!-- Transaction display -->
+    <string name="wallet_label">Ví: %1$s</string>
+    <string name="wallet_deleted">Ví đã xóa</string>
+    <string name="category_deleted">Danh mục đã xóa</string>
+    <string name="transfer_route">%1$s ← %2$s</string>
+    <string name="transaction_income">Thu nhập</string>
+    <string name="transaction_expense">Chi tiêu</string>
+    <string name="transaction_transfer">Chuyển tiền</string>
+    <!-- Transaction Detail BottomSheet -->
+    <string name="time">Giờ</string>
+    <string name="wallet_from">Ví nguồn</string>
+    <string name="wallet_to">Ví nhận</string>
+    <string name="created_at">Ngày tạo</string>
+    <string name="delete_confirm_title">Xóa giao dịch?</string>
+    <string name="delete_transaction_confirm">Bạn có chắc muốn xóa giao dịch này?</string>
+    <!-- Notifications -->
+    <string name="notification_reminder_title">Nhắc ghi chi tiêu</string>
+    <string name="notification_reminder_body">Hôm nay bạn đã ghi chi tiêu chưa? Chỉ mất vài giây!</string>
+    <string name="notification_reminder_body_long">Đừng bỏ lỡ việc ghi chi tiêu hôm nay. Mở app và nhấn + để thêm giao dịch nhanh. Việc ghi chép đều đặn giúp bạn kiểm soát tài chính tốt hơn.</string>
+    <string name="notification_channel_name">Nhắc nhở hàng ngày</string>
+    <string name="notification_channel_description">Thông báo nhắc ghi chi tiêu hàng ngày</string>
+    <string name="hint_note">Ghi chú</string>
+    <string name="create">Tạo</string>
     <!-- Financial Health -->
     <string name="financial_health">Sức khỏe tài chính</string>
     <string name="health_score">Điểm sức khỏe</string>
+    <string name="health_excellent">Xuất sắc</string>
+    <string name="health_good">Tốt</string>
+    <string name="health_warning">Cần chú ý</string>
+    <string name="health_critical">Nguy hiểm</string>
     <string name="daily_budget">Ngân sách hàng ngày</string>
     <string name="month_prediction">Dự đoán tháng này</string>
-
+    <string name="saving_rate">Tiết kiệm</string>
+    <string name="budget_usage">Ngân sách</string>
+    <string name="vs_last_month">Tháng trước</string>
+    <string name="budget_remaining_label">Ngân sách còn lại: </string>
+    <string name="today_expense_value">Chi tiêu hôm nay: %1$s</string>
+    <string name="top_category_value">Chi nhiều nhất: %1$s - %2$s</string>
+    <!-- Alert types -->
+    <string name="alert_over_budget">Sắp vượt ngân sách</string>
+    <string name="alert_near_budget">Đã dùng 80%% ngân sách</string>
+    <string name="alert_expense_increased">Chi tiêu tăng mạnh so với tháng trước</string>
+    <string name="alert_missing_records">Có thể bỏ sót ghi chi tiêu</string>
+    <string name="alert_abnormal_spending">Chi bất thường hôm nay</string>
     <!-- Mood -->
     <string name="mood">Cảm xúc</string>
     <string name="regret">Khoản chi cần thiết?</string>
     <string name="necessary">Cần thiết</string>
     <string name="unnecessary">Không cần thiết</string>
+    <!-- Recurring (extended) -->
+    <string name="recurring_empty">Chưa có giao dịch định kỳ nào.\nNhấn nút + để thêm!</string>
+    <string name="recurring_type">Loại giao dịch</string>
+    <string name="recurring_name_hint">Tên khoản (VD: Tiền phòng)</string>
+    <string name="recurring_cycle">Chu kỳ</string>
+    <string name="recurring_day_of_month">Ngày trong tháng</string>
+    <string name="recurring_month">Tháng</string>
+    <string name="recurring_start_date">Ngày bắt đầu</string>
+    <string name="recurring_end_date">Ngày kết thúc</string>
+    <string name="recurring_select_date">Chọn ngày</string>
+    <string name="recurring_no_end">Không giới hạn</string>
+    <string name="recurring_next_run">Kỳ tiếp theo: %1$s</string>
+    <string name="recurring_until"> - Đến %1$s</string>
+    <string name="recurring_every">Mỗi</string>
+    <string name="recurring_last_day_of_month">Ngày cuối tháng</string>
+    <string name="recurring_day_n">Ngày %1$d</string>
+    <string name="recurring_day_month">Ngày %1$d tháng %2$s</string>
+    <string name="recurring_income_default">Khoản thu định kỳ</string>
+    <string name="recurring_expense_default">Khoản chi định kỳ</string>
+    <string name="sunday">Chủ nhật</string>
+    <string name="monday">Thứ 2</string>
+    <string name="tuesday">Thứ 3</string>
+    <string name="wednesday">Thứ 4</string>
+    <string name="thursday">Thứ 5</string>
+    <string name="friday">Thứ 6</string>
+    <string name="saturday">Thứ 7</string>
+    <string-array name="day_of_week_labels">
+        <item>Chủ nhật</item>
+        <item>Thứ 2</item>
+        <item>Thứ 3</item>
+        <item>Thứ 4</item>
+        <item>Thứ 5</item>
+        <item>Thứ 6</item>
+        <item>Thứ 7</item>
+    </string-array>
+    <string-array name="month_labels">
+        <item>Tháng 1</item>
+        <item>Tháng 2</item>
+        <item>Tháng 3</item>
+        <item>Tháng 4</item>
+        <item>Tháng 5</item>
+        <item>Tháng 6</item>
+        <item>Tháng 7</item>
+        <item>Tháng 8</item>
+        <item>Tháng 9</item>
+        <item>Tháng 10</item>
+        <item>Tháng 11</item>
+        <item>Tháng 12</item>
+    </string-array>
+    <!-- Budget Reallocation -->
+    <string name="reallocation_title">Phân bổ lại ngân sách</string>
+    <string name="reallocation_target_label">Danh mục cần bù:</string>
+    <string name="reallocation_source">Nguồn bù:</string>
+    <string name="reallocation_unallocated">Ngân sách chưa phân bổ (%1$s)</string>
+    <string name="reallocation_from_budget">Từ %1$s (%2$s)</string>
+    <string name="reallocation_amount">Số tiền cần bù</string>
+    <string name="reallocation_preview">Xem trước thay đổi:</string>
+    <string name="reallocation_confirm">Xác nhận phân bổ</string>
+    <string name="reallocation_exceed_source">Số tiền vượt quá nguồn có thể chuyển</string>
+    <string name="reallocation_no_source">Không có nguồn để bù</string>
+    <!-- Bottom Nav -->
+    <string name="add">Thêm</string>
+    <!-- Alerts -->
+    <string name="alert_overdue_goals_title">Mục tiêu quá hạn</string>
+    <string name="alert_overdue_goals_body">Bạn có %1$d mục tiêu đang quá hạn:\n\n%2$s</string>
+    <!-- Budget Status -->
+    <string name="budget_status_safe">An toàn</string>
+    <string name="budget_status_warning">Cảnh báo</string>
+    <string name="budget_status_reached">Đạt giới hạn</string>
+    <string name="budget_status_exceeded">Vượt %1$d%%</string>
+    <string name="budget_exceeded_amount">Đã vượt %1$s</string>
+    <string name="budget_fill">Bù ngân sách</string>
 </resources>

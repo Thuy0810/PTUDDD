@@ -15,6 +15,7 @@ import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +46,8 @@ public class BudgetListActivity extends AppCompatActivity {
             if (list != null) {
                 for (Budget b : list) {
                     lines.add(Budget.SCOPE_MONTHLY.equals(b.getScope())
-                            ? "Tháng: " + MoneyFormat.format(b.getLimitAmount())
-                            : "Danh mục: " + MoneyFormat.format(b.getLimitAmount()));
+                            ? "Tháng: " + MoneyFormat.formatLong(b.getLimitAmount())
+                            : "Danh mục: " + MoneyFormat.formatLong(b.getLimitAmount()));
                 }
             }
             adapter.clear();
@@ -65,17 +66,19 @@ public class BudgetListActivity extends AppCompatActivity {
                 .setTitle("Đặt ngân sách tháng")
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
-                    try {
-                        double limit = Double.parseDouble(input.getText().toString().trim());
-                        Budget b = new Budget();
-                        b.setScope(Budget.SCOPE_MONTHLY);
-                        b.setMonth(DateUtils.currentMonthKey());
-                        b.setLimitAmount(limit);
-                        budgetRepo.add(uid, b);
-                        Toast.makeText(this, "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Long parsed = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (parsed == null) {
+                        Toast.makeText(this, "Số tiền không hợp lệ",
+                                Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    Budget b = new Budget();
+                    b.setScope(Budget.SCOPE_MONTHLY);
+                    b.setMonth(DateUtils.currentMonthKey());
+                    b.setLimitAmount(parsed);
+                    budgetRepo.addOrUpdate(uid, b);
+                    Toast.makeText(this, "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
                 .show();

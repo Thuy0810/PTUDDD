@@ -24,6 +24,7 @@ import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.databinding.ActivityBudgetEditBinding;
 import com.expensemanager.app.databinding.ItemBudgetAllocationBinding;
 import com.expensemanager.app.util.MoneyFormat;
+import com.expensemanager.app.util.MoneyValueParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,8 +40,8 @@ public class BudgetEditActivity extends AppCompatActivity {
 
     private List<Category> expenseCategories = new ArrayList<>();
     private List<Budget> budgets = new ArrayList<>();
-    private Map<String, Double> categoryBudgets = new HashMap<>();
-    private double totalBudget = 0;
+    private Map<String, Long> categoryBudgets = new HashMap<>();
+    private long totalBudget = 0L;
     private String monthKey;
 
     @Override
@@ -88,7 +89,7 @@ public class BudgetEditActivity extends AppCompatActivity {
         budgetRepo.observeMonth(uid, monthKey).observe(this, list -> {
             budgets = list != null ? list : new ArrayList<>();
             categoryBudgets = new HashMap<>();
-            totalBudget = 0;
+            totalBudget = 0L;
             for (Budget b : budgets) {
                 if (b.getCategoryId() != null) {
                     categoryBudgets.put(b.getCategoryId(), b.getLimitAmount());
@@ -101,7 +102,7 @@ public class BudgetEditActivity extends AppCompatActivity {
     }
 
     private void updateTotalBudget() {
-        binding.textTotalBudget.setText(MoneyFormat.format(totalBudget));
+        binding.textTotalBudget.setText(MoneyFormat.formatLong(totalBudget));
     }
 
     private void updateRecyclerView() {
@@ -113,13 +114,13 @@ public class BudgetEditActivity extends AppCompatActivity {
 
             ItemBudgetAllocationBinding itemBinding = ItemBudgetAllocationBinding.bind(itemView);
 
-            double amount = categoryBudgets.containsKey(cat.getId())
-                    ? categoryBudgets.get(cat.getId()) : 0;
-            int progress = totalBudget > 0 ? (int) (amount / totalBudget * 100) : 0;
+            long amount = categoryBudgets.containsKey(cat.getId())
+                    ? categoryBudgets.get(cat.getId()) : 0L;
+            int progress = totalBudget > 0 ? (int) (amount * 100 / totalBudget) : 0;
             progress = Math.min(progress, 100);
 
             itemBinding.textCategoryName.setText(cat.getName());
-            itemBinding.textAllocatedAmount.setText(MoneyFormat.format(amount));
+            itemBinding.textAllocatedAmount.setText(MoneyFormat.formatLong(amount));
             itemBinding.textPercent.setText(progress + "%");
             itemBinding.progressBar.setProgress(progress);
 
@@ -142,35 +143,35 @@ public class BudgetEditActivity extends AppCompatActivity {
         }
     }
 
-    private void showEditDialog(Category cat, double currentAmount) {
+    private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(this);
         input.setHint("Số tiền phân bổ");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         if (currentAmount > 0) {
-            input.setText(String.valueOf((long) currentAmount));
+            input.setText(String.valueOf(currentAmount));
         }
 
         new AlertDialog.Builder(this)
                 .setTitle("Phân bổ: " + cat.getName())
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
-                    try {
-                        double amount = Double.parseDouble(input.getText().toString().trim());
-                        if (amount < 0) throw new Exception();
-                        saveCategoryBudget(cat, amount);
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Long parsed = MoneyValueParser.tryParseStrict(
+                            input.getText().toString().trim());
+                    if (parsed == null) {
+                        Toast.makeText(this, "Số tiền không hợp lệ",
+                                Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    saveCategoryBudget(cat, parsed);
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
     }
 
-    private void saveCategoryBudget(Category cat, double amount) {
+    private void saveCategoryBudget(Category cat, long amount) {
         String uid = authRepo.getUid();
         if (uid == null) return;
 
-        // check if budget exists for this category
         Budget existing = null;
         for (Budget b : budgets) {
             if (cat.getId().equals(b.getCategoryId())) {
@@ -180,13 +181,9 @@ public class BudgetEditActivity extends AppCompatActivity {
         }
 
         if (existing != null) {
-            com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                    .collection("users").document(uid)
-                    .collection("budgets").document(existing.getId())
-                    .update("limitAmount", amount)
-                    .addOnSuccessListener(a -> {
-                        Toast.makeText(this, "Đã cập nhật", Toast.LENGTH_SHORT).show();
-                    });
+            budgetRepo.updateLimitAmount(uid, existing.getId(), amount,
+                    a -> Toast.makeText(this, "Đã cập nhật", Toast.LENGTH_SHORT).show(),
+                    null);
         } else {
             Budget b = new Budget();
             b.setScope(Budget.SCOPE_CATEGORY);
@@ -195,9 +192,6 @@ public class BudgetEditActivity extends AppCompatActivity {
             b.setLimitAmount(amount);
             budgetRepo.addOrUpdate(uid, b);
         }
-
-        // reload
-        loadData();
     }
 
     private void showCreateGroupDialog() {

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    app:cardBackgroundColor="#E8F5E9"
+    app:cardBackgroundColor="@color/income_green_light"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/income_green"

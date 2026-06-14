@@ -19,7 +19,6 @@ import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.util.CategorySuggester;
 import com.expensemanager.app.util.QuickParseUtil;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -190,12 +189,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void loadTransaction(String uid, String txId) {
-        FirebaseFirestore.getInstance()
-                .collection("users").document(uid).collection("transactions")
-                .document(txId).get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) return;
-                    Transaction t = doc.toObject(Transaction.class);
+        txRepo.getTransactionById(uid, txId)
+                .addOnSuccessListener(t -> {
                     if (t == null) return;
 
                     originalTransaction = t;
@@ -205,7 +200,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                     } else {
                         binding.radioExpense.setChecked(true);
                     }
-                    binding.editAmount.setText(String.valueOf((long) t.getAmount()));
+                    binding.editAmount.setText(String.valueOf(t.getAmount()));
                     binding.editNote.setText(t.getNote() != null ? t.getNote() : "");
 
                     setupCategorySpinner(t.getType());
