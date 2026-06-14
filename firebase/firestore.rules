@@ -42,10 +42,13 @@ service cloud.firestore {
       allow read:
         if request.auth != null
         && request.auth.uid == userId;
-      allow create, update, delete:
+      allow create, update:
         if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.currentBalance is number;
+      allow delete:
+        if request.auth != null
+        && request.auth.uid == userId;
     }
 
     match /users/{userId}/budgets/{document=**} {

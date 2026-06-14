@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -23,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class BackupManager {
@@ -39,9 +41,11 @@ public final class BackupManager {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         JSONObject backup = new JSONObject();
+        AtomicBoolean hasError = new AtomicBoolean(false);
+        AtomicInteger remaining = new AtomicInteger(2);
 
-        exportProfile(db, uid, backup, () ->
-                exportCollections(db, uid, backup, () -> {
+        exportProfile(db, uid, backup, hasError, remaining, () ->
+                exportCollections(db, uid, backup, hasError, remaining, () -> {
                     try {
                         File dir = ctx.getCacheDir();
                         File file = new File(dir, "expense_backup_" + System.currentTimeMillis() + ".json");
@@ -56,16 +60,19 @@ public final class BackupManager {
                                         ctx.getPackageName() + ".fileprovider", file));
                         share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         ctx.startActivity(Intent.createChooser(share, "Sao luu du lieu"));
-                        onDone.run();
+                        finishOne(remaining, hasError, onDone, onError);
                     } catch (Exception e) {
                         Log.e(TAG, "exportUserData: failed to write file", e);
-                        onError.run();
+                        hasError.set(true);
+                        finishOne(remaining, hasError, onDone, onError);
                     }
-                }, onError),
-                onError);
+                }, onDone, onError),
+                onDone, onError);
     }
 
     private static void exportProfile(FirebaseFirestore db, String uid, JSONObject backup,
+                                      AtomicBoolean hasError,
+                                      AtomicInteger remaining,
                                       Runnable onDone, Runnable onError) {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
@@ -77,20 +84,22 @@ public final class BackupManager {
                             }
                         }
                     } catch (Exception ignored) {}
-                    onDone.run();
+                    finishOne(remaining, hasError, onDone, onError);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "exportProfile: failed", e);
-                    onError.run();
+                    hasError.set(true);
+                    finishOne(remaining, hasError, onDone, onError);
                 });
     }
 
     private static void exportCollections(FirebaseFirestore db, String uid, JSONObject backup,
+                                         AtomicBoolean hasError,
+                                         AtomicInteger remaining,
                                          Runnable onDone, Runnable onError) {
-        AtomicInteger remaining = new AtomicInteger(COLLECTIONS.length);
+        AtomicInteger collRemaining = new AtomicInteger(COLLECTIONS.length);
 
         for (String coll : COLLECTIONS) {
-            // Only orderBy date for transactions; other collections lack this field
             Query query;
             if ("transactions".equals(coll)) {
                 query = db.collection("users").document(uid).collection(coll)
@@ -105,22 +114,21 @@ public final class BackupManager {
                             JSONArray arr = new JSONArray();
                             if (snap != null) {
                                 for (QueryDocumentSnapshot doc : snap) {
-                                    JSONObject obj = new JSONObject(doc.getData());
-                                    obj.put("_id", doc.getId());
-                                    arr.put(obj);
+                                    arr.put(serializeDoc(doc));
                                 }
                             }
                             backup.put(coll, arr);
                         } catch (Exception ignored) {}
 
-                        if (remaining.decrementAndGet() == 0) {
-                            onDone.run();
+                        if (collRemaining.decrementAndGet() == 0) {
+                            finishOne(remaining, hasError, onDone, onError);
                         }
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "exportCollections: failed to export " + coll, e);
-                        if (remaining.decrementAndGet() == 0) {
-                            onDone.run();
+                        hasError.set(true);
+                        if (collRemaining.decrementAndGet() == 0) {
+                            finishOne(remaining, hasError, onDone, onError);
                         }
                     });
         }
@@ -141,11 +149,12 @@ public final class BackupManager {
             JSONObject backup = new JSONObject(sb.toString());
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+            AtomicBoolean hasError = new AtomicBoolean(false);
             AtomicInteger remaining = new AtomicInteger(COLLECTIONS.length + 1);
 
-            restoreProfile(db, uid, backup, remaining, onDone, onError);
+            restoreProfile(db, uid, backup, hasError, remaining, onDone, onError);
             for (String coll : COLLECTIONS) {
-                restoreCollection(db, uid, coll, backup, remaining, onDone, onError);
+                restoreCollection(db, uid, coll, backup, hasError, remaining, onDone, onError);
             }
         } catch (Exception e) {
             Log.e(TAG, "importUserData: failed", e);
@@ -154,38 +163,42 @@ public final class BackupManager {
     }
 
     private static void restoreProfile(FirebaseFirestore db, String uid, JSONObject backup,
-                                       AtomicInteger remaining, Runnable onDone, Runnable onError) {
+                                       AtomicBoolean hasError, AtomicInteger remaining,
+                                       Runnable onDone, Runnable onError) {
         try {
             if (backup.has("profile")) {
                 JSONObject profile = backup.getJSONObject("profile");
                 Map<String, Object> data = jsonToMap(profile);
                 db.collection("users").document(uid).set(data)
-                        .addOnSuccessListener(a -> doneOrWait(remaining, onDone))
+                        .addOnSuccessListener(a -> finishOne(remaining, hasError, onDone, onError))
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "restoreProfile: failed", e);
-                            doneOrWait(remaining, onDone);
+                            hasError.set(true);
+                            finishOne(remaining, hasError, onDone, onError);
                         });
             } else {
-                doneOrWait(remaining, onDone);
+                finishOne(remaining, hasError, onDone, onError);
             }
         } catch (Exception e) {
             Log.e(TAG, "restoreProfile: exception", e);
-            doneOrWait(remaining, onDone);
+            hasError.set(true);
+            finishOne(remaining, hasError, onDone, onError);
         }
     }
 
     private static void restoreCollection(FirebaseFirestore db, String uid, String coll,
-                                          JSONObject backup, AtomicInteger remaining,
+                                          JSONObject backup,
+                                          AtomicBoolean hasError, AtomicInteger remaining,
                                           Runnable onDone, Runnable onError) {
         try {
             if (!backup.has(coll)) {
-                doneOrWait(remaining, onDone);
+                finishOne(remaining, hasError, onDone, onError);
                 return;
             }
 
             JSONArray arr = backup.getJSONArray(coll);
             if (arr.length() == 0) {
-                doneOrWait(remaining, onDone);
+                finishOne(remaining, hasError, onDone, onError);
                 return;
             }
 
@@ -209,23 +222,58 @@ public final class BackupManager {
                             .collection(coll).document(docId), data);
                 }
 
+                final int thisBatchEnd = batchEnd;
                 batch.commit()
                         .addOnSuccessListener(a -> {
                             if (completedBatches.incrementAndGet() >= totalBatches) {
-                                doneOrWait(remaining, onDone);
+                                finishOne(remaining, hasError, onDone, onError);
                             }
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "restoreCollection: failed for " + coll, e);
+                            hasError.set(true);
                             if (completedBatches.incrementAndGet() >= totalBatches) {
-                                doneOrWait(remaining, onDone);
+                                finishOne(remaining, hasError, onDone, onError);
                             }
                         });
             }
         } catch (Exception e) {
             Log.e(TAG, "restoreCollection: exception for " + coll, e);
-            doneOrWait(remaining, onDone);
+            hasError.set(true);
+            finishOne(remaining, hasError, onDone, onError);
         }
+    }
+
+    private static void finishOne(AtomicInteger remaining, AtomicBoolean hasError,
+                                  Runnable onDone, Runnable onError) {
+        if (remaining.decrementAndGet() == 0) {
+            if (hasError.get()) {
+                onError.run();
+            } else {
+                onDone.run();
+            }
+        }
+    }
+
+    private static JSONObject serializeDoc(QueryDocumentSnapshot doc) throws JSONException {
+        JSONObject obj = new JSONObject();
+        for (Map.Entry<String, Object> entry : doc.getData().entrySet()) {
+            obj.put(entry.getKey(), serializeValue(entry.getValue()));
+        }
+        obj.put("_id", doc.getId());
+        return obj;
+    }
+
+    private static Object serializeValue(Object value) {
+        if (value instanceof Timestamp) {
+            Timestamp ts = (Timestamp) value;
+            JSONObject wrapper = new JSONObject();
+            wrapper.put("_type", "timestamp");
+            wrapper.put("seconds", ts.getSeconds());
+            wrapper.put("nanoseconds", ts.getNanoseconds());
+            return wrapper;
+        }
+        return value;
     }
 
     @SuppressWarnings("unchecked")
@@ -236,9 +284,11 @@ public final class BackupManager {
             String key = keys.next();
             Object value = obj.get(key);
             if (value instanceof JSONObject) {
-                value = jsonToMap((JSONObject) value);
+                value = deserializeValue(jsonToMap((JSONObject) value));
             } else if (value instanceof JSONArray) {
                 value = jsonArrayToList((JSONArray) value);
+            } else {
+                value = deserializeValue(value);
             }
             map.put(key, value);
         }
@@ -251,18 +301,24 @@ public final class BackupManager {
         for (int i = 0; i < arr.length(); i++) {
             Object value = arr.get(i);
             if (value instanceof JSONObject) {
-                value = jsonToMap((JSONObject) value);
+                value = deserializeValue(jsonToMap((JSONObject) value));
             } else if (value instanceof JSONArray) {
                 value = jsonArrayToList((JSONArray) value);
+            } else {
+                value = deserializeValue(value);
             }
             list.add(value);
         }
         return list;
     }
 
-    private static void doneOrWait(AtomicInteger remaining, Runnable onDone) {
-        if (remaining.decrementAndGet() == 0) {
-            onDone.run();
+    private static Object deserializeValue(Object value) {
+        if (value instanceof JSONObject) {
+            JSONObject jo = (JSONObject) value;
+            if ("timestamp".equals(jo.optString("_type"))) {
+                return new Timestamp(jo.getLong("seconds"), jo.getInt("nanoseconds"));
+            }
         }
+        return value;
     }
 }

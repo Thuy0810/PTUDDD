@@ -293,8 +293,8 @@ public class TransactionListFragment extends Fragment {
                 double max = maxStr.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxStr);
                 List<Transaction> amountFiltered = new ArrayList<>();
                 for (Transaction t : filtered) {
-                    double amt = t.getAmount();
-                    if (amt >= min && amt <= max) amountFiltered.add(t);
+                long amt = t.getAmount();
+                if (amt >= min && amt <= max) amountFiltered.add(t);
                 }
                 filtered = amountFiltered;
             }
@@ -302,7 +302,7 @@ public class TransactionListFragment extends Fragment {
 
         // Sort
         if (selectedSort == 1) {
-            Collections.sort(filtered, (a, b) -> Double.compare(b.getAmount(), a.getAmount()));
+            Collections.sort(filtered, (a, b) -> Long.compare(b.getAmount(), a.getAmount()));
         }
 
         adapter.setItems(filtered);

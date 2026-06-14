@@ -1,9 +1,11 @@
 package com.expensemanager.app.data.repository;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.Wallet;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -30,20 +32,24 @@ public class WalletRepository {
         return live;
     }
 
-    public void add(String uid, Wallet w) {
-        String id = w.getId() != null ? w.getId() : db.collection("users").document(uid)
-                .collection("wallets").document().getId();
-        db.collection("users").document(uid).collection("wallets")
-                .document(id).set(w.toMap());
+    @NonNull
+    public Task<Void> add(String uid, Wallet w) {
+        String id = w.getId() != null ? w.getId()
+                : db.collection("users").document(uid)
+                        .collection("wallets").document().getId();
+        return db.collection("users").document(uid)
+                .collection("wallets").document(id).set(w.toMap());
     }
 
-    public void update(String uid, Wallet w) {
-        db.collection("users").document(uid).collection("wallets")
-                .document(w.getId()).set(w.toMap());
+    @NonNull
+    public Task<Void> update(String uid, Wallet w) {
+        return db.collection("users").document(uid)
+                .collection("wallets").document(w.getId()).set(w.toMap());
     }
 
-    public void delete(String uid, String id) {
-        db.collection("users").document(uid).collection("wallets")
-                .document(id).delete();
+    @NonNull
+    public Task<Void> delete(String uid, String id) {
+        return db.collection("users").document(uid)
+                .collection("wallets").document(id).delete();
     }
 }

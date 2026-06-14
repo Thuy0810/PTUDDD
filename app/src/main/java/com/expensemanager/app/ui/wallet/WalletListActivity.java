@@ -93,7 +93,7 @@ public class WalletListActivity extends AppCompatActivity {
         EditText editBalance = view.findViewById(R.id.editWalletBalance);
         Spinner spinnerType = view.findViewById(R.id.spinnerWalletType);
 
-        String[] types = {"Tiền mặt", "Ngân hàng", "Ví điện tử", "Tiết kiệm"};
+        String[] types = {"Tien mat", "Ngan hang", "Vi dien tu", "Tiet kiem"};
         String[] typeKeys = {"cash", "bank", "ewallet", "savings"};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, types);
@@ -108,7 +108,7 @@ public class WalletListActivity extends AppCompatActivity {
         view.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String name = editName.getText().toString().trim();
             if (name.isEmpty()) {
-                Toast.makeText(this, "Nhập tên ví", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Nhap ten vi", Toast.LENGTH_SHORT).show();
                 return;
             }
             int pos = spinnerType.getSelectedItemPosition();
@@ -120,9 +120,16 @@ public class WalletListActivity extends AppCompatActivity {
             }
             Wallet wallet = new Wallet(null, name, typeKey, balance);
             wallet.setCurrentBalance(balance);
-            walletRepo.add(uid, wallet);
-            Toast.makeText(this, "Đã thêm ví", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            view.findViewById(R.id.btnCreate).setEnabled(false);
+            walletRepo.add(uid, wallet)
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(this, "Da them vi", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        view.findViewById(R.id.btnCreate).setEnabled(true);
+                        Toast.makeText(this, "Khong the them: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
         });
         dialog.show();
     }
@@ -138,11 +145,10 @@ public class WalletListActivity extends AppCompatActivity {
         if (wallet.getCurrentBalance() > 0) {
             editBalance.setText(String.valueOf((long) wallet.getCurrentBalance()));
         }
-        // Hide balance field in edit mode
         editBalance.setVisibility(View.GONE);
-        view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText("Lưu");
+        view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText("Luu");
 
-        String[] types = {"Tiền mặt", "Ngân hàng", "Ví điện tử", "Tiết kiệm"};
+        String[] types = {"Tien mat", "Ngan hang", "Vi dien tu", "Tiet kiem"};
         String[] typeKeys = {"cash", "bank", "ewallet", "savings"};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, types);
@@ -161,13 +167,18 @@ public class WalletListActivity extends AppCompatActivity {
                 .setView(view)
                 .setPositiveButton(R.string.delete, (d, w) -> {
                     new AlertDialog.Builder(this)
-                            .setTitle("Xóa ví")
-                            .setMessage("Bạn có chắc muốn xóa ví \"" + wallet.getName() + "\"?")
-                            .setPositiveButton("Xóa", (dl, wl) -> {
-                                walletRepo.delete(uid, wallet.getId());
-                                Toast.makeText(this, "Đã xóa ví", Toast.LENGTH_SHORT).show();
+                            .setTitle("Xoa vi")
+                            .setMessage("Ban co chat muon xoa vi \"" + wallet.getName() + "\"?")
+                            .setPositiveButton("Xoa", (dl, wl) -> {
+                                walletRepo.delete(uid, wallet.getId())
+                                        .addOnSuccessListener(unused -> {
+                                            Toast.makeText(this, "Da xoa vi", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Khong the xoa: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                        });
                             })
-                            .setNegativeButton("Hủy", null)
+                            .setNegativeButton("Huy", null)
                             .show();
                 })
                 .setNegativeButton(R.string.cancel, null)
@@ -176,15 +187,22 @@ public class WalletListActivity extends AppCompatActivity {
         view.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String name = editName.getText().toString().trim();
             if (name.isEmpty()) {
-                Toast.makeText(this, "Nhập tên ví", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Nhap ten vi", Toast.LENGTH_SHORT).show();
                 return;
             }
             int pos = spinnerType.getSelectedItemPosition();
             wallet.setName(name);
             wallet.setType(typeKeys[pos]);
-            walletRepo.update(uid, wallet);
-            Toast.makeText(this, "Đã cập nhật", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            view.findViewById(R.id.btnCreate).setEnabled(false);
+            walletRepo.update(uid, wallet)
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(this, "Da cap nhat", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        view.findViewById(R.id.btnCreate).setEnabled(true);
+                        Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
         });
 
         dialog.show();

@@ -93,34 +93,22 @@ public class TransactionRepository {
             db.collection("users").document(uid).collection("transactions").add(t.toMap());
             return;
         }
-        addAtomic(uid, t, walletRepo, t.getWalletId());
-    }
-
-    public void update(String uid, Transaction t, WalletRepository walletRepo) {
-        if (t.getId() == null) return;
-        updateAtomic(uid, t, t, walletRepo, t.getWalletId(), t.getWalletId());
-    }
-
-    public void delete(String uid, String txId) {
-        db.collection("users").document(uid).collection("transactions")
-                .document(txId).delete();
+        addAtomic(uid, t, t.getWalletId());
     }
 
     @NonNull
-    public Task<Void> addAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+    public Task<Void> addAtomic(String uid, Transaction t, String walletId) {
         return db.runTransaction(transaction -> {
             DocumentReference walletRef = db.collection("users").document(uid)
                     .collection("wallets").document(walletId);
             DocumentReference txRef = db.collection("users").document(uid)
                     .collection("transactions").document();
 
-            // Read wallet balance FIRST
             DocumentSnapshot walletSnap = transaction.get(walletRef);
             Double balance = walletSnap.getDouble("currentBalance");
             if (balance == null) balance = 0.0;
-            double change = Transaction.TYPE_INCOME.equals(t.getType()) ? t.getAmount() : -t.getAmount();
+            long change = Transaction.TYPE_INCOME.equals(t.getType()) ? t.getAmount() : -t.getAmount();
 
-            // THEN write transaction and update wallet
             transaction.set(txRef, t.toMap());
             transaction.update(walletRef, "currentBalance", balance + change);
             return null;
@@ -129,26 +117,23 @@ public class TransactionRepository {
 
     @NonNull
     public Task<Void> updateAtomic(String uid, Transaction original, Transaction updated,
-                                   WalletRepository walletRepo,
                                    String originalWalletId, String newWalletId) {
         return db.runTransaction(transaction -> {
             DocumentReference txRef = db.collection("users").document(uid)
                     .collection("transactions").document(updated.getId());
 
-            double originalEffect = Transaction.TYPE_INCOME.equals(original.getType())
+            long originalEffect = Transaction.TYPE_INCOME.equals(original.getType())
                     ? original.getAmount() : -original.getAmount();
-            double newEffect = Transaction.TYPE_INCOME.equals(updated.getType())
+            long newEffect = Transaction.TYPE_INCOME.equals(updated.getType())
                     ? updated.getAmount() : -updated.getAmount();
             double totalChange = newEffect - originalEffect;
 
             if (originalWalletId != null && originalWalletId.equals(newWalletId)) {
-                // Read the single wallet BEFORE any write
                 DocumentReference walletRef = db.collection("users").document(uid)
                         .collection("wallets").document(originalWalletId);
                 DocumentSnapshot walletSnap = transaction.get(walletRef);
                 Double balance = walletSnap.getDouble("currentBalance");
                 if (balance == null) balance = 0.0;
-                // Write transaction first, then update wallet
                 transaction.set(txRef, updated.toMap());
                 transaction.update(walletRef, "currentBalance", balance + totalChange);
             } else {
@@ -162,7 +147,6 @@ public class TransactionRepository {
                     newWalletRef = db.collection("users").document(uid)
                             .collection("wallets").document(newWalletId);
                 }
-                // Read both wallets BEFORE any write
                 DocumentSnapshot origSnap = null;
                 DocumentSnapshot newSnap = null;
                 if (origWalletRef != null) {
@@ -171,15 +155,12 @@ public class TransactionRepository {
                 if (newWalletRef != null) {
                     newSnap = transaction.get(newWalletRef);
                 }
-                // Write transaction first
                 transaction.set(txRef, updated.toMap());
-                // Then update original wallet (reverse effect)
                 if (origSnap != null) {
                     Double origBalance = origSnap.getDouble("currentBalance");
                     if (origBalance == null) origBalance = 0.0;
                     transaction.update(origWalletRef, "currentBalance", origBalance - originalEffect);
                 }
-                // Then update new wallet (apply new effect)
                 if (newSnap != null) {
                     Double newBalance = newSnap.getDouble("currentBalance");
                     if (newBalance == null) newBalance = 0.0;
@@ -191,7 +172,7 @@ public class TransactionRepository {
     }
 
     @NonNull
-    public Task<Void> deleteAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+    public Task<Void> deleteAtomic(String uid, Transaction t, String walletId) {
         return db.runTransaction(transaction -> {
             DocumentReference txRef = null;
             if (t.getId() != null) {
@@ -205,7 +186,6 @@ public class TransactionRepository {
                         .collection("wallets").document(walletId);
             }
 
-            // Read wallet balance FIRST
             Double balance = null;
             if (walletRef != null) {
                 DocumentSnapshot walletSnap = transaction.get(walletRef);
@@ -213,12 +193,11 @@ public class TransactionRepository {
                 if (balance == null) balance = 0.0;
             }
 
-            // Then write: delete transaction first, update wallet second
             if (txRef != null) {
                 transaction.delete(txRef);
             }
             if (walletRef != null) {
-                double change = Transaction.TYPE_INCOME.equals(t.getType()) ? -t.getAmount() : t.getAmount();
+                long change = Transaction.TYPE_INCOME.equals(t.getType()) ? -t.getAmount() : t.getAmount();
                 transaction.update(walletRef, "currentBalance", balance + change);
             }
             return null;

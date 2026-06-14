@@ -265,7 +265,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void performAdd(String uid, Transaction t, Wallet wallet) {
         binding.btnSave.setEnabled(false);
-        txRepo.addAtomic(uid, t, walletRepo, wallet.getId())
+        txRepo.addAtomic(uid, t, wallet.getId())
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
                     finish();
@@ -278,7 +278,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void performUpdate(String uid, Transaction original, Transaction updated, Wallet wallet) {
         binding.btnSave.setEnabled(false);
-        txRepo.updateAtomic(uid, original, updated, walletRepo,
+        txRepo.updateAtomic(uid, original, updated,
                 original.getWalletId(), wallet.getId())
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
@@ -304,7 +304,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (uid == null || editTxId == null || originalTransaction == null) return;
 
         binding.btnDelete.setEnabled(false);
-        txRepo.deleteAtomic(uid, originalTransaction, walletRepo, originalTransaction.getWalletId())
+        txRepo.deleteAtomic(uid, originalTransaction, originalTransaction.getWalletId())
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
                     finish();

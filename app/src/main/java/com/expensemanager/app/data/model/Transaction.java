@@ -15,7 +15,7 @@ public class Transaction {
     @DocumentId
     private String id;
     private String type;
-    private double amount;
+    private long amount;
     private String categoryId;
     private String walletId;
     private String fromWalletId;
@@ -36,8 +36,8 @@ public class Transaction {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public long getAmount() { return amount; }
+    public void setAmount(long amount) { this.amount = amount; }
 
     public String getCategoryId() { return categoryId; }
     public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
