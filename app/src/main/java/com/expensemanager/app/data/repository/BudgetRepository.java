@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.Budget;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -35,10 +37,19 @@ public class BudgetRepository {
         db.collection("users").document(uid).collection("budgets").add(b.toMap());
     }
 
-    public void addOrUpdate(String uid, Budget b) {
+    public void addOrUpdate(String uid, Budget b,
+                             OnSuccessListener<Void> onSuccess,
+                             OnFailureListener onFailure) {
         String docId = uid + "_" + b.getMonth() + "_" + b.getCategoryId();
+        b.setId(docId);
         db.collection("users").document(uid).collection("budgets")
-                .document(docId).set(b.toMap());
+                .document(docId).set(b.toMap())
+                .addOnSuccessListener(onSuccess)
+                .addOnFailureListener(onFailure);
+    }
+
+    public void addOrUpdate(String uid, Budget b) {
+        addOrUpdate(uid, b, null, null);
     }
 
     public void delete(String uid, String id) {

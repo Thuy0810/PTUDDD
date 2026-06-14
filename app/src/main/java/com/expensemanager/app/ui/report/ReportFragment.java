@@ -2,6 +2,7 @@ package com.expensemanager.app.ui.report;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,14 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentReportBinding;
@@ -27,7 +26,8 @@ import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
-import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.ui.adapter.TransactionAdapter;
+import com.expensemanager.app.ui.transaction.AddTransactionActivity;
 import com.expensemanager.app.util.MoneyFormat;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -43,6 +43,8 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ public class ReportFragment extends Fragment {
 
     private TransactionRepository txRepo;
     private String currentUid;
+    private TransactionAdapter txAdapter;
 
     @Nullable
     @Override
@@ -82,12 +85,25 @@ public class ReportFragment extends Fragment {
 
         txRepo = new TransactionRepository();
 
+        setupRecyclerView();
         setupPeriodSpinner();
         setupDatePickerButton();
         setupFilters();
         setupChartListeners();
 
         loadData();
+    }
+
+    private void setupRecyclerView() {
+        txAdapter = new TransactionAdapter();
+        binding.recyclerTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerTransactions.setAdapter(txAdapter);
+
+        txAdapter.setOnItemClick(t -> {
+            Intent i = new Intent(requireContext(), AddTransactionActivity.class);
+            i.putExtra(AddTransactionActivity.EXTRA_TX_ID, t.getId());
+            startActivity(i);
+        });
     }
 
     private void setupPeriodSpinner() {
@@ -129,11 +145,13 @@ public class ReportFragment extends Fragment {
             for (Wallet w : wallets) {
                 if (w.getId() != null) walletMap.put(w.getId(), w);
             }
+            txAdapter.setWalletMap(walletMap);
             setupWalletSpinner();
         });
 
         catRepo.observeAll(currentUid).observe(getViewLifecycleOwner(), categories -> {
             categoryMap = CategoryRepository.toMap(categories);
+            txAdapter.setCategoryMap(categoryMap);
         });
 
         binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> {
@@ -223,8 +241,8 @@ public class ReportFragment extends Fragment {
 
     private void loadData() {
         Calendar[] range = getDateRange();
-        Date start = range[0];
-        Date end = range[1];
+        Date start = range[0].getTime();
+        Date end = range[1].getTime();
 
         txRepo.observeRange(currentUid, start, end)
                 .observe(getViewLifecycleOwner(), txs -> {
@@ -233,7 +251,9 @@ public class ReportFragment extends Fragment {
                 });
 
         Calendar[] lastRange = getLastPeriodRange();
-        txRepo.observeRange(currentUid, lastRange[0], lastRange[1])
+        Date lastStart = lastRange[0].getTime();
+        Date lastEnd = lastRange[1].getTime();
+        txRepo.observeRange(currentUid, lastStart, lastEnd)
                 .observe(getViewLifecycleOwner(), lastTxs -> {
                     lastMonthByCat = new HashMap<>();
                     double expense = 0;
@@ -272,6 +292,20 @@ public class ReportFragment extends Fragment {
             if (!passesTypeFilter(t)) continue;
             filtered.add(t);
         }
+
+        // Hien thi danh sach giao dich
+        List<Transaction> sortedTxs = new ArrayList<>(filtered);
+        Collections.sort(sortedTxs, (a, b) -> {
+            Date da = a.getDateAsDate();
+            Date db = b.getDateAsDate();
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return db.compareTo(da);
+        });
+
+        txAdapter.setItems(sortedTxs);
+        binding.textEmptyTransactions.setVisibility(sortedTxs.isEmpty() ? View.VISIBLE : View.GONE);
+
         bindMonthData(filtered);
     }
 

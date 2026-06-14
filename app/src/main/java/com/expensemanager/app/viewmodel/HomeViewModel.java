@@ -36,6 +36,7 @@ public class HomeViewModel extends ViewModel {
     private final MediatorLiveData<HomeSummary> summary = new MediatorLiveData<>();
     private final MediatorLiveData<FinancialInsights> insights = new MediatorLiveData<>();
     private final MediatorLiveData<List<String>> budgetAlerts = new MediatorLiveData<>();
+    private final MediatorLiveData<List<Transaction>> recentTransactions = new MediatorLiveData<>();
 
     private List<Transaction> monthTx = new ArrayList<>();
     private List<Transaction> allTx = new ArrayList<>();
@@ -122,9 +123,22 @@ public class HomeViewModel extends ViewModel {
 
         budgetAlerts.setValue(com.expensemanager.app.util.BudgetChecker.checkAlerts(
                 budgets, TransactionRepository.expensesOnly(monthTx)));
+
+        // Most recent 5 transactions
+        List<Transaction> sorted = new ArrayList<>(allTx);
+        sorted.sort((a, b) -> {
+            Date da = a.getDateAsDate();
+            Date db = b.getDateAsDate();
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return db.compareTo(da);
+        });
+        recentTransactions.setValue(sorted.size() > 5 ? sorted.subList(0, 5) : sorted);
     }
 
     public LiveData<HomeSummary> getSummary() { return summary; }
     public LiveData<FinancialInsights> getInsights() { return insights; }
     public LiveData<List<String>> getBudgetAlerts() { return budgetAlerts; }
+    public LiveData<List<Transaction>> getRecentTransactions() { return recentTransactions; }
 }

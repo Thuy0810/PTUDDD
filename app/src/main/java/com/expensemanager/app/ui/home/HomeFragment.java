@@ -1,5 +1,6 @@
 package com.expensemanager.app.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,11 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentHomeBinding;
 import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.data.model.HomeSummary;
+import com.expensemanager.app.data.model.Transaction;
+import com.expensemanager.app.ui.adapter.TransactionAdapter;
+import com.expensemanager.app.ui.transaction.AddTransactionActivity;
 import com.expensemanager.app.util.MoneyFormat;
 import com.expensemanager.app.viewmodel.HomeViewModel;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
@@ -24,6 +29,7 @@ import java.util.List;
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private HomeViewModel viewModel;
+    private TransactionAdapter transactionAdapter;
 
     @Nullable
     @Override
@@ -39,12 +45,30 @@ public class HomeFragment extends Fragment {
 
         viewModel = HomeViewModelHolder.get();
 
+        setupRecyclerView();
+
         viewModel.getSummary().observe(getViewLifecycleOwner(), this::bindSummary);
         viewModel.getInsights().observe(getViewLifecycleOwner(), this::bindInsights);
         viewModel.getBudgetAlerts().observe(getViewLifecycleOwner(), this::bindAlerts);
+        viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::bindRecentTransactions);
 
         binding.textSeeAll.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.transactionListFragment);
+            Navigation.findNavController(v).navigate(R.id.reportFragment);
+        });
+
+        binding.layoutHeader.setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), AddTransactionActivity.class));
+        });
+    }
+
+    private void setupRecyclerView() {
+        transactionAdapter = new TransactionAdapter();
+        binding.recyclerRecentTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerRecentTransactions.setAdapter(transactionAdapter);
+        transactionAdapter.setOnItemClick(t -> {
+            Intent i = new Intent(requireContext(), AddTransactionActivity.class);
+            i.putExtra("transaction_id", t.getId());
+            startActivity(i);
         });
     }
 
@@ -83,6 +107,17 @@ public class HomeFragment extends Fragment {
         }
         binding.cardAlerts.setVisibility(View.VISIBLE);
         binding.textAlerts.setText(TextUtils.join("\n", alerts));
+    }
+
+    private void bindRecentTransactions(List<Transaction> txs) {
+        if (txs == null || txs.isEmpty()) {
+            binding.textEmpty.setVisibility(View.GONE);
+            binding.recyclerRecentTransactions.setVisibility(View.GONE);
+            return;
+        }
+        binding.textEmpty.setVisibility(View.GONE);
+        binding.recyclerRecentTransactions.setVisibility(View.VISIBLE);
+        transactionAdapter.setItems(txs);
     }
 
     @Override

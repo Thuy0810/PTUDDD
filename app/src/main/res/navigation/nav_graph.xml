@@ -15,11 +15,6 @@
         android:label="@string/nav_budget" />
 
     <fragment
-        android:id="@+id/transactionListFragment"
-        android:name="com.expensemanager.app.ui.transaction.TransactionListFragment"
-        android:label="@string/nav_transactions" />
-
-    <fragment
         android:id="@+id/reportFragment"
         android:name="com.expensemanager.app.ui.report.ReportFragment"
         android:label="@string/nav_report" />

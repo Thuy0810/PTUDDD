@@ -261,7 +261,7 @@ public class BudgetFragment extends Fragment {
         b.setCategoryId(cat.getId());
         b.setMonth(DateUtils.currentMonthKey());
         b.setLimitAmount(limit);
-        budgetRepo.add(uid, b);
+        budgetRepo.addOrUpdate(uid, b);
         Toast.makeText(requireContext(), "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
     }
 

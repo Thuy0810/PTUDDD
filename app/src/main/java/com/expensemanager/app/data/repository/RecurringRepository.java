@@ -1,5 +1,7 @@
 package com.expensemanager.app.data.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -15,9 +17,9 @@ import java.util.Calendar;
 import java.util.List;
 
 public class RecurringRepository {
+    private static final String TAG = "RecurringRepository";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final TransactionRepository txRepo = new TransactionRepository();
-    private final WalletRepository walletRepo = new WalletRepository();
 
     public LiveData<List<RecurringRule>> observeAll(String uid) {
         MutableLiveData<List<RecurringRule>> live = new MutableLiveData<>();
@@ -108,7 +110,8 @@ public class RecurringRepository {
         t.setNote(rule.getNote() != null ? rule.getNote() : "Giao dịch định kỳ");
         t.setDate(Timestamp.now());
 
-        txRepo.add(uid, t, walletRepo);
+        txRepo.add(uid, t)
+                .addOnFailureListener(e -> Log.e(TAG, "Khong the tao giao dich dinh ky", e));
     }
 
     public void add(String uid, RecurringRule rule) {

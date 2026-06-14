@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,40 +40,19 @@ public final class BackupManager {
 
     public static void exportUserData(Context ctx, String uid, Runnable onDone, Runnable onError) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         JSONObject backup = new JSONObject();
         AtomicBoolean hasError = new AtomicBoolean(false);
-        AtomicInteger remaining = new AtomicInteger(2);
 
-        exportProfile(db, uid, backup, hasError, remaining, () ->
-                exportCollections(db, uid, backup, hasError, remaining, () -> {
-                    try {
-                        File dir = ctx.getCacheDir();
-                        File file = new File(dir, "expense_backup_" + System.currentTimeMillis() + ".json");
-                        FileWriter w = new FileWriter(file);
-                        w.write(backup.toString(2));
-                        w.close();
-
-                        Intent share = new Intent(Intent.ACTION_SEND);
-                        share.setType("application/json");
-                        share.putExtra(Intent.EXTRA_STREAM,
-                                FileProvider.getUriForFile(ctx,
-                                        ctx.getPackageName() + ".fileprovider", file));
-                        share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        ctx.startActivity(Intent.createChooser(share, "Sao luu du lieu"));
-                        finishOne(remaining, hasError, onDone, onError);
-                    } catch (Exception e) {
-                        Log.e(TAG, "exportUserData: failed to write file", e);
-                        hasError.set(true);
-                        finishOne(remaining, hasError, onDone, onError);
-                    }
-                }, onDone, onError),
-                onDone, onError);
+        exportProfile(db, uid, backup,
+                () -> exportCollections(db, uid, backup, hasError,
+                        () -> writeAndShareBackup(ctx, backup, hasError, onDone, onError),
+                        onError
+                ),
+                onError
+        );
     }
 
     private static void exportProfile(FirebaseFirestore db, String uid, JSONObject backup,
-                                      AtomicBoolean hasError,
-                                      AtomicInteger remaining,
                                       Runnable onDone, Runnable onError) {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
@@ -84,18 +64,16 @@ public final class BackupManager {
                             }
                         }
                     } catch (Exception ignored) {}
-                    finishOne(remaining, hasError, onDone, onError);
+                    onDone.run();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "exportProfile: failed", e);
-                    hasError.set(true);
-                    finishOne(remaining, hasError, onDone, onError);
+                    onError.run();
                 });
     }
 
     private static void exportCollections(FirebaseFirestore db, String uid, JSONObject backup,
                                          AtomicBoolean hasError,
-                                         AtomicInteger remaining,
                                          Runnable onDone, Runnable onError) {
         AtomicInteger collRemaining = new AtomicInteger(COLLECTIONS.length);
 
@@ -118,19 +96,42 @@ public final class BackupManager {
                                 }
                             }
                             backup.put(coll, arr);
-                        } catch (Exception ignored) {}
+                        } catch (JSONException ignored) {}
 
                         if (collRemaining.decrementAndGet() == 0) {
-                            finishOne(remaining, hasError, onDone, onError);
+                            if (hasError.get()) onError.run();
+                            else onDone.run();
                         }
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "exportCollections: failed to export " + coll, e);
                         hasError.set(true);
                         if (collRemaining.decrementAndGet() == 0) {
-                            finishOne(remaining, hasError, onDone, onError);
+                            onError.run();
                         }
                     });
+        }
+    }
+
+    private static void writeAndShareBackup(Context ctx, JSONObject backup, AtomicBoolean hasError,
+                                           Runnable onDone, Runnable onError) {
+        try {
+            File dir = ctx.getCacheDir();
+            File file = new File(dir, "expense_backup_" + System.currentTimeMillis() + ".json");
+            FileWriter w = new FileWriter(file);
+            w.write(backup.toString(2));
+            w.close();
+
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("application/json");
+            share.putExtra(Intent.EXTRA_STREAM,
+                    FileProvider.getUriForFile(ctx, ctx.getPackageName() + ".fileprovider", file));
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            ctx.startActivity(Intent.createChooser(share, "Sao luu du lieu"));
+            onDone.run();
+        } catch (Exception e) {
+            Log.e(TAG, "writeAndShareBackup: failed", e);
+            onError.run();
         }
     }
 
@@ -222,7 +223,6 @@ public final class BackupManager {
                             .collection(coll).document(docId), data);
                 }
 
-                final int thisBatchEnd = batchEnd;
                 batch.commit()
                         .addOnSuccessListener(a -> {
                             if (completedBatches.incrementAndGet() >= totalBatches) {
@@ -247,11 +247,8 @@ public final class BackupManager {
     private static void finishOne(AtomicInteger remaining, AtomicBoolean hasError,
                                   Runnable onDone, Runnable onError) {
         if (remaining.decrementAndGet() == 0) {
-            if (hasError.get()) {
-                onError.run();
-            } else {
-                onDone.run();
-            }
+            if (hasError.get()) onError.run();
+            else onDone.run();
         }
     }
 
@@ -264,7 +261,7 @@ public final class BackupManager {
         return obj;
     }
 
-    private static Object serializeValue(Object value) {
+    private static Object serializeValue(Object value) throws JSONException {
         if (value instanceof Timestamp) {
             Timestamp ts = (Timestamp) value;
             JSONObject wrapper = new JSONObject();
@@ -276,49 +273,37 @@ public final class BackupManager {
         return value;
     }
 
+    private static Object deserializeJsonValue(Object value) throws JSONException {
+        if (value instanceof JSONObject) {
+            JSONObject object = (JSONObject) value;
+            if ("timestamp".equals(object.optString("_type"))) {
+                return new Timestamp(object.getLong("seconds"), object.getInt("nanoseconds"));
+            }
+            return jsonToMap(object);
+        }
+        if (value instanceof JSONArray) {
+            return jsonArrayToList((JSONArray) value);
+        }
+        return value == JSONObject.NULL ? null : value;
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> jsonToMap(JSONObject obj) throws JSONException {
-        Map<String, Object> map = new java.util.HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         Iterator<String> keys = obj.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            Object value = obj.get(key);
-            if (value instanceof JSONObject) {
-                value = deserializeValue(jsonToMap((JSONObject) value));
-            } else if (value instanceof JSONArray) {
-                value = jsonArrayToList((JSONArray) value);
-            } else {
-                value = deserializeValue(value);
-            }
-            map.put(key, value);
+            map.put(key, deserializeJsonValue(obj.get(key)));
         }
         return map;
     }
 
     @SuppressWarnings("unchecked")
-    private static Object jsonArrayToList(JSONArray arr) throws JSONException {
+    private static ArrayList<Object> jsonArrayToList(JSONArray arr) throws JSONException {
         ArrayList<Object> list = new ArrayList<>();
         for (int i = 0; i < arr.length(); i++) {
-            Object value = arr.get(i);
-            if (value instanceof JSONObject) {
-                value = deserializeValue(jsonToMap((JSONObject) value));
-            } else if (value instanceof JSONArray) {
-                value = jsonArrayToList((JSONArray) value);
-            } else {
-                value = deserializeValue(value);
-            }
-            list.add(value);
+            list.add(deserializeJsonValue(arr.get(i)));
         }
         return list;
-    }
-
-    private static Object deserializeValue(Object value) {
-        if (value instanceof JSONObject) {
-            JSONObject jo = (JSONObject) value;
-            if ("timestamp".equals(jo.optString("_type"))) {
-                return new Timestamp(jo.getLong("seconds"), jo.getInt("nanoseconds"));
-            }
-        }
-        return value;
     }
 }

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -27,10 +28,14 @@ import com.expensemanager.app.databinding.ItemBudgetAllocSimpleBinding;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 public class BudgetAllocationActivity extends AppCompatActivity {
 
@@ -51,6 +56,13 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     private String uid = null;
     private SharedPreferences prefs;
 
+    private LiveData<List<Transaction>> txLiveData;
+    private LiveData<List<Category>> catLiveData;
+    private LiveData<List<Budget>> budgetLiveData;
+    private Observer<List<Transaction>> txObserver;
+    private Observer<List<Category>> catObserver;
+    private Observer<List<Budget>> budgetObserver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +80,13 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         }
 
         setupClickListeners();
+        loadData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("BudgetAlloc", "onResume: reloading data");
         loadData();
     }
 
@@ -144,11 +163,23 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         if (uid == null) return;
 
         String monthKey = getMonthKey();
+        Log.d("BudgetAlloc", "loadData: monthKey=" + monthKey);
+
+        // Remove old observers first
+        if (txLiveData != null && txObserver != null) {
+            txLiveData.removeObserver(txObserver);
+        }
+        if (catLiveData != null && catObserver != null) {
+            catLiveData.removeObserver(catObserver);
+        }
+        if (budgetLiveData != null && budgetObserver != null) {
+            budgetLiveData.removeObserver(budgetObserver);
+        }
 
         expectedIncomeOverride = prefs.getLong("income_" + monthKey, -1);
         if (expectedIncomeOverride == -1) expectedIncomeOverride = monthlyIncome;
 
-        txRepo.observeMonth(uid, monthKey).observe(this, list -> {
+        txObserver = list -> {
             monthlyIncome = 0;
             if (list != null) {
                 for (Transaction t : list) {
@@ -158,9 +189,11 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 }
             }
             updateUI();
-        });
+        };
+        txLiveData = txRepo.observeMonth(uid, monthKey);
+        txLiveData.observe(this, txObserver);
 
-        categoryRepo.observeAll(uid).observe(this, list -> {
+        catObserver = list -> {
             expenseCategories = new ArrayList<>();
             if (list != null) {
                 for (Category c : list) {
@@ -170,19 +203,27 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 }
             }
             updateUI();
-        });
+        };
+        catLiveData = categoryRepo.observeAll(uid);
+        catLiveData.observe(this, catObserver);
 
-        budgetRepo.observeMonth(uid, monthKey).observe(this, list -> {
+        budgetObserver = list -> {
             allocatedMap = new HashMap<>();
-            if (list != null) {
+            if (list != null && !list.isEmpty()) {
+                Log.d("BudgetAlloc", "observeMonth loaded " + list.size() + " budgets for monthKey=" + monthKey);
                 for (Budget b : list) {
                     if (b.getCategoryId() != null) {
+                        Log.d("BudgetAlloc", "  budget: categoryId=" + b.getCategoryId() + ", amount=" + b.getLimitAmount());
                         allocatedMap.put(b.getCategoryId(), b.getLimitAmount());
                     }
                 }
+            } else {
+                Log.d("BudgetAlloc", "observeMonth: no budgets for monthKey=" + monthKey);
             }
             updateUI();
-        });
+        };
+        budgetLiveData = budgetRepo.observeMonth(uid, monthKey);
+        budgetLiveData.observe(this, budgetObserver);
     }
 
     private String getMonthKey() {
@@ -204,6 +245,11 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         double effectiveIncome = getEffectiveIncome();
         double remaining = effectiveIncome - totalAllocated;
         if (remaining < 0) remaining = 0;
+
+        Log.d("BudgetAlloc", "updateUI: allocatedMap size=" + allocatedMap.size()
+                + ", totalAllocated=" + totalAllocated + ", effectiveIncome=" + effectiveIncome
+                + ", remaining=" + remaining
+                + ", expenseCategories=" + expenseCategories.size());
 
         binding.textAllocated.setText(MoneyFormat.format(totalAllocated));
         binding.textUnallocated.setText(MoneyFormat.format(remaining));
@@ -254,10 +300,12 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
     private void updateEssentialItems() {
         binding.layoutEssentialItems.removeAllViews();
+        Log.d("BudgetAlloc", "updateEssentialItems: expenseCategories=" + expenseCategories.size() + ", allocatedMap=" + allocatedMap.size());
 
         for (Category cat : expenseCategories) {
             double allocated = allocatedMap.containsKey(cat.getId())
                     ? allocatedMap.get(cat.getId()) : 0;
+            Log.d("BudgetAlloc", "  item: cat=" + cat.getId() + " (" + cat.getName() + "), allocated=" + allocated);
 
             addEssentialItem(cat, allocated);
         }
@@ -284,6 +332,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 LayoutInflater.from(this), binding.layoutEssentialItems, false);
 
         card.textCategoryName.setText(cat.getName());
+
+
+
         card.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
         card.textAllocated.setText(MoneyFormat.format(allocated));
         card.textAmount.setText(MoneyFormat.format(allocated) + " / --");
@@ -298,9 +349,46 @@ public class BudgetAllocationActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
         }
 
+        // Click on card or yellow chip to edit
         card.getRoot().setOnClickListener(v -> showEditDialog(cat, allocated));
 
+        // Menu button for edit/delete
+        card.btnMenu.setOnClickListener(v -> showItemMenu(v, cat, allocated));
+
         binding.layoutEssentialItems.addView(card.getRoot());
+    }
+
+    private void showItemMenu(View anchor, Category cat, double allocated) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        popup.getMenuInflater().inflate(R.menu.menu_item_edit_delete, popup.getMenu());
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.action_edit) {
+                showEditDialog(cat, allocated);
+                return true;
+            } else if (id == R.id.action_delete) {
+                confirmDeleteBudget(cat);
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+
+    private void confirmDeleteBudget(Category cat) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xóa ngân sách")
+                .setMessage("Xóa ngân sách cho danh mục \"" + cat.getName() + "\"?")
+                .setPositiveButton("Xóa", (d, w) -> {
+                    String monthKey = getMonthKey();
+                    String docId = uid + "_" + monthKey + "_" + cat.getId();
+                    budgetRepo.delete(uid, docId);
+                    allocatedMap.remove(cat.getId());
+                    updateUI();
+                    Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private void showEditDialog(Category cat, double currentAmount) {
@@ -331,37 +419,65 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
     private void saveBudget(Category cat, double amount, String monthKey) {
         if (uid == null) return;
+        Log.d("BudgetAlloc", "saveBudget: cat=" + cat.getId() + ", amount=" + amount + ", month=" + monthKey);
 
         Budget b = new Budget();
         b.setScope(Budget.SCOPE_CATEGORY);
         b.setCategoryId(cat.getId());
         b.setMonth(monthKey);
         b.setLimitAmount(amount);
-        budgetRepo.addOrUpdate(uid, b);
-
-        allocatedMap.put(cat.getId(), amount);
-        Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
-        updateUI();
+        budgetRepo.addOrUpdate(uid, b,
+                aVoid -> {
+                    Log.d("BudgetAlloc", "saveBudget SUCCESS: cat=" + cat.getId());
+                    allocatedMap.put(cat.getId(), amount);
+                    updateUI();
+                },
+                e -> {
+                    Log.e("BudgetAlloc", "saveBudget FAILED: " + e.getMessage());
+                    Toast.makeText(this, "Lỗi lưu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+        Toast.makeText(this, "Đang lưu...", Toast.LENGTH_SHORT).show();
     }
 
     private void saveAllAllocations() {
         if (uid == null) return;
 
         String monthKey = getMonthKey();
+        final int total = allocatedMap.size();
+        Log.d("BudgetAlloc", "saveAllAllocations: total=" + total + ", month=" + monthKey);
+
+        if (total == 0) {
+            Toast.makeText(this, "Chưa có phân bổ nào để lưu", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        final int[] done = {0};
+        final boolean[] anyError = {false};
         for (Map.Entry<String, Double> entry : allocatedMap.entrySet()) {
             String catId = entry.getKey();
             Double amount = entry.getValue();
-            if (catId != null && amount != null) {
-                Budget b = new Budget();
-                b.setScope(Budget.SCOPE_CATEGORY);
-                b.setCategoryId(catId);
-                b.setMonth(monthKey);
-                b.setLimitAmount(amount);
-                budgetRepo.addOrUpdate(uid, b);
-            }
+            if (catId == null || amount == null) continue;
+            Log.d("BudgetAlloc", "  saving: catId=" + catId + ", amount=" + amount);
+            Budget b = new Budget();
+            b.setScope(Budget.SCOPE_CATEGORY);
+            b.setCategoryId(catId);
+            b.setMonth(monthKey);
+            b.setLimitAmount(amount);
+            budgetRepo.addOrUpdate(uid, b, aVoid -> {
+                done[0]++;
+                Log.d("BudgetAlloc", "  saved OK: catId=" + catId + ", done=" + done[0] + "/" + total);
+                if (done[0] >= total && !anyError[0]) {
+                    Toast.makeText(this, "Đã lưu tất cả phân bổ", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }, e -> {
+                anyError[0] = true;
+                done[0]++;
+                Log.e("BudgetAlloc", "  save FAILED: catId=" + catId + ", error=" + e.getMessage());
+                Toast.makeText(this, "Lỗi lưu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
         }
-        Toast.makeText(this, "Da luu tat ca phan bo", Toast.LENGTH_SHORT).show();
-        finish();
     }
 
     private void showAddCategoryDialog() {
@@ -455,6 +571,15 @@ public class BudgetAllocationActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (txLiveData != null && txObserver != null) {
+            txLiveData.removeObserver(txObserver);
+        }
+        if (catLiveData != null && catObserver != null) {
+            catLiveData.removeObserver(catObserver);
+        }
+        if (budgetLiveData != null && budgetObserver != null) {
+            budgetLiveData.removeObserver(budgetObserver);
+        }
         binding = null;
     }
 }

@@ -193,7 +193,7 @@ public class BudgetEditActivity extends AppCompatActivity {
             b.setCategoryId(cat.getId());
             b.setMonth(monthKey);
             b.setLimitAmount(amount);
-            budgetRepo.add(uid, b);
+            budgetRepo.addOrUpdate(uid, b);
         }
 
         // reload

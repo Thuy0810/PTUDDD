@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.databinding.FragmentTransactionListBinding;
+import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Category;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;

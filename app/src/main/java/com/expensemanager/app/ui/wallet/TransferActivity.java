@@ -68,10 +68,11 @@ public class TransferActivity extends AppCompatActivity {
     private void confirmTransfer(String uid) {
         String amountStr = binding.editAmount.getText() != null
                 ? binding.editAmount.getText().toString().trim() : "0";
-        double amount;
+        long amount;
         try {
-            amount = Double.parseDouble(amountStr.replace(",", ""));
-        } catch (Exception e) {
+            String normalized = amountStr.replace(",", "").replace(".", "").trim();
+            amount = Long.parseLong(normalized);
+        } catch (NumberFormatException e) {
             Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -101,7 +102,7 @@ public class TransferActivity extends AppCompatActivity {
         performTransfer(uid, amount, fromWallet, toWallet);
     }
 
-    private void performTransfer(String uid, double amount, Wallet fromWallet, Wallet toWallet) {
+    private void performTransfer(String uid, long amount, Wallet fromWallet, Wallet toWallet) {
         String note = binding.editNote.getText() != null
                 ? binding.editNote.getText().toString().trim() : "Chuyen tien";
 
@@ -113,13 +114,12 @@ public class TransferActivity extends AppCompatActivity {
             DocumentSnapshot toSnap = transaction.get(
                     db.collection("users").document(uid).collection("wallets").document(toWallet.getId()));
 
-            Double fromBalance = fromSnap.getDouble("currentBalance");
-            Double toBalance = toSnap.getDouble("currentBalance");
+            Long fromBalance = fromSnap.getLong("currentBalance");
+            Long toBalance = toSnap.getLong("currentBalance");
 
-            if (fromBalance == null || toBalance == null) {
-                throw new FirebaseFirestoreException("Khong doc duoc so du",
-                        FirebaseFirestoreException.Code.ABORTED);
-            }
+            if (fromBalance == null) fromBalance = 0L;
+            if (toBalance == null) toBalance = 0L;
+
             if (fromBalance < amount) {
                 throw new FirebaseFirestoreException("So du khong du",
                         FirebaseFirestoreException.Code.ABORTED);
@@ -153,12 +153,8 @@ public class TransferActivity extends AppCompatActivity {
         });
     }
 
-    private String formatAmount(double amount) {
-        if (amount == (long) amount) {
-            return String.format("%d", (long) amount);
-        } else {
-            return String.format("%.2f", amount);
-        }
+    private String formatAmount(long amount) {
+        return String.format("%,d", amount);
     }
 
     @Override

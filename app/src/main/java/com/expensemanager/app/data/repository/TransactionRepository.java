@@ -88,12 +88,14 @@ public class TransactionRepository {
         return live;
     }
 
-    public void add(String uid, Transaction t, WalletRepository walletRepo) {
-        if (t.getWalletId() == null || t.getWalletId().isEmpty()) {
-            db.collection("users").document(uid).collection("transactions").add(t.toMap());
-            return;
+    public Task<Void> add(String uid, Transaction transaction) {
+        if (transaction.getWalletId() == null || transaction.getWalletId().isEmpty()) {
+            return db.collection("users").document(uid)
+                    .collection("transactions")
+                    .add(transaction.toMap())
+                    .continueWith(task -> null);
         }
-        addAtomic(uid, t, t.getWalletId());
+        return addAtomic(uid, transaction, transaction.getWalletId());
     }
 
     @NonNull

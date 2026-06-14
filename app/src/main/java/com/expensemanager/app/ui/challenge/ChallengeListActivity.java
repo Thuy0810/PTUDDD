@@ -146,9 +146,12 @@ public class ChallengeListActivity extends AppCompatActivity {
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMonth.setAdapter(monthAdapter);
 
-        final Timestamp[] dateStart = {null};
+        final Timestamp[] dateStart = {new Timestamp(new Date())};
         final Timestamp[] dateEnd = {null};
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        // Pre-select today in the start date button
+        btnDateStart.setText(dateFormat.format(new Date()));
 
         btnDateStart.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
@@ -205,8 +208,11 @@ public class ChallengeListActivity extends AppCompatActivity {
                 .setPositiveButton("Tạo", (d, w) -> {
                     String note = editNote.getText().toString().trim();
                     String amountStr = editAmount.getText().toString().trim().replace(",", "");
-                    double amount;
-                    try { amount = Double.parseDouble(amountStr); } catch (Exception e) {
+                    long amount;
+                    try {
+                        String normalized = amountStr.replace(".", "").trim();
+                        amount = Long.parseLong(normalized);
+                    } catch (Exception e) {
                         Toast.makeText(this, "Nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -220,6 +226,12 @@ public class ChallengeListActivity extends AppCompatActivity {
                     int cyclePos = spinnerCycle.getSelectedItemPosition();
                     int dayPos = spinnerDay.getSelectedItemPosition();
                     int monthPos = spinnerMonth.getSelectedItemPosition();
+
+                    if (catPos < 0 || catPos >= categories.size()
+                            || walletPos < 0 || walletPos >= wallets.size()) {
+                        Toast.makeText(this, "Vui lòng chọn danh mục và ví", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Category cat = categories.get(catPos);
                     Wallet wallet = wallets.get(walletPos);
 
@@ -254,6 +266,7 @@ public class ChallengeListActivity extends AppCompatActivity {
                     r.setDateStart(dateStart[0]);
                     r.setDateEnd(dateEnd[0]);
                     r.setEnabled(true);
+                    r.setNextRun(calculateNextRun(dateStart[0], cycleType, dayOfMonth, dayOfWeek, monthOfYear));
                     recurringRepo.add(uid, r);
                     Toast.makeText(this, "Đã tạo giao dịch định kỳ!", Toast.LENGTH_SHORT).show();
                 })
@@ -308,13 +321,17 @@ public class ChallengeListActivity extends AppCompatActivity {
                 .setTitle("Sửa: " + r.getNote())
                 .setView(input)
                 .setPositiveButton("Lưu", (d, w) -> {
+                    long amount;
                     try {
-                        r.setAmount(Double.parseDouble(input.getText().toString().replace(",", "")));
-                        recurringRepo.update(uid, r);
-                        Toast.makeText(this, "Đã lưu", Toast.LENGTH_SHORT).show();
+                        String normalized = input.getText().toString().replace(",", "").replace(".", "").trim();
+                        amount = Long.parseLong(normalized);
                     } catch (Exception e) {
                         Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    r.setAmount(amount);
+                    recurringRepo.update(uid, r);
+                    Toast.makeText(this, "Đã lưu", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
                 .setNeutralButton("Xóa", (d, w) -> {
@@ -322,6 +339,39 @@ public class ChallengeListActivity extends AppCompatActivity {
                     Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
                 })
                 .show();
+    }
+
+    private Timestamp calculateNextRun(Timestamp dateStart, String cycleType,
+                                      int dayOfMonth, int dayOfWeek, int monthOfYear) {
+        Calendar cal = Calendar.getInstance();
+        if (dateStart != null) {
+            cal.setTime(dateStart.toDate());
+        }
+
+        switch (cycleType) {
+            case RecurringRule.CYCLE_DAILY:
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+                break;
+            case RecurringRule.CYCLE_WEEKLY:
+                cal.add(Calendar.WEEK_OF_YEAR, 1);
+                break;
+            case RecurringRule.CYCLE_MONTHLY:
+                cal.add(Calendar.MONTH, 1);
+                if (dayOfMonth > 0 && dayOfMonth <= 31) {
+                    cal.set(Calendar.DAY_OF_MONTH, Math.min(dayOfMonth, cal.getActualMaximum(Calendar.DAY_OF_MONTH)));
+                }
+                break;
+            case RecurringRule.CYCLE_YEARLY:
+                cal.add(Calendar.YEAR, 1);
+                if (monthOfYear >= 1 && monthOfYear <= 12) {
+                    cal.set(Calendar.MONTH, monthOfYear - 1);
+                    if (dayOfMonth > 0 && dayOfMonth <= 31) {
+                        cal.set(Calendar.DAY_OF_MONTH, Math.min(dayOfMonth, cal.getActualMaximum(Calendar.DAY_OF_MONTH)));
+                    }
+                }
+                break;
+        }
+        return new Timestamp(cal.getTime());
     }
 
     @Override

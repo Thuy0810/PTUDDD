@@ -35,7 +35,7 @@
                 android:textSize="16sp" />
         </FrameLayout>
 
-        <!-- Name + dropdown -->
+        <!-- Name + amount -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="0đ / 3.500.000đ"
+                android:text="0đ / --"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -88,5 +88,16 @@
                 android:src="@drawable/ic_expand"
                 app:tint="#B3000000" />
         </LinearLayout>
+
+        <!-- Menu button -->
+        <ImageView
+            android:id="@+id/btnMenu"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/ic_more_vert"
+            app:tint="@color/text_secondary" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

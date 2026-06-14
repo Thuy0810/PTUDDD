@@ -220,9 +220,11 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         String amountStr = binding.editAmount.getText() != null
                 ? binding.editAmount.getText().toString().trim() : "0";
-        double amount;
-        try { amount = Double.parseDouble(amountStr.replace(",", "")); }
-        catch (Exception e) {
+        long amount;
+        try {
+            String normalized = amountStr.replace(",", "").replace(".", "").trim();
+            amount = Long.parseLong(normalized);
+        } catch (NumberFormatException e) {
             Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
             return;
         }

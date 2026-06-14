@@ -5,7 +5,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,6 +28,8 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
         public String title;
         public List<CategoryItem> categories = new ArrayList<>();
         public boolean isExpanded = true;
+        public boolean isOtherSection = false;
+        public double totalBalance = 0;
 
         public Section(String title) {
             this.title = title;
@@ -58,6 +59,7 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
     private Map<String, Double> allocatedMap = new HashMap<>();
     private Map<String, Double> spentMap = new HashMap<>();
     private OnCategoryEdit editListener;
+    private double totalBalance = 0;
 
     public void setSections(List<Section> sections) {
         this.sections = sections;
@@ -76,6 +78,11 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
 
     public void setOnCategoryEdit(OnCategoryEdit listener) {
         this.editListener = listener;
+    }
+
+    public void setTotalBalance(double balance) {
+        this.totalBalance = balance;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -125,6 +132,11 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             if (section.isExpanded) {
                 for (CategoryItem item : section.categories) {
                     addCategoryCard(binding.layoutCards, item);
+                }
+
+                // Add balance card for "Khác" section
+                if ("Khác".equals(section.title) && totalBalance > 0) {
+                    addBalanceCard(binding.layoutCards);
                 }
             }
 
@@ -178,6 +190,27 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             });
 
             container.addView(cardBinding.getRoot());
+        }
+
+        private void addBalanceCard(LinearLayout container) {
+            View balanceView = LayoutInflater.from(itemView.getContext())
+                    .inflate(R.layout.item_budget_balance, container, false);
+
+            TextView textBalance = balanceView.findViewById(R.id.textBalance);
+            TextView textBalanceLabel = balanceView.findViewById(R.id.textBalanceLabel);
+
+            textBalance.setText(MoneyFormat.format(totalBalance));
+            textBalance.setTextColor(itemView.getContext().getColor(R.color.income_green));
+
+            if (totalBalance >= 0) {
+                textBalanceLabel.setText("Số dư khả dụng");
+                textBalance.setTextColor(itemView.getContext().getColor(R.color.income_green));
+            } else {
+                textBalanceLabel.setText("Số dư âm");
+                textBalance.setTextColor(itemView.getContext().getColor(R.color.expense_red));
+            }
+
+            container.addView(balanceView);
         }
 
         private String getCategoryEmoji(String iconKey) {

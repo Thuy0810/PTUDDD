@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.SavingsGoal;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -62,7 +63,10 @@ public class GoalRepository {
     }
 
     public void add(String uid, SavingsGoal g) {
-        db.collection("users").document(uid).collection("savings_goals").add(g.toMap());
+        DocumentReference ref = db.collection("users").document(uid)
+                .collection("savings_goals").document();
+        g.setId(ref.getId());
+        ref.set(g.toMap());
     }
 
     public void update(String uid, SavingsGoal g) {

@@ -12,11 +12,6 @@
         android:title="@string/nav_budget" />
 
     <item
-        android:id="@+id/nav_transactions"
-        android:icon="@drawable/ic_transaction"
-        android:title="@string/nav_transactions" />
-
-    <item
         android:id="@+id/nav_report"
         android:icon="@drawable/ic_report"
         android:title="@string/nav_report" />

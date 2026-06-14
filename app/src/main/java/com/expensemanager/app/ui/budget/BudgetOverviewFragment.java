@@ -18,11 +18,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Budget;
 import com.expensemanager.app.data.model.Category;
+import com.expensemanager.app.data.model.RecurringRule;
+import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.model.Transaction;
+import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
+import com.expensemanager.app.data.repository.GoalRepository;
+import com.expensemanager.app.data.repository.RecurringRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
+import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.FragmentBudgetOverviewBinding;
 import com.expensemanager.app.ui.budget.BudgetAllocationActivity;
 import com.expensemanager.app.util.DateUtils;
@@ -40,6 +46,8 @@ public class BudgetOverviewFragment extends Fragment {
     private final BudgetRepository budgetRepo = new BudgetRepository();
     private final CategoryRepository categoryRepo = new CategoryRepository();
     private final TransactionRepository txRepo = new TransactionRepository();
+    private final GoalRepository goalRepo = new GoalRepository();
+    private final RecurringRepository recurringRepo = new RecurringRepository();
 
     private BudgetSectionAdapter adapter;
     private List<BudgetSectionAdapter.Section> sections = new ArrayList<>();
@@ -49,8 +57,9 @@ public class BudgetOverviewFragment extends Fragment {
     private int selectedYear = Calendar.getInstance().get(Calendar.YEAR);
     private int selectedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
-    // Cached all categories
     private List<Category> allCategories = new ArrayList<>();
+    private List<RecurringRule> recurringRules = new ArrayList<>();
+    private List<SavingsGoal> savingsGoals = new ArrayList<>();
 
     @Nullable
     @Override
@@ -123,6 +132,30 @@ public class BudgetOverviewFragment extends Fragment {
 
         String monthKey = String.format("%04d-%02d", selectedYear, selectedMonth);
 
+        // Load wallet balance
+        WalletRepository walletRepo = new WalletRepository();
+        walletRepo.observeAll(uid).observe(getViewLifecycleOwner(), wallets -> {
+            double totalBalance = 0;
+            if (wallets != null) {
+                for (Wallet w : wallets) {
+                    totalBalance += w.getCurrentBalance();
+                }
+            }
+            adapter.setTotalBalance(totalBalance);
+        });
+
+        // Load recurring rules
+        recurringRepo.observeAll(uid).observe(getViewLifecycleOwner(), list -> {
+            recurringRules = list != null ? list : new ArrayList<>();
+            calculateAndUpdateSummary();
+        });
+
+        // Load savings goals
+        goalRepo.observeAll(uid).observe(getViewLifecycleOwner(), list -> {
+            savingsGoals = list != null ? list : new ArrayList<>();
+            calculateAndUpdateSummary();
+        });
+
         categoryRepo.observeAll(uid).observe(getViewLifecycleOwner(), list -> {
             allCategories = list != null ? list : new ArrayList<>();
             buildSections();
@@ -138,6 +171,7 @@ public class BudgetOverviewFragment extends Fragment {
                 }
             }
             adapter.setAllocatedMap(allocatedMap);
+            calculateAndUpdateSummary();
         });
 
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
@@ -162,8 +196,58 @@ public class BudgetOverviewFragment extends Fragment {
         });
     }
 
+    private void calculateAndUpdateSummary() {
+        // Calculate recurring expenses for the month
+        double recurringExpense = 0;
+        for (RecurringRule rule : recurringRules) {
+            if (rule.isEnabled() && Transaction.TYPE_EXPENSE.equals(rule.getType())) {
+                String cycle = rule.getCycleType();
+                if (cycle == null) cycle = RecurringRule.CYCLE_MONTHLY;
+
+                switch (cycle) {
+                    case RecurringRule.CYCLE_DAILY:
+                        recurringExpense += rule.getAmount() * 30;
+                        break;
+                    case RecurringRule.CYCLE_WEEKLY:
+                        recurringExpense += rule.getAmount() * 4;
+                        break;
+                    case RecurringRule.CYCLE_MONTHLY:
+                        recurringExpense += rule.getAmount();
+                        break;
+                    case RecurringRule.CYCLE_YEARLY:
+                        recurringExpense += rule.getAmount() / 12.0;
+                        break;
+                }
+            }
+        }
+
+        // Calculate savings goal contributions needed
+        double savingsNeeded = 0;
+        for (SavingsGoal goal : savingsGoals) {
+            if (!goal.isCompleted()) {
+                double remaining = goal.getTargetAmount() - goal.getSavedAmount();
+                if (remaining > 0) {
+                    Calendar deadline = Calendar.getInstance();
+                    if (goal.getDeadline() != null) {
+                        deadline.setTime(goal.getDeadline().toDate());
+                    }
+                    int monthsRemaining = (deadline.get(Calendar.YEAR) - selectedYear) * 12
+                            + (deadline.get(Calendar.MONTH) + 1 - selectedMonth);
+                    if (monthsRemaining > 0) {
+                        savingsNeeded += remaining / monthsRemaining;
+                    } else {
+                        savingsNeeded += remaining;
+                    }
+                }
+            }
+        }
+
+        // Update UI with calculated values
+        binding.textTotalExpense.setText(MoneyFormat.format(recurringExpense));
+        binding.textExtraSaving.setText(MoneyFormat.format(savingsNeeded));
+    }
+
     private void buildSections() {
-        // Group categories
         Map<String, BudgetSectionAdapter.Section> sectionMap = new HashMap<>();
 
         BudgetSectionAdapter.Section essential = new BudgetSectionAdapter.Section("Thiết yếu");
@@ -203,25 +287,6 @@ public class BudgetOverviewFragment extends Fragment {
         if (!other.categories.isEmpty()) sections.add(other);
 
         adapter.setSections(sections);
-    }
-
-    private void updateSummary() {
-        double totalExpense = 0, totalIncome = 0;
-        for (Map.Entry<String, Double> e : spentMap.entrySet()) {
-            totalExpense += e.getValue();
-        }
-        binding.textTotalExpense.setText(MoneyFormat.format(totalExpense));
-        binding.textTotalIncome.setText(MoneyFormat.format(totalIncome));
-
-        double saved = totalIncome - totalExpense;
-        binding.textTotalSaving.setText(MoneyFormat.format(Math.max(saved, 0)));
-
-        double extraSaving = totalIncome - totalExpense;
-        if (extraSaving > 0) {
-            binding.textExtraSaving.setText(MoneyFormat.format(extraSaving));
-        } else {
-            binding.textExtraSaving.setText("0đ");
-        }
     }
 
     private void updateSummaryWithAmounts(double totalIncome, double totalExpense) {

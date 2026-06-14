@@ -2,6 +2,7 @@ package com.expensemanager.app.ui.budget;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ public class BudgetSettingsDialog extends Dialog {
 
     private final DialogBudgetSettingsBinding binding;
     private final String uid;
+    private final SharedPreferences prefs;
 
     private String selectedLanguage = "Tiếng Việt";
     private String selectedCurrency = "VND (₫)";
@@ -32,6 +34,7 @@ public class BudgetSettingsDialog extends Dialog {
         super(context);
         this.uid = uid;
         this.binding = DialogBudgetSettingsBinding.inflate(LayoutInflater.from(context));
+        this.prefs = context.getSharedPreferences("budget_settings_" + uid, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -48,17 +51,30 @@ public class BudgetSettingsDialog extends Dialog {
             );
         }
 
+        loadSavedSettings();
+        setupClickListeners();
+    }
+
+    private void loadSavedSettings() {
+        selectedLanguage = prefs.getString("language", "Tiếng Việt");
+        selectedCurrency = prefs.getString("currency", "VND (₫)");
+        selectedDecimal = prefs.getString("decimalPlaces", "0");
+        selectedSymbolPosition = prefs.getString("symbolPosition", "Sau số tiền");
+
         binding.textLanguageValue.setText(selectedLanguage);
         binding.textCurrencyValue.setText(selectedCurrency);
         binding.textDecimalValue.setText(selectedDecimal);
         binding.textSymbolPositionValue.setText(selectedSymbolPosition);
+    }
 
+    private void setupClickListeners() {
         binding.textLanguageValue.setOnClickListener(v -> showLanguagePicker());
         binding.textCurrencyValue.setOnClickListener(v -> showCurrencyPicker());
         binding.textDecimalValue.setOnClickListener(v -> showDecimalPicker());
         binding.textSymbolPositionValue.setOnClickListener(v -> showSymbolPositionPicker());
 
         binding.btnSave.setOnClickListener(v -> saveSettings());
+        binding.btnCancel.setOnClickListener(v -> dismiss());
     }
 
     private void showLanguagePicker() {
@@ -106,11 +122,21 @@ public class BudgetSettingsDialog extends Dialog {
     }
 
     private void saveSettings() {
+        // Lưu vào SharedPreferences trước (backup)
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("language", selectedLanguage);
+        editor.putString("currency", selectedCurrency);
+        editor.putString("decimalPlaces", selectedDecimal);
+        editor.putString("symbolPosition", selectedSymbolPosition);
+        editor.apply();
+
+        // Thử lưu vào Firestore
         Map<String, Object> settings = new HashMap<>();
         settings.put("language", selectedLanguage);
         settings.put("currency", selectedCurrency);
         settings.put("decimalPlaces", selectedDecimal);
         settings.put("symbolPosition", selectedSymbolPosition);
+        settings.put("updatedAt", System.currentTimeMillis());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users").document(uid)
@@ -120,8 +146,10 @@ public class BudgetSettingsDialog extends Dialog {
                     Toast.makeText(getContext(), "Đã lưu cài đặt", Toast.LENGTH_SHORT).show();
                     dismiss();
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(), "Lưu thất bại", Toast.LENGTH_SHORT).show()
-                );
+                .addOnFailureListener(e -> {
+                    // Nếu Firestore lỗi, vẫn thông báo thành công vì đã lưu local
+                    Toast.makeText(getContext(), "Đã lưu cài đặt (offline)", Toast.LENGTH_SHORT).show();
+                    dismiss();
+                });
     }
 }
