@@ -10,7 +10,24 @@ service cloud.firestore {
     }
 
     match /users/{userId}/transactions/{transactionId} {
-      allow create, read, update, delete:
+      allow read:
+        if request.auth != null
+        && request.auth.uid == userId;
+      allow create:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.type in ['income', 'expense', 'transfer']
+        && request.resource.data.date is timestamp;
+      allow update:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.type in ['income', 'expense', 'transfer']
+        && request.resource.data.date is timestamp;
+      allow delete:
         if request.auth != null
         && request.auth.uid == userId;
     }
@@ -22,9 +39,13 @@ service cloud.firestore {
     }
 
     match /users/{userId}/wallets/{walletId} {
-      allow create, read, update, delete:
+      allow read:
         if request.auth != null
         && request.auth.uid == userId;
+      allow create, update, delete:
+        if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.currentBalance is number;
     }
 
     match /users/{userId}/budgets/{document=**} {

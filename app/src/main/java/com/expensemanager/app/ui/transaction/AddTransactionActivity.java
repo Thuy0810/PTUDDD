@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -254,17 +255,39 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);
             t.setDate(originalTransaction.getDate());
-            txRepo.updateAtomic(uid, originalTransaction, t, walletRepo,
-                    originalTransaction.getWalletId(), wallet.getId());
-            Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
-            finish();
+            performUpdate(uid, originalTransaction, t, wallet);
         } else {
             Timestamp txDate = parsedDate != null ? parsedDate : Timestamp.now();
             t.setDate(txDate);
-            txRepo.addAtomic(uid, t, walletRepo, wallet.getId());
-            Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
-            finish();
+            performAdd(uid, t, wallet);
         }
+    }
+
+    private void performAdd(String uid, Transaction t, Wallet wallet) {
+        binding.btnSave.setEnabled(false);
+        txRepo.addAtomic(uid, t, walletRepo, wallet.getId())
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    binding.btnSave.setEnabled(true);
+                    Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void performUpdate(String uid, Transaction original, Transaction updated, Wallet wallet) {
+        binding.btnSave.setEnabled(false);
+        txRepo.updateAtomic(uid, original, updated, walletRepo,
+                original.getWalletId(), wallet.getId())
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    binding.btnSave.setEnabled(true);
+                    Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 
     private void showDeleteConfirm() {
@@ -278,15 +301,18 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void deleteTransaction() {
         String uid = authRepo.getUid();
-        if (uid == null || editTxId == null) return;
+        if (uid == null || editTxId == null || originalTransaction == null) return;
 
-        if (originalTransaction != null) {
-            String walletId = originalTransaction.getWalletId();
-            txRepo.deleteAtomic(uid, originalTransaction, walletRepo, walletId);
-        }
-
-        Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
-        finish();
+        binding.btnDelete.setEnabled(false);
+        txRepo.deleteAtomic(uid, originalTransaction, walletRepo, originalTransaction.getWalletId())
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    binding.btnDelete.setEnabled(true);
+                    Toast.makeText(this, "Khong the xoa: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 
     @Override

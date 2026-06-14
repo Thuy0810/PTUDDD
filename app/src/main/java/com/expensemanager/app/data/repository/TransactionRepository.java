@@ -1,9 +1,13 @@
 package com.expensemanager.app.data.repository;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.Transaction;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -17,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 
 public class TransactionRepository {
+    private static final String TAG = "TransactionRepository";
+
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public LiveData<List<Transaction>> observeMonth(String uid, String monthKey) {
@@ -37,6 +43,11 @@ public class TransactionRepository {
                     .whereLessThan("date", new Timestamp(end))
                     .orderBy("date", Query.Direction.DESCENDING)
                     .addSnapshotListener((snap, e) -> {
+                        if (e != null) {
+                            Log.e(TAG, "observeMonth: listen failed", e);
+                            live.setValue(new ArrayList<>());
+                            return;
+                        }
                         List<Transaction> list = new ArrayList<>();
                         if (snap != null) {
                             for (QueryDocumentSnapshot doc : snap) {
@@ -48,6 +59,7 @@ public class TransactionRepository {
                         live.setValue(list);
                     });
         } catch (Exception ex) {
+            Log.e(TAG, "observeMonth: exception", ex);
             live.setValue(new ArrayList<>());
         }
         return live;
@@ -58,6 +70,11 @@ public class TransactionRepository {
         db.collection("users").document(uid).collection("transactions")
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((snap, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "observeAll: listen failed", e);
+                        live.setValue(new ArrayList<>());
+                        return;
+                    }
                     List<Transaction> list = new ArrayList<>();
                     if (snap != null) {
                         for (QueryDocumentSnapshot doc : snap) {
@@ -89,29 +106,34 @@ public class TransactionRepository {
                 .document(txId).delete();
     }
 
-    public void addAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
-        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+    @NonNull
+    public Task<Void> addAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+        return db.runTransaction(transaction -> {
+            DocumentReference walletRef = db.collection("users").document(uid)
+                    .collection("wallets").document(walletId);
             DocumentReference txRef = db.collection("users").document(uid)
                     .collection("transactions").document();
-            transaction.set(txRef, t.toMap());
 
-            DocumentSnapshot walletSnap = transaction.get(
-                    db.collection("users").document(uid).collection("wallets").document(walletId));
+            // Read wallet balance FIRST
+            DocumentSnapshot walletSnap = transaction.get(walletRef);
             Double balance = walletSnap.getDouble("currentBalance");
             if (balance == null) balance = 0.0;
             double change = Transaction.TYPE_INCOME.equals(t.getType()) ? t.getAmount() : -t.getAmount();
-            transaction.update(walletSnap.getReference(), "currentBalance", balance + change);
+
+            // THEN write transaction and update wallet
+            transaction.set(txRef, t.toMap());
+            transaction.update(walletRef, "currentBalance", balance + change);
             return null;
         });
     }
 
-    public void updateAtomic(String uid, Transaction original, Transaction updated,
-                             WalletRepository walletRepo,
-                             String originalWalletId, String newWalletId) {
-        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+    @NonNull
+    public Task<Void> updateAtomic(String uid, Transaction original, Transaction updated,
+                                   WalletRepository walletRepo,
+                                   String originalWalletId, String newWalletId) {
+        return db.runTransaction(transaction -> {
             DocumentReference txRef = db.collection("users").document(uid)
                     .collection("transactions").document(updated.getId());
-            transaction.set(txRef, updated.toMap());
 
             double originalEffect = Transaction.TYPE_INCOME.equals(original.getType())
                     ? original.getAmount() : -original.getAmount();
@@ -120,46 +142,84 @@ public class TransactionRepository {
             double totalChange = newEffect - originalEffect;
 
             if (originalWalletId != null && originalWalletId.equals(newWalletId)) {
-                DocumentSnapshot walletSnap = transaction.get(
-                        db.collection("users").document(uid).collection("wallets").document(originalWalletId));
+                // Read the single wallet BEFORE any write
+                DocumentReference walletRef = db.collection("users").document(uid)
+                        .collection("wallets").document(originalWalletId);
+                DocumentSnapshot walletSnap = transaction.get(walletRef);
                 Double balance = walletSnap.getDouble("currentBalance");
                 if (balance == null) balance = 0.0;
-                transaction.update(walletSnap.getReference(), "currentBalance", balance + totalChange);
+                // Write transaction first, then update wallet
+                transaction.set(txRef, updated.toMap());
+                transaction.update(walletRef, "currentBalance", balance + totalChange);
             } else {
+                DocumentReference origWalletRef = null;
+                DocumentReference newWalletRef = null;
                 if (originalWalletId != null) {
-                    DocumentSnapshot origSnap = transaction.get(
-                            db.collection("users").document(uid).collection("wallets").document(originalWalletId));
-                    Double origBalance = origSnap.getDouble("currentBalance");
-                    if (origBalance == null) origBalance = 0.0;
-                    transaction.update(origSnap.getReference(), "currentBalance", origBalance - originalEffect);
+                    origWalletRef = db.collection("users").document(uid)
+                            .collection("wallets").document(originalWalletId);
                 }
                 if (newWalletId != null) {
-                    DocumentSnapshot newSnap = transaction.get(
-                            db.collection("users").document(uid).collection("wallets").document(newWalletId));
+                    newWalletRef = db.collection("users").document(uid)
+                            .collection("wallets").document(newWalletId);
+                }
+                // Read both wallets BEFORE any write
+                DocumentSnapshot origSnap = null;
+                DocumentSnapshot newSnap = null;
+                if (origWalletRef != null) {
+                    origSnap = transaction.get(origWalletRef);
+                }
+                if (newWalletRef != null) {
+                    newSnap = transaction.get(newWalletRef);
+                }
+                // Write transaction first
+                transaction.set(txRef, updated.toMap());
+                // Then update original wallet (reverse effect)
+                if (origSnap != null) {
+                    Double origBalance = origSnap.getDouble("currentBalance");
+                    if (origBalance == null) origBalance = 0.0;
+                    transaction.update(origWalletRef, "currentBalance", origBalance - originalEffect);
+                }
+                // Then update new wallet (apply new effect)
+                if (newSnap != null) {
                     Double newBalance = newSnap.getDouble("currentBalance");
                     if (newBalance == null) newBalance = 0.0;
-                    transaction.update(newSnap.getReference(), "currentBalance", newBalance + newEffect);
+                    transaction.update(newWalletRef, "currentBalance", newBalance + newEffect);
                 }
             }
             return null;
         });
     }
 
-    public void deleteAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
-        db.runTransaction((com.google.firebase.firestore.Transaction.Function<Void>) transaction -> {
+    @NonNull
+    public Task<Void> deleteAtomic(String uid, Transaction t, WalletRepository walletRepo, String walletId) {
+        return db.runTransaction(transaction -> {
+            DocumentReference txRef = null;
             if (t.getId() != null) {
-                DocumentReference txRef = db.collection("users").document(uid)
+                txRef = db.collection("users").document(uid)
                         .collection("transactions").document(t.getId());
-                transaction.delete(txRef);
             }
 
+            DocumentReference walletRef = null;
             if (walletId != null) {
-                DocumentSnapshot walletSnap = transaction.get(
-                        db.collection("users").document(uid).collection("wallets").document(walletId));
-                Double balance = walletSnap.getDouble("currentBalance");
+                walletRef = db.collection("users").document(uid)
+                        .collection("wallets").document(walletId);
+            }
+
+            // Read wallet balance FIRST
+            Double balance = null;
+            if (walletRef != null) {
+                DocumentSnapshot walletSnap = transaction.get(walletRef);
+                balance = walletSnap.getDouble("currentBalance");
                 if (balance == null) balance = 0.0;
+            }
+
+            // Then write: delete transaction first, update wallet second
+            if (txRef != null) {
+                transaction.delete(txRef);
+            }
+            if (walletRef != null) {
                 double change = Transaction.TYPE_INCOME.equals(t.getType()) ? -t.getAmount() : t.getAmount();
-                transaction.update(walletSnap.getReference(), "currentBalance", balance + change);
+                transaction.update(walletRef, "currentBalance", balance + change);
             }
             return null;
         });
@@ -203,6 +263,11 @@ public class TransactionRepository {
                 .whereLessThan("date", new Timestamp(end))
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((snap, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "observeRange: listen failed", e);
+                        live.setValue(new ArrayList<>());
+                        return;
+                    }
                     List<Transaction> list = new ArrayList<>();
                     if (snap != null) {
                         for (QueryDocumentSnapshot doc : snap) {

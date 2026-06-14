@@ -3,6 +3,7 @@ package com.expensemanager.app.util;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
@@ -25,6 +26,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class BackupManager {
+    private static final String TAG = "BackupManager";
+
     private static final String[] COLLECTIONS = {
             "transactions", "wallets", "categories",
             "budgets", "savings_goals", "savings_challenges", "recurring"
@@ -52,9 +55,10 @@ public final class BackupManager {
                                 FileProvider.getUriForFile(ctx,
                                         ctx.getPackageName() + ".fileprovider", file));
                         share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        ctx.startActivity(Intent.createChooser(share, "Sao lưu dữ liệu"));
+                        ctx.startActivity(Intent.createChooser(share, "Sao luu du lieu"));
                         onDone.run();
                     } catch (Exception e) {
+                        Log.e(TAG, "exportUserData: failed to write file", e);
                         onError.run();
                     }
                 }, onError),
@@ -75,7 +79,10 @@ public final class BackupManager {
                     } catch (Exception ignored) {}
                     onDone.run();
                 })
-                .addOnFailureListener(e -> onError.run());
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "exportProfile: failed", e);
+                    onError.run();
+                });
     }
 
     private static void exportCollections(FirebaseFirestore db, String uid, JSONObject backup,
@@ -83,9 +90,15 @@ public final class BackupManager {
         AtomicInteger remaining = new AtomicInteger(COLLECTIONS.length);
 
         for (String coll : COLLECTIONS) {
-            Query query = db.collection("users").document(uid).collection(coll)
-                    .orderBy("date", Query.Direction.DESCENDING);
-            // Some collections may not have a date field, so fall back to simple get
+            // Only orderBy date for transactions; other collections lack this field
+            Query query;
+            if ("transactions".equals(coll)) {
+                query = db.collection("users").document(uid).collection(coll)
+                        .orderBy("date", Query.Direction.DESCENDING);
+            } else {
+                query = db.collection("users").document(uid).collection(coll);
+            }
+
             query.get()
                     .addOnSuccessListener(snap -> {
                         try {
@@ -105,6 +118,7 @@ public final class BackupManager {
                         }
                     })
                     .addOnFailureListener(e -> {
+                        Log.e(TAG, "exportCollections: failed to export " + coll, e);
                         if (remaining.decrementAndGet() == 0) {
                             onDone.run();
                         }
@@ -134,6 +148,7 @@ public final class BackupManager {
                 restoreCollection(db, uid, coll, backup, remaining, onDone, onError);
             }
         } catch (Exception e) {
+            Log.e(TAG, "importUserData: failed", e);
             onError.run();
         }
     }
@@ -146,11 +161,15 @@ public final class BackupManager {
                 Map<String, Object> data = jsonToMap(profile);
                 db.collection("users").document(uid).set(data)
                         .addOnSuccessListener(a -> doneOrWait(remaining, onDone))
-                        .addOnFailureListener(e -> doneOrWait(remaining, onDone));
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "restoreProfile: failed", e);
+                            doneOrWait(remaining, onDone);
+                        });
             } else {
                 doneOrWait(remaining, onDone);
             }
         } catch (Exception e) {
+            Log.e(TAG, "restoreProfile: exception", e);
             doneOrWait(remaining, onDone);
         }
     }
@@ -171,6 +190,9 @@ public final class BackupManager {
             }
 
             int batchSize = 400;
+            int totalBatches = (int) Math.ceil((double) arr.length() / batchSize);
+            AtomicInteger completedBatches = new AtomicInteger(0);
+
             for (int batchStart = 0; batchStart < arr.length(); batchStart += batchSize) {
                 WriteBatch batch = db.batch();
                 int batchEnd = Math.min(batchStart + batchSize, arr.length());
@@ -181,26 +203,27 @@ public final class BackupManager {
                     if (docId == null || docId.isEmpty()) continue;
 
                     Map<String, Object> data = jsonToMap(obj);
-                    data.remove("_id"); // Remove _id before writing to Firestore
+                    data.remove("_id");
 
                     batch.set(db.collection("users").document(uid)
                             .collection(coll).document(docId), data);
                 }
 
-                final int thisBatchEnd = batchEnd;
                 batch.commit()
                         .addOnSuccessListener(a -> {
-                            if (thisBatchEnd >= arr.length()) {
+                            if (completedBatches.incrementAndGet() >= totalBatches) {
                                 doneOrWait(remaining, onDone);
                             }
                         })
                         .addOnFailureListener(e -> {
-                            if (thisBatchEnd >= arr.length()) {
+                            Log.e(TAG, "restoreCollection: failed for " + coll, e);
+                            if (completedBatches.incrementAndGet() >= totalBatches) {
                                 doneOrWait(remaining, onDone);
                             }
                         });
             }
         } catch (Exception e) {
+            Log.e(TAG, "restoreCollection: exception for " + coll, e);
             doneOrWait(remaining, onDone);
         }
     }
