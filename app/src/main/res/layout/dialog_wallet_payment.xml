@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tạo ví thanh toán"
+            android:text="@string/s1_create_payment_wallet"
             android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Tạo ví để quản lý chi tiêu hàng ngày của bạn"
+            android:text="@string/s1_create_wallet_desc"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Loại ví"
+            android:text="@string/wallet_type"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -240,7 +240,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:gravity="center"
-                        android:text="Tiền mặt"
+                        android:text="@string/wallet_cash"
                         android:textColor="@color/text_primary"
                         android:textSize="11sp" />
                 </LinearLayout>
@@ -252,7 +252,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Số dư ban đầu"
+            android:text="@string/s1_initial_balance"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -276,7 +276,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Tên ví"
+            android:text="@string/wallet_name"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -285,7 +285,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Ví của tôi">
+            android:hint="@string/s1_my_wallet">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editWalletName"
@@ -308,7 +308,7 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="20dp"
-            android:text="Tạo ví"
+            android:text="@string/s1_create_wallet_btn"
             app:cornerRadius="12dp" />
     </LinearLayout>
 </ScrollView>

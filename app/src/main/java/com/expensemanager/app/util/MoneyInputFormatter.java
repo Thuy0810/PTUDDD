@@ -9,7 +9,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * Utility cho input số tiền VND — tự động thêm dấu phẩy khi nhập.
+ * Tiện ích nhập số tiền vnd — tự động thêm dấu phẩy khi nhập.
  *
  * <p>Dùng {@link #attach(EditText)} để gắn formatter vào ô nhập liệu.
  * Dùng {@link #getRawValue(EditText)} để lấy giá trị {@code long}.
@@ -48,8 +48,8 @@ public final class MoneyInputFormatter {
     public static String format(long value) {
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
         DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-        symbols.setDecimalSeparator(',');
-        symbols.setGroupingSeparator('.');
+            symbols.setDecimalSeparator('.');
+            symbols.setGroupingSeparator(',');
         df.setDecimalFormatSymbols(symbols);
         df.setGroupingUsed(true);
         df.setMaximumFractionDigits(0);
@@ -82,11 +82,11 @@ public final class MoneyInputFormatter {
     }
 
     /**
-     * Format một giá trị {@code long} thành chuỗi hiển thị VND.
-     * Ví dụ: {@code 500000 -> "500,000 VND"}
+     * Format một giá trị {@code long} thành chuỗi hiển thị vnd.
+     * Ví dụ: {@code 500000 -> "500,000 vnd"}
      */
     public static String formatWithCurrency(long value) {
-        return format(value) + " VND";
+        return format(value) + " vnd";
     }
 
     private static class MoneyTextWatcher implements TextWatcher {
@@ -119,7 +119,7 @@ public final class MoneyInputFormatter {
 
                         editText.setText(formatted);
 
-                        // Adjust cursor position
+                        // Giữ vị trí con trỏ gần điểm nhập hiện tại.
                         int diff = formatted.length() - s.length();
                         int newPos = Math.min(selStart + diff,
                                 Math.max(0, formatted.length()));

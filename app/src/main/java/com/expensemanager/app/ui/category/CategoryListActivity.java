@@ -51,17 +51,17 @@ public class CategoryListActivity extends AppCompatActivity {
 
         adapter.setOnItemLongClick(c -> {
             if (c.isSystem()) {
-                Toast.makeText(this, "Không xóa danh mục hệ thống", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.j2_cannot_delete_system_category), Toast.LENGTH_SHORT).show();
                 return;
             }
             new AlertDialog.Builder(this)
-                    .setTitle("Xóa danh mục?")
-                    .setMessage("Xóa \"" + c.getName() + "\"?")
-                    .setPositiveButton("Xóa", (d, w) -> {
+                    .setTitle(getString(R.string.j2_delete_category_title))
+                    .setMessage(getString(R.string.j2_delete_quoted, c.getName()))
+                    .setPositiveButton(getString(R.string.delete), (d, w) -> {
                         catRepo.delete(uid, c.getId());
-                        Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.success_delete), Toast.LENGTH_SHORT).show();
                     })
-                    .setNegativeButton("Hủy", null)
+                    .setNegativeButton(getString(R.string.cancel), null)
                     .show();
         });
 
@@ -70,14 +70,14 @@ public class CategoryListActivity extends AppCompatActivity {
 
     private void showAddDialog(String uid) {
         EditText editName = new EditText(this);
-        editName.setHint("Tên danh mục");
+        editName.setHint(getString(R.string.category_name));
         RadioGroup radioType = new RadioGroup(this);
         radioType.setOrientation(RadioGroup.HORIZONTAL);
         android.widget.RadioButton rbExpense = new android.widget.RadioButton(this);
-        rbExpense.setText("Chi tiêu");
+        rbExpense.setText(getString(R.string.expense));
         rbExpense.setChecked(true);
         android.widget.RadioButton rbIncome = new android.widget.RadioButton(this);
-        rbIncome.setText("Thu nhập");
+        rbIncome.setText(getString(R.string.income));
         radioType.addView(rbExpense);
         radioType.addView(rbIncome);
 
@@ -88,20 +88,20 @@ public class CategoryListActivity extends AppCompatActivity {
         layout.addView(radioType);
 
         new AlertDialog.Builder(this)
-                .setTitle("Danh mục mới")
+                .setTitle(getString(R.string.j2_new_category_title))
                 .setView(layout)
-                .setPositiveButton("Tạo", (d, w) -> {
+                .setPositiveButton(getString(R.string.create), (d, w) -> {
                     String name = editName.getText().toString().trim();
                     if (name.isEmpty()) {
-                        Toast.makeText(this, "Nhập tên danh mục", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j2_enter_category_name), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     String type = rbIncome.isChecked() ? Category.TYPE_INCOME : Category.TYPE_EXPENSE;
                     Category c = new Category(null, name, type, "other", "#6B7280", false);
                     catRepo.add(uid, c);
-                    Toast.makeText(this, "Đã tạo danh mục", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j2_category_created), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

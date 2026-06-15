@@ -53,6 +53,8 @@ public class HomeFragment extends Fragment {
         viewModel.getSummary().observe(getViewLifecycleOwner(), this::bindSummary);
         viewModel.getInsights().observe(getViewLifecycleOwner(), this::bindInsights);
         viewModel.getRecentTransactions().observe(getViewLifecycleOwner(), this::bindRecentTransactions);
+        viewModel.getCategoryMap().observe(getViewLifecycleOwner(), transactionAdapter::setCategoryMap);
+        viewModel.getWalletMap().observe(getViewLifecycleOwner(), transactionAdapter::setWalletMap);
 
         binding.textSeeAll.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.reportFragment));

@@ -13,7 +13,10 @@ import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.GoalRepository;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
+import com.expensemanager.app.ui.transaction.QuickAddActivity;
 import com.expensemanager.app.util.MoneyFormat;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import android.view.View;
 import com.expensemanager.app.worker.RecurringTransactionWorker;
 
 import java.util.List;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     if (navController != null) navController.navigate(R.id.budgetFragment);
                     return true;
                 } else if (id == R.id.nav_add) {
-                    startActivity(new Intent(this, AddTransactionActivity.class));
+                    showAddModeSheet();
                     return true;
                 } else if (id == R.id.nav_report) {
                     if (navController != null) navController.navigate(R.id.reportFragment);
@@ -69,6 +72,24 @@ public class MainActivity extends AppCompatActivity {
         checkOverdueGoals();
     }
 
+    /** Hiển thị bottom sheet chọn cách thêm giao dịch: nhập thường hoặc nhập nhanh. */
+    private void showAddModeSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_add, null);
+        sheet.setContentView(view);
+
+        view.findViewById(R.id.optionNormal).setOnClickListener(v -> {
+            sheet.dismiss();
+            startActivity(new Intent(this, AddTransactionActivity.class));
+        });
+        view.findViewById(R.id.optionQuick).setOnClickListener(v -> {
+            sheet.dismiss();
+            startActivity(new Intent(this, QuickAddActivity.class));
+        });
+
+        sheet.show();
+    }
+
     private void checkOverdueGoals() {
         String uid = new AuthRepository().getUid();
         if (uid == null) return;
@@ -79,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
             StringBuilder sb = new StringBuilder();
             for (SavingsGoal g : overdue) {
                 long shortfall = g.getTargetAmount() - g.getSavedAmount();
-                sb.append("• ").append(g.getTitle())
-                        .append(": thiếu ").append(MoneyFormat.format(shortfall))
+                sb.append(getString(R.string.j1_overdue_goal_line,
+                        g.getTitle(), MoneyFormat.format(shortfall)))
                         .append("\n");
             }
 

@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.expensemanager.app.data.model.RecurringRule;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.MoneyValueParser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
@@ -17,7 +18,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -181,7 +181,7 @@ public class RecurringRepository {
             if (!runDate.after(now)) {
                 // Nếu runDate hợp lệ: check dateEnd, execute
                 if (rule.getDateEnd() == null || !runDate.after(rule.getDateEnd().toDate())) {
-                    executeOccurrence(uid, rule, nextRun, () -> {}, e -> {});
+                    executeOccurrence(uid, rule, nextRun, unused -> {}, e -> {});
                     runsScheduled++;
                 }
             }
@@ -203,7 +203,7 @@ public class RecurringRepository {
                 .document(occurrenceId);
 
         db.runTransaction(transaction -> {
-            DocumentSnapshot occSnap = transaction.get(occRef).get();
+            DocumentSnapshot occSnap = transaction.get(occRef);
             if (occSnap.exists()) {
                 return null;
             }
@@ -247,7 +247,7 @@ public class RecurringRepository {
             // 4. Cập nhật rule: lastRun và nextRun
             DocumentReference ruleRef = db.collection("users").document(uid)
                     .collection("recurring").document(rule.getId());
-            Timestamp newNextRun = calculateNextRunFromCursor(rule, runAt);
+            Timestamp newNextRun = calculateNextRunFromCursor(rule, runAt.toDate());
             transaction.update(ruleRef, "lastRun", runAt);
             if (newNextRun != null) {
                 transaction.update(ruleRef, "nextRun", newNextRun);

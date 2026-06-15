@@ -26,7 +26,7 @@ import com.expensemanager.app.databinding.FragmentBudgetBinding;
 import com.expensemanager.app.domain.usecase.BudgetService;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -183,7 +183,7 @@ public class BudgetFragment extends Fragment {
 
     private void showAddDialog(Category preselected) {
         if (allCategories.isEmpty()) {
-            Toast.makeText(requireContext(), "Chưa có danh mục", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.j1_no_category), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -195,46 +195,46 @@ public class BudgetFragment extends Fragment {
 
         int selectedIndex = preselected != null ? allCategories.indexOf(preselected) : 0;
         final EditText inputAmount = new EditText(requireContext());
-        inputAmount.setHint("Hạn mức (VNĐ)");
+        inputAmount.setHint(getString(R.string.j1_limit_vnd_hint));
         inputAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(inputAmount);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-                .setTitle("Đặt ngân sách theo danh mục")
+                .setTitle(getString(R.string.j1_set_budget_by_category))
                 .setSingleChoiceItems(names, selectedIndex, (d, which) -> {
                     selectedCat[0] = allCategories.get(which);
                 })
                 .setView(inputAmount)
-                .setPositiveButton("Lưu", (d, w) -> {
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
                     if (selectedCat[0] == null) {
-                        Toast.makeText(requireContext(), "Chọn danh mục", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getString(R.string.select_category), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Long parsed = MoneyValueParser.tryParseStrict(
-                            inputAmount.getText().toString().trim());
-                    if (parsed == null) {
-                        Toast.makeText(requireContext(), "Nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
+                    long parsed = MoneyInputFormatter.getRawValue(inputAmount);
+                    if (parsed <= 0) {
+                        Toast.makeText(requireContext(), getString(R.string.j1_enter_valid_amount), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     saveBudget(selectedCat[0], parsed);
                 })
-                .setNegativeButton("Hủy", null);
+                .setNegativeButton(getString(R.string.cancel), null);
         builder.show();
     }
 
     private void showEditDialog(Budget budget, Category cat) {
         final EditText input = new EditText(requireContext());
-        input.setHint("Hạn mức mới");
+        input.setHint(getString(R.string.j1_new_limit_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf(budget.getLimitAmount()));
+        MoneyInputFormatter.attach(input);
+        input.setText(MoneyInputFormatter.format(budget.getLimitAmount()));
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Sửa ngân sách: " + (cat != null ? cat.getName() : ""))
+                .setTitle(getString(R.string.j1_edit_budget_for, (cat != null ? cat.getName() : "")))
                 .setView(input)
-                .setPositiveButton("Lưu", (d, w) -> {
-                    Long parsed = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (parsed == null) {
-                        Toast.makeText(requireContext(), "Số tiền không hợp lệ",
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long parsed = MoneyInputFormatter.getRawValue(input);
+                    if (parsed <= 0) {
+                        Toast.makeText(requireContext(), getString(R.string.error_invalid_amount),
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -243,8 +243,8 @@ public class BudgetFragment extends Fragment {
                         budgetRepo.updateLimitAmount(uid, budget.getId(), parsed);
                     }
                 })
-                .setNegativeButton("Hủy", null)
-                .setNeutralButton("Xóa", (d, w) -> {
+                .setNegativeButton(getString(R.string.cancel), null)
+                .setNeutralButton(getString(R.string.delete), (d, w) -> {
                     String uid = authRepo.getUid();
                     if (uid != null) budgetRepo.delete(uid, budget.getId());
                 })
@@ -261,7 +261,7 @@ public class BudgetFragment extends Fragment {
         b.setMonth(DateUtils.currentMonthKey());
         b.setLimitAmount(limit);
         budgetRepo.addOrUpdate(uid, b);
-        Toast.makeText(requireContext(), "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.j1_budget_saved), Toast.LENGTH_SHORT).show();
     }
 
     @Override

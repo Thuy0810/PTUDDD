@@ -46,7 +46,7 @@
                     android:layout_width="0dp"
                     android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:text="Tháng này"
+                    android:text="@string/report_this_month"
                     android:textSize="12sp" />
 
                 <Spinner
@@ -88,7 +88,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="Tất cả"
+                        android:text="@string/s2_all"
                         android:textSize="12sp" />
 
                     <RadioButton
@@ -96,7 +96,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
-                        android:text="Thu"
+                        android:text="@string/s2_income_short"
                         android:textSize="12sp" />
 
                     <RadioButton
@@ -104,7 +104,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
-                        android:text="Chi"
+                        android:text="@string/s2_expense_short"
                         android:textSize="12sp" />
                 </RadioGroup>
 
@@ -115,7 +115,7 @@
                     android:layout_marginStart="4dp"
                     android:background="@drawable/bg_spinner_dropdown"
                     android:gravity="center"
-                    android:hint="Từ"
+                    android:hint="@string/s2_from"
                     android:inputType="number"
                     android:paddingHorizontal="8dp"
                     android:textSize="12sp" />
@@ -127,7 +127,7 @@
                     android:layout_marginStart="4dp"
                     android:background="@drawable/bg_spinner_dropdown"
                     android:gravity="center"
-                    android:hint="Đến"
+                    android:hint="@string/s2_to"
                     android:inputType="number"
                     android:paddingHorizontal="8dp"
                     android:textSize="12sp" />

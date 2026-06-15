@@ -7,6 +7,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.ActivityLoginBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.main.MainActivity;
@@ -43,16 +44,16 @@ public class LoginActivity extends AppCompatActivity {
                 ? binding.editPassword.getText().toString() : "";
 
         if (email.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_empty_email), Toast.LENGTH_SHORT).show();
             return;
         }
         if (password.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_empty_password), Toast.LENGTH_SHORT).show();
             return;
         }
 
         binding.btnLogin.setEnabled(false);
-        binding.btnLogin.setText("Đang đăng nhập...");
+        binding.btnLogin.setText(getString(R.string.j2_logging_in));
 
         authRepo.login(email, password)
                 .addOnSuccessListener(v -> {
@@ -68,35 +69,35 @@ public class LoginActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     binding.btnLogin.setEnabled(true);
-                    binding.btnLogin.setText("Đăng nhập");
+                    binding.btnLogin.setText(getString(R.string.login));
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
     private void showForgotPasswordDialog() {
         TextInputEditText editEmail = new TextInputEditText(this);
-        editEmail.setHint("Nhập email của bạn");
+        editEmail.setHint(getString(R.string.j2_enter_your_email));
         editEmail.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         editEmail.setPadding(48, 32, 48, 16);
 
         new AlertDialog.Builder(this)
-                .setTitle("Khôi phục mật khẩu")
-                .setMessage("Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.")
+                .setTitle(getString(R.string.reset_password))
+                .setMessage(getString(R.string.reset_password_desc))
                 .setView(editEmail)
-                .setPositiveButton("Gửi", (d, w) -> {
+                .setPositiveButton(getString(R.string.j2_send), (d, w) -> {
                     String email = editEmail.getText() != null
                             ? editEmail.getText().toString().trim() : "";
                     if (email.isEmpty()) {
-                        Toast.makeText(this, "Nhập email", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j2_enter_email), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                             .addOnSuccessListener(r -> Toast.makeText(this,
-                                    "Đã gửi email đặt lại mật khẩu!", Toast.LENGTH_LONG).show())
+                                    getString(R.string.j2_reset_email_sent), Toast.LENGTH_LONG).show())
                             .addOnFailureListener(e -> Toast.makeText(this,
-                                    "Gửi thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                                    getString(R.string.j2_send_failed, e.getMessage()), Toast.LENGTH_LONG).show());
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 }

@@ -24,7 +24,7 @@ import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.databinding.ActivityBudgetEditBinding;
 import com.expensemanager.app.databinding.ItemBudgetAllocationBinding;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,26 +145,26 @@ public class BudgetEditActivity extends AppCompatActivity {
 
     private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(this);
-        input.setHint("Số tiền phân bổ");
+        input.setHint(getString(R.string.j1_allocation_amount_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(input);
         if (currentAmount > 0) {
-            input.setText(String.valueOf(currentAmount));
+            input.setText(MoneyInputFormatter.format(currentAmount));
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Phân bổ: " + cat.getName())
+                .setTitle(getString(R.string.j1_allocate_to, cat.getName()))
                 .setView(input)
-                .setPositiveButton("Lưu", (d, w) -> {
-                    Long parsed = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (parsed == null) {
-                        Toast.makeText(this, "Số tiền không hợp lệ",
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long parsed = MoneyInputFormatter.getRawValue(input);
+                    if (parsed <= 0) {
+                        Toast.makeText(this, getString(R.string.error_invalid_amount),
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
                     saveCategoryBudget(cat, parsed);
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -182,7 +182,7 @@ public class BudgetEditActivity extends AppCompatActivity {
 
         if (existing != null) {
             budgetRepo.updateLimitAmount(uid, existing.getId(), amount,
-                    a -> Toast.makeText(this, "Đã cập nhật", Toast.LENGTH_SHORT).show(),
+                    a -> Toast.makeText(this, getString(R.string.j1_updated), Toast.LENGTH_SHORT).show(),
                     null);
         } else {
             Budget b = new Budget();
@@ -196,41 +196,41 @@ public class BudgetEditActivity extends AppCompatActivity {
 
     private void showCreateGroupDialog() {
         EditText input = new EditText(this);
-        input.setHint("Tên nhóm");
+        input.setHint(getString(R.string.j1_group_name_hint));
 
         new AlertDialog.Builder(this)
-                .setTitle("Tạo nhóm danh mục")
+                .setTitle(getString(R.string.j1_create_category_group))
                 .setView(input)
-                .setPositiveButton("Tạo", (d, w) -> {
+                .setPositiveButton(getString(R.string.create), (d, w) -> {
                     String name = input.getText().toString().trim();
                     if (!name.isEmpty()) {
-                        Toast.makeText(this, "Đã tạo nhóm: " + name, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j1_group_created, name), Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showDeleteConfirm() {
         new AlertDialog.Builder(this)
-                .setTitle("Xóa ngân sách")
-                .setMessage("Bạn có chắc muốn xóa tất cả ngân sách tháng này?")
-                .setPositiveButton("Xóa", (d, w) -> {
+                .setTitle(getString(R.string.j1_delete_budget_title))
+                .setMessage(getString(R.string.j1_delete_all_budget_confirm))
+                .setPositiveButton(getString(R.string.delete), (d, w) -> {
                     String uid = authRepo.getUid();
                     if (uid != null) {
                         for (Budget b : budgets) {
                             budgetRepo.delete(uid, b.getId());
                         }
-                        Toast.makeText(this, "Đã xóa ngân sách", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j1_budget_deleted), Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void saveAll() {
-        Toast.makeText(this, "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.j1_budget_saved), Toast.LENGTH_SHORT).show();
         finish();
     }
 

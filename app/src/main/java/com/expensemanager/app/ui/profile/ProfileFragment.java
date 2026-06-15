@@ -9,8 +9,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.expensemanager.app.R;
+import com.expensemanager.app.util.LocaleHelper;
 import com.expensemanager.app.databinding.FragmentProfileBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.auth.LoginActivity;
@@ -40,7 +43,7 @@ public class ProfileFragment extends Fragment {
         authRepo.observeProfile().observe(getViewLifecycleOwner(), p -> {
             if (p != null && binding != null) {
                 String name = p.getDisplayName();
-                binding.textUserName.setText(name != null && !name.isEmpty() ? name : "User");
+                binding.textUserName.setText(name != null && !name.isEmpty() ? name : getString(R.string.user));
                 String email = p.getEmail();
                 binding.textUserEmail.setText(email != null ? email : "");
                 if (name != null && !name.isEmpty()) {
@@ -65,8 +68,7 @@ public class ProfileFragment extends Fragment {
                     startActivity(new Intent(requireContext(), SecurityActivity.class)));
         }
         if (binding.btnLanguage != null) {
-            binding.btnLanguage.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "Ngôn ngữ: Tiếng Việt", Toast.LENGTH_SHORT).show());
+            binding.btnLanguage.setOnClickListener(v -> showLanguagePicker());
         }
 
         // Quản lý
@@ -90,11 +92,11 @@ public class ProfileFragment extends Fragment {
         // Hỗ trợ
         if (binding.btnHelp != null) {
             binding.btnHelp.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "Trung tâm hỗ trợ", Toast.LENGTH_SHORT).show());
+                    Toast.makeText(requireContext(), getString(R.string.help_center), Toast.LENGTH_SHORT).show());
         }
         if (binding.btnContact != null) {
             binding.btnContact.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "Liên hệ hỗ trợ", Toast.LENGTH_SHORT).show());
+                    Toast.makeText(requireContext(), getString(R.string.j3_contact_support), Toast.LENGTH_SHORT).show());
         }
 
         // Đăng xuất
@@ -108,10 +110,31 @@ public class ProfileFragment extends Fragment {
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
                 } catch (Exception e) {
-                    Toast.makeText(requireContext(), "Lỗi đăng xuất", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), getString(R.string.j3_logout_error), Toast.LENGTH_SHORT).show();
                 }
             });
         }
+    }
+
+    private void showLanguagePicker() {
+        final String[] tags = { LocaleHelper.VIETNAMESE, LocaleHelper.ENGLISH };
+        String[] labels = {
+                getString(R.string.language_vietnamese),
+                getString(R.string.language_english)
+        };
+        String current = LocaleHelper.getLanguage();
+        int checked = LocaleHelper.ENGLISH.equals(current) ? 1 : 0;
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.choose_language)
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (!tags[which].equals(LocaleHelper.getLanguage())) {
+                        LocaleHelper.setLanguage(tags[which]);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     @Override

@@ -56,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="User"
+                    android:text="@string/user"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -250,7 +250,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tiếng Việt"
+                        android:text="@string/language_vietnamese"
                         android:textColor="@color/text_hint"
                         android:textSize="13sp"
                         android:layout_marginEnd="4dp" />
@@ -271,7 +271,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="4dp"
-            android:text="Quản lý"
+            android:text="@string/s2_management"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -319,7 +319,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Quản lý ví"
+                        android:text="@string/wallets"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -366,7 +366,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Quản lý danh mục"
+                        android:text="@string/s2_manage_categories"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -413,7 +413,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Mục tiêu tiết kiệm"
+                        android:text="@string/goals"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -460,7 +460,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Giao dịch định kỳ"
+                        android:text="@string/recurring"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 

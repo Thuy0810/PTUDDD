@@ -14,7 +14,7 @@ import com.expensemanager.app.databinding.ActivityTransferBinding;
 import com.expensemanager.app.domain.usecase.TransferService;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,12 +36,14 @@ public class TransferActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Chuyen tien");
+            getSupportActionBar().setTitle(getString(R.string.transfer));
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         String uid = authRepo.getUid();
         if (uid == null) { finish(); return; }
+
+        MoneyInputFormatter.attach(binding.editAmount);
 
         walletRepo.observeAll(uid).observe(this, list -> {
             wallets = list != null ? list : new ArrayList<>();
@@ -60,11 +62,9 @@ public class TransferActivity extends AppCompatActivity {
     }
 
     private void confirmTransfer(String uid) {
-        long amount = MoneyValueParser.tryParseStrict(
-                binding.editAmount.getText() != null
-                        ? binding.editAmount.getText().toString() : "");
+        long amount = MoneyInputFormatter.getRawValue(binding.editAmount);
         if (amount <= 0) {
-            Toast.makeText(this, "Nhap so tien > 0", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j2_enter_amount_gt_zero), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -72,14 +72,14 @@ public class TransferActivity extends AppCompatActivity {
         Wallet toWallet = (Wallet) binding.spinnerTo.getSelectedItem();
 
         if (fromWallet == null || toWallet == null) {
-            Toast.makeText(this, "Chon vi nguon va vi dich", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j2_select_from_to_wallet), Toast.LENGTH_SHORT).show();
             return;
         }
 
         int code = TransferService.validate(
                 fromWallet.getId(), toWallet.getId(), amount);
         if (code == TransferService.ERR_SAME_WALLET) {
-            Toast.makeText(this, "Chon hai vi khac nhau", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j2_select_two_diff_wallets), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -87,8 +87,8 @@ public class TransferActivity extends AppCompatActivity {
             // Cảnh báo nhưng vẫn cho phép thực hiện — Firestore transaction sẽ kiểm tra lại
             // (ràng buộc 7.2: hiển thị cảnh báo trước, không chặn).
             Toast.makeText(this,
-                    "Canh bao: so du vi nguon khong du (" +
-                            MoneyFormat.formatLong(fromWallet.getCurrentBalance()) + ")",
+                    getString(R.string.j2_warn_insufficient_balance,
+                            MoneyFormat.formatLong(fromWallet.getCurrentBalance())),
                     Toast.LENGTH_LONG).show();
         }
 
@@ -97,7 +97,7 @@ public class TransferActivity extends AppCompatActivity {
 
     private void performTransfer(String uid, long amount, Wallet fromWallet, Wallet toWallet) {
         String note = binding.editNote.getText() != null
-                ? binding.editNote.getText().toString().trim() : "Chuyen tien";
+                ? binding.editNote.getText().toString().trim() : "Chuyển tiền";
 
         binding.btnConfirm.setEnabled(false);
 
@@ -105,13 +105,13 @@ public class TransferActivity extends AppCompatActivity {
                         fromWallet.getId(), toWallet.getId(),
                         amount, note, DateUtils.nowVietnam())
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Da chuyen " + MoneyFormat.formatLong(amount),
+                    Toast.makeText(this, getString(R.string.j2_transferred, MoneyFormat.formatLong(amount)),
                             Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     binding.btnConfirm.setEnabled(true);
-                    Toast.makeText(this, "Loi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j2_error_generic, e.getMessage()), Toast.LENGTH_SHORT).show();
                 });
     }
 

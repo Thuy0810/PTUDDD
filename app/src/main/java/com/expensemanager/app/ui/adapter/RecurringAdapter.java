@@ -163,7 +163,7 @@ public class RecurringAdapter extends RecyclerView.Adapter<RecurringAdapter.VH> 
 
             switch (cycle) {
                 case RecurringRule.CYCLE_DAILY:
-                    return binding.getRoot().getContext().getString(R.string.recurring_daily);
+                    return binding.getRoot().getContext().getString(R.string.repeat_daily);
                 case RecurringRule.CYCLE_WEEKLY:
                     return ctx + " " + getDayOfWeekName(r.getDayOfWeek());
                 case RecurringRule.CYCLE_YEARLY:
@@ -175,7 +175,7 @@ public class RecurringAdapter extends RecyclerView.Adapter<RecurringAdapter.VH> 
                                 R.string.recurring_last_day_of_month);
                     }
                     return binding.getRoot().getContext().getString(
-                            R.string.recurring_day_of_month, r.getDayOfMonth());
+                            R.string.recurring_day_n, r.getDayOfMonth());
             }
         }
 

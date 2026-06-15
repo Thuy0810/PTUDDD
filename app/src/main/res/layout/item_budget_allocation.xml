@@ -47,7 +47,7 @@
                 android:id="@+id/textCategoryName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ăn uống"
+                android:text="@string/s3_food_drink"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -75,7 +75,7 @@
                 android:id="@+id/textAllocatedAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2.000.000 đ"
+                android:text="2,000,000 vnd"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />

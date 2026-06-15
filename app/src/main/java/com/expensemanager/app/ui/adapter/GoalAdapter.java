@@ -55,21 +55,24 @@ public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.VH> {
         holder.binding.textPercent.setText(pct + "%");
         holder.binding.progressBar.setProgress(pct);
 
+        android.content.Context ctx = holder.itemView.getContext();
         boolean overdue = g.isOverdue();
         if (overdue) {
             holder.binding.textDeadline.setTextColor(0xFFE53935);
-            holder.binding.textDeadline.setText("QUÁ HẠN! " + DateUtils.formatDisplay(g.getDeadline().toDate()));
+            holder.binding.textDeadline.setText(ctx.getString(R.string.j3_overdue_with_date,
+                    DateUtils.formatDisplay(g.getDeadline().toDate())));
         } else if (g.getDeadline() != null) {
             holder.binding.textDeadline.setTextColor(
                     holder.itemView.getContext().getColor(R.color.text_secondary));
-            holder.binding.textDeadline.setText("Hạn: " + DateUtils.formatDisplay(g.getDeadline().toDate()));
+            holder.binding.textDeadline.setText(ctx.getString(R.string.j3_deadline_with_date,
+                    DateUtils.formatDisplay(g.getDeadline().toDate())));
         } else {
             holder.binding.textDeadline.setTextColor(
                     holder.itemView.getContext().getColor(R.color.text_secondary));
-            holder.binding.textDeadline.setText("Không có hạn");
+            holder.binding.textDeadline.setText(ctx.getString(R.string.j3_no_deadline));
         }
 
-        String progressLine = buildTimeProgress(g);
+        String progressLine = buildTimeProgress(ctx, g);
         holder.binding.textDeadline.setText(progressLine);
 
         if (overdue && !g.isCompleted()) {
@@ -84,34 +87,34 @@ public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.VH> {
         });
     }
 
-    private String buildTimeProgress(SavingsGoal g) {
+    private String buildTimeProgress(android.content.Context ctx, SavingsGoal g) {
         if (g.isCompleted()) {
-            return "Hoàn thành!";
+            return ctx.getString(R.string.j3_completed);
         }
 
         StringBuilder sb = new StringBuilder();
 
         if (g.getDeadline() != null) {
             long daysLeft = g.getRemainingDays();
+            String dateStr = DateUtils.formatDisplay(g.getDeadline().toDate());
             if (daysLeft < 0) {
-                sb.append("QUÁ HẠN! ");
-                sb.append(DateUtils.formatDisplay(g.getDeadline().toDate()));
+                sb.append(ctx.getString(R.string.j3_overdue_with_date, dateStr));
             } else if (daysLeft == 0) {
-                sb.append("Hết hạn hôm nay!");
+                sb.append(ctx.getString(R.string.j3_due_today));
             } else if (daysLeft <= 7) {
-                sb.append("Còn ").append(daysLeft).append(" ngày - ");
-                sb.append(DateUtils.formatDisplay(g.getDeadline().toDate()));
+                sb.append(ctx.getString(R.string.j3_days_left_with_date, daysLeft, dateStr));
             } else {
-                sb.append("Hạn: ").append(DateUtils.formatDisplay(g.getDeadline().toDate()));
+                sb.append(ctx.getString(R.string.j3_deadline_with_date, dateStr));
             }
         } else {
-            sb.append("Không có hạn");
+            sb.append(ctx.getString(R.string.j3_no_deadline));
         }
 
         if (!g.isCompleted() && g.getTargetAmount() > g.getSavedAmount()) {
             double monthlyRequired = g.getMonthlyRequired();
             if (monthlyRequired > 0) {
-                sb.append(" | Cần ").append(MoneyFormat.format(monthlyRequired)).append("/tháng");
+                sb.append(ctx.getString(R.string.j3_required_per_month,
+                        MoneyFormat.format(monthlyRequired)));
             }
         }
 

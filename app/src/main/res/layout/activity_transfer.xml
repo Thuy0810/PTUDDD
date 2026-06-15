@@ -21,7 +21,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Số tiền chuyển"
+                android:hint="@string/s3_transfer_amount"
                 style="@style/Widget.ExpenseManager.TextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -50,7 +50,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Từ ví"
+                        android:text="@string/s3_from_wallet"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -65,7 +65,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Đến ví"
+                        android:text="@string/s3_to_wallet"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -95,7 +95,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ghi chú (tùy chọn)"
+                        android:text="@string/s3_note_optional"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -110,7 +110,7 @@
                             android:id="@+id/editNote"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Ví dụ: Trả tiền tháng"
+                            android:hint="@string/s3_transfer_note_hint"
                             android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
@@ -124,7 +124,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:text="Xác nhận chuyển tiền"
+        android:text="@string/s3_confirm_transfer"
         android:textSize="16sp" />
 
 </LinearLayout>

@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nhấn giữ để sửa hoặc xóa"
+            android:text="@string/s3_long_press_edit_delete"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
     </LinearLayout>
@@ -48,7 +48,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tổng số dư"
+                android:text="@string/s3_total_balance"
                 android:textColor="@color/text_on_dark"
                 android:textSize="13sp" />
 
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="0 đ"
+                android:text="0 vnd"
                 android:textColor="@color/white"
                 android:textSize="28sp"
                 android:textStyle="bold" />

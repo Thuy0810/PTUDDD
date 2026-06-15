@@ -59,9 +59,8 @@ public class ReportFragment extends Fragment {
     private List<Transaction> currentTxs = new ArrayList<>();
     private boolean lastMonthLoaded = false;
 
-    private int selectedYear = Calendar.getInstance().get(Calendar.YEAR);
-    private int selectedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
-    private int selectedPeriod = 0; // 0=Tuan, 1=Thang, 2=Quy, 3=Nam
+    private final Calendar selectedDate = Calendar.getInstance();
+    private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
     private String selectedWalletId = null;
     private String selectedType = "all"; // all/income/expense/transfer
 
@@ -107,7 +106,13 @@ public class ReportFragment extends Fragment {
     }
 
     private void setupPeriodSpinner() {
-        String[] periods = {"Tuần", "Tháng", "Quý", "Năm"};
+        String[] periods = {
+                getString(R.string.j3_period_day),
+                getString(R.string.j3_period_week),
+                getString(R.string.j3_period_month),
+                getString(R.string.j3_period_quarter),
+                getString(R.string.j3_period_year)
+        };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item, java.util.Arrays.asList(periods));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -117,6 +122,7 @@ public class ReportFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 selectedPeriod = pos;
+                updateDateButtonLabel();
                 loadData();
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
@@ -124,15 +130,49 @@ public class ReportFragment extends Fragment {
     }
 
     private void setupDatePickerButton() {
+        updateDateButtonLabel();
         binding.btnPickDate.setOnClickListener(v -> {
             DatePickerDialog dpd = new DatePickerDialog(requireContext(),
                     (dp, year, month, day) -> {
-                        selectedYear = year;
-                        selectedMonth = month + 1;
+                        selectedDate.set(Calendar.YEAR, year);
+                        selectedDate.set(Calendar.MONTH, month);
+                        selectedDate.set(Calendar.DAY_OF_MONTH, day);
+                        updateDateButtonLabel();
                         loadData();
-                    }, selectedYear, selectedMonth - 1, 1);
+                    },
+                    selectedDate.get(Calendar.YEAR),
+                    selectedDate.get(Calendar.MONTH),
+                    selectedDate.get(Calendar.DAY_OF_MONTH));
             dpd.show();
         });
+    }
+
+    private void updateDateButtonLabel() {
+        if (binding == null) return;
+        String prefix;
+        switch (selectedPeriod) {
+            case 1:
+                prefix = getString(R.string.j3_period_week);
+                break;
+            case 2:
+                prefix = getString(R.string.j3_period_month);
+                break;
+            case 3:
+                prefix = getString(R.string.j3_period_quarter);
+                break;
+            case 4:
+                prefix = getString(R.string.j3_period_year);
+                break;
+            default:
+                prefix = getString(R.string.j3_period_day);
+                break;
+        }
+        binding.btnPickDate.setText(prefix + ": "
+                + String.format(java.util.Locale.forLanguageTag("vi-VN"),
+                "%02d/%02d/%04d",
+                selectedDate.get(Calendar.DAY_OF_MONTH),
+                selectedDate.get(Calendar.MONTH) + 1,
+                selectedDate.get(Calendar.YEAR)));
     }
 
     private void setupFilters() {
@@ -152,6 +192,7 @@ public class ReportFragment extends Fragment {
         catRepo.observeAll(currentUid).observe(getViewLifecycleOwner(), categories -> {
             categoryMap = CategoryRepository.toMap(categories);
             txAdapter.setCategoryMap(categoryMap);
+            applyFiltersAndBind();
         });
 
         binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> {
@@ -165,7 +206,7 @@ public class ReportFragment extends Fragment {
 
     private void setupWalletSpinner() {
         List<String> names = new ArrayList<>();
-        names.add("Tất cả ví");
+        names.add(getString(R.string.j3_all_wallets));
         for (Wallet w : wallets) names.add(w.getName());
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -221,7 +262,7 @@ public class ReportFragment extends Fragment {
         }
 
         if (filtered.isEmpty()) {
-            Toast.makeText(requireContext(), "Không có giao dịch trong danh mục " + catName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.j3_no_tx_in_category, catName), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -233,9 +274,9 @@ public class ReportFragment extends Fragment {
         }
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Giao dịch: " + catName)
+                .setTitle(getString(R.string.j3_transactions_of, catName))
                 .setMessage(sb.toString())
-                .setPositiveButton("Đóng", null)
+                .setPositiveButton(getString(R.string.j3_close), null)
                 .show();
     }
 
@@ -329,45 +370,42 @@ public class ReportFragment extends Fragment {
     }
 
     private Calendar[] getDateRange() {
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
-        start.set(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
-        end.set(selectedYear, selectedMonth - 1, 1, 0, 0, 0);
+        Calendar start = (Calendar) selectedDate.clone();
+        start.set(Calendar.HOUR_OF_DAY, 0);
+        start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0);
+        start.set(Calendar.MILLISECOND, 0);
+        Calendar end = (Calendar) start.clone();
 
         switch (selectedPeriod) {
-            case 0: // Week (Mon-Sun around selected date)
+            case 0: // Day
+                end.add(Calendar.DAY_OF_MONTH, 1);
+                break;
+            case 1: // Week (Mon-Sun around selected date)
                 int dow = start.get(Calendar.DAY_OF_WEEK);
                 int diffToMon = (dow == Calendar.SUNDAY) ? -6 : -(dow - Calendar.MONDAY);
                 start.add(Calendar.DAY_OF_MONTH, diffToMon);
                 end = (Calendar) start.clone();
-                end.add(Calendar.DAY_OF_MONTH, 6);
-                end.set(Calendar.HOUR_OF_DAY, 23);
-                end.set(Calendar.MINUTE, 59);
-                end.set(Calendar.SECOND, 59);
+                end.add(Calendar.DAY_OF_MONTH, 7);
                 break;
-            case 2: // Quarter
-                int quarter = (selectedMonth - 1) / 3;
+            case 2: // Month
+                start.set(Calendar.DAY_OF_MONTH, 1);
+                end = (Calendar) start.clone();
+                end.add(Calendar.MONTH, 1);
+                break;
+            case 3: // Quarter
+                int quarter = start.get(Calendar.MONTH) / 3;
                 start.set(Calendar.MONTH, quarter * 3);
+                start.set(Calendar.DAY_OF_MONTH, 1);
                 end.set(Calendar.MONTH, quarter * 3 + 2);
-                end.set(Calendar.DAY_OF_MONTH, end.getActualMaximum(Calendar.DAY_OF_MONTH));
-                end.set(Calendar.HOUR_OF_DAY, 23);
-                end.set(Calendar.MINUTE, 59);
-                end.set(Calendar.SECOND, 59);
+                end.set(Calendar.DAY_OF_MONTH, 1);
+                end.add(Calendar.MONTH, 1);
                 break;
-            case 3: // Year
+            case 4: // Year
                 start.set(Calendar.MONTH, Calendar.JANUARY);
                 start.set(Calendar.DAY_OF_MONTH, 1);
-                end.set(Calendar.MONTH, Calendar.DECEMBER);
-                end.set(Calendar.DAY_OF_MONTH, 31);
-                end.set(Calendar.HOUR_OF_DAY, 23);
-                end.set(Calendar.MINUTE, 59);
-                end.set(Calendar.SECOND, 59);
-                break;
-            default: // Month
-                end.set(Calendar.DAY_OF_MONTH, end.getActualMaximum(Calendar.DAY_OF_MONTH));
-                end.set(Calendar.HOUR_OF_DAY, 23);
-                end.set(Calendar.MINUTE, 59);
-                end.set(Calendar.SECOND, 59);
+                end = (Calendar) start.clone();
+                end.add(Calendar.YEAR, 1);
                 break;
         }
         return new Calendar[]{start, end};
@@ -379,15 +417,19 @@ public class ReportFragment extends Fragment {
         Calendar end = (Calendar) curr[1].clone();
 
         switch (selectedPeriod) {
-            case 0: // Last week
+            case 0: // Previous day
+                start.add(Calendar.DAY_OF_MONTH, -1);
+                end.add(Calendar.DAY_OF_MONTH, -1);
+                break;
+            case 1: // Last week
                 start.add(Calendar.DAY_OF_MONTH, -7);
                 end.add(Calendar.DAY_OF_MONTH, -7);
                 break;
-            case 2: // Last quarter
+            case 3: // Last quarter
                 start.add(Calendar.MONTH, -3);
                 end.add(Calendar.MONTH, -3);
                 break;
-            case 3: // Last year
+            case 4: // Last year
                 start.add(Calendar.YEAR, -1);
                 end.add(Calendar.YEAR, -1);
                 break;
@@ -428,8 +470,9 @@ public class ReportFragment extends Fragment {
         if (lastMonthExpense > 0) {
             double diff = expense - lastMonthExpense;
             String sign = diff > 0 ? "+" : "";
-            String pct = String.format("%s%.0f%% so với kỳ trước",
-                    sign, Math.abs(diff / lastMonthExpense * 100));
+            String pctValue = String.format(java.util.Locale.getDefault(), "%.0f",
+                    Math.abs(diff / lastMonthExpense * 100));
+            String pct = getString(R.string.j3_vs_previous_period, sign, pctValue);
             binding.textComparison.setText(pct);
             binding.textComparison.setVisibility(View.VISIBLE);
         } else {
@@ -441,9 +484,10 @@ public class ReportFragment extends Fragment {
             double topAmount = byCat.get(topCat);
             Category cat = categoryMap.get(topCat);
             String catName = cat != null ? cat.getName() : topCat;
-            binding.textTopCategory.setText(catName + ": " + MoneyFormat.format(topAmount));
+            binding.textTopCategory.setText(getString(R.string.j3_top_category_value,
+                    catName, MoneyFormat.format(topAmount)));
         } else {
-            binding.textTopCategory.setText("Chưa có dữ liệu");
+            binding.textTopCategory.setText(getString(R.string.j3_no_data));
         }
 
         bindPieChart(byCat);
@@ -454,8 +498,8 @@ public class ReportFragment extends Fragment {
             if (Transaction.TYPE_EXPENSE.equals(t.getType())) txCount++;
         }
         double avgExpense = txCount > 0 ? expense / txCount : 0;
-        binding.textMonthlyAnalysis.setText("Chi tiêu TB: " + MoneyFormat.format(avgExpense)
-                + " | Chuyển tiền: " + MoneyFormat.format(transfer));
+        binding.textMonthlyAnalysis.setText(getString(R.string.j3_monthly_analysis,
+                MoneyFormat.format(avgExpense), MoneyFormat.format(transfer)));
     }
 
     private String findTopCategory(Map<String, Double> byCat) {

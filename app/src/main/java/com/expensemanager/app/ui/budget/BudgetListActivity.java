@@ -15,7 +15,7 @@ import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +46,8 @@ public class BudgetListActivity extends AppCompatActivity {
             if (list != null) {
                 for (Budget b : list) {
                     lines.add(Budget.SCOPE_MONTHLY.equals(b.getScope())
-                            ? "Tháng: " + MoneyFormat.formatLong(b.getLimitAmount())
-                            : "Danh mục: " + MoneyFormat.formatLong(b.getLimitAmount()));
+                            ? getString(R.string.j1_month_line, MoneyFormat.formatLong(b.getLimitAmount()))
+                            : getString(R.string.j1_category_line, MoneyFormat.formatLong(b.getLimitAmount())));
                 }
             }
             adapter.clear();
@@ -60,16 +60,16 @@ public class BudgetListActivity extends AppCompatActivity {
 
     private void showAddDialog(String uid) {
         EditText input = new EditText(this);
-        input.setHint("Giới hạn chi tháng (VNĐ)");
+        input.setHint(getString(R.string.j1_month_limit_vnd_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(input);
         new AlertDialog.Builder(this)
-                .setTitle("Đặt ngân sách tháng")
+                .setTitle(getString(R.string.j1_set_month_budget))
                 .setView(input)
-                .setPositiveButton("Lưu", (d, w) -> {
-                    Long parsed = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (parsed == null) {
-                        Toast.makeText(this, "Số tiền không hợp lệ",
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long parsed = MoneyInputFormatter.getRawValue(input);
+                    if (parsed <= 0) {
+                        Toast.makeText(this, getString(R.string.error_invalid_amount),
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -78,9 +78,9 @@ public class BudgetListActivity extends AppCompatActivity {
                     b.setMonth(DateUtils.currentMonthKey());
                     b.setLimitAmount(parsed);
                     budgetRepo.addOrUpdate(uid, b);
-                    Toast.makeText(this, "Đã lưu ngân sách", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j1_budget_saved), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

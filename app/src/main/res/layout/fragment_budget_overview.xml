@@ -31,7 +31,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Ngân sách"
+                    android:text="@string/budgets"
                     android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -49,7 +49,7 @@
                         android:id="@+id/textMonth"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tháng 5"
+                        android:text="@string/s2_month_5"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
 
@@ -80,7 +80,7 @@
                 android:layout_height="48dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="12dp"
-                android:text="Giao việc cho tiền (Phân bổ ngân sách)"
+                android:text="@string/s2_allocate_money_task"
                 app:cornerRadius="12dp" />
 
             <!-- Summary cards -->
@@ -122,7 +122,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
-                                android:text="Tổng chi"
+                                android:text="@string/report_expense"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -132,7 +132,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="0đ"
+                            android:text="0 vnd"
                             android:textColor="@color/expense_red"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -170,7 +170,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
-                                android:text="Tổng thu"
+                                android:text="@string/report_income"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -180,7 +180,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="0đ"
+                            android:text="0 vnd"
                             android:textColor="@color/income_green"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -218,7 +218,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
-                                android:text="Tiết kiệm"
+                                android:text="@string/saving_rate"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -228,7 +228,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
-                            android:text="0đ"
+                            android:text="0 vnd"
                             android:textColor="@color/primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -258,7 +258,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bạn có thể tiết kiệm thêm"
+                        android:text="@string/s2_can_save_more"
                         android:textColor="@color/income_green"
                         android:textSize="13sp" />
 
@@ -271,7 +271,7 @@
                         android:id="@+id/textExtraSaving"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0đ"
+                        android:text="0 vnd"
                         android:textColor="@color/income_green"
                         android:textSize="14sp"
                         android:textStyle="bold" />

@@ -34,6 +34,7 @@ import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -161,7 +162,7 @@ public class TransactionListFragment extends Fragment {
 
     private void setupDateRangeButton() {
         selectedMonthKey = DateUtils.currentMonthKey();
-        binding.btnDateRange.setText("Tháng này");
+        binding.btnDateRange.setText(getString(R.string.j2_this_month));
 
         binding.btnDateRange.setOnClickListener(v -> {
             DatePickerDialog dpd = new DatePickerDialog(requireContext(),
@@ -174,7 +175,7 @@ public class TransactionListFragment extends Fragment {
                                 year, month + 1, 1,
                                 year, month + 1, endCal.get(Calendar.DAY_OF_MONTH));
                         dateMode = DateRangeMode.RANGE;
-                        binding.btnDateRange.setText("Từ ngày " + day + "/" + (month + 1));
+                        binding.btnDateRange.setText(getString(R.string.j2_from_day, day, (month + 1)));
                         loadTransactions();
                     }, Calendar.getInstance().get(Calendar.YEAR),
                     Calendar.getInstance().get(Calendar.MONTH), 1);
@@ -184,14 +185,14 @@ public class TransactionListFragment extends Fragment {
         binding.btnDateRange.setOnLongClickListener(v -> {
             selectedMonthKey = DateUtils.currentMonthKey();
             dateMode = DateRangeMode.MONTH;
-            binding.btnDateRange.setText("Tháng này");
+            binding.btnDateRange.setText(getString(R.string.j2_this_month));
             loadTransactions();
             return true;
         });
     }
 
     private void setupSortSpinner() {
-        String[] sortLabels = {"Mới nhất", "Lớn nhất"};
+        String[] sortLabels = getResources().getStringArray(R.array.sort_labels);
         ArrayAdapter<String> adapter2 = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item, java.util.Arrays.asList(sortLabels));
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -211,7 +212,7 @@ public class TransactionListFragment extends Fragment {
 
     private void setupWalletSpinner() {
         List<String> names = new ArrayList<>();
-        names.add("Tất cả ví");
+        names.add(getString(R.string.all_wallets));
         for (Wallet w : wallets) names.add(w.getName());
 
         ArrayAdapter<String> adapter3 = new ArrayAdapter<>(requireContext(),
@@ -233,6 +234,8 @@ public class TransactionListFragment extends Fragment {
     }
 
     private void setupAmountFilter() {
+        MoneyInputFormatter.attach(binding.editMinAmount);
+        MoneyInputFormatter.attach(binding.editMaxAmount);
         TextWatcher amountWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { applyFilter(); }
@@ -288,18 +291,16 @@ public class TransactionListFragment extends Fragment {
                 ? binding.editMinAmount.getText().toString() : "";
         String maxStr = binding.editMaxAmount != null && binding.editMaxAmount.getText() != null
                 ? binding.editMaxAmount.getText().toString() : "";
-        try {
-            if (!minStr.isEmpty() || !maxStr.isEmpty()) {
-                double min = minStr.isEmpty() ? 0 : Double.parseDouble(minStr);
-                double max = maxStr.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxStr);
-                List<Transaction> amountFiltered = new ArrayList<>();
-                for (Transaction t : filtered) {
+        if (!minStr.isEmpty() || !maxStr.isEmpty()) {
+            long min = minStr.isEmpty() ? 0L : MoneyInputFormatter.getRawValue(binding.editMinAmount);
+            long max = maxStr.isEmpty() ? Long.MAX_VALUE : MoneyInputFormatter.getRawValue(binding.editMaxAmount);
+            List<Transaction> amountFiltered = new ArrayList<>();
+            for (Transaction t : filtered) {
                 long amt = t.getAmount();
                 if (amt >= min && amt <= max) amountFiltered.add(t);
-                }
-                filtered = amountFiltered;
             }
-        } catch (NumberFormatException ignored) {}
+            filtered = amountFiltered;
+        }
 
         // Sort
         if (selectedSort == 1) {

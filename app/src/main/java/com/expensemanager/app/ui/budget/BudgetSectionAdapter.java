@@ -204,10 +204,10 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             textBalance.setTextColor(itemView.getContext().getColor(R.color.income_green));
 
             if (totalBalance >= 0) {
-                textBalanceLabel.setText("Số dư khả dụng");
+                textBalanceLabel.setText(itemView.getContext().getString(R.string.j1_available_balance));
                 textBalance.setTextColor(itemView.getContext().getColor(R.color.income_green));
             } else {
-                textBalanceLabel.setText("Số dư âm");
+                textBalanceLabel.setText(itemView.getContext().getString(R.string.j1_negative_balance));
                 textBalance.setTextColor(itemView.getContext().getColor(R.color.expense_red));
             }
 

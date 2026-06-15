@@ -27,7 +27,7 @@ public final class DateRangeUtils {
     public static Range thisMonth() {
         Date now = DateUtils.nowVietnam();
         return new Range(
-                DateUtils.startOfMonth(now),
+                DateUtils.startOfMonth(now).toDate(),
                 DateUtils.startOfNextMonth(DateUtils.currentMonthKey()),
                 DateUtils.currentMonthLabel());
     }

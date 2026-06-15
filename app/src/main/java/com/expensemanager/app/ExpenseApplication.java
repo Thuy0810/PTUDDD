@@ -23,7 +23,6 @@ public class ExpenseApplication extends Application {
     private void applyCurrencySettings() {
         try {
             String symbol = PrefsHelper.getCurrencySymbol(this);
-            boolean before = PrefsHelper.isCurrencySymbolBefore(this);
             int decimals = PrefsHelper.getCurrencyDecimals(this);
             String localeTag = PrefsHelper.getCurrencyLocale(this);
 
@@ -39,7 +38,7 @@ public class ExpenseApplication extends Application {
                 loc = new Locale("vi", "VN");
             }
 
-            MoneyFormat.applySettings(symbol, before, decimals, loc);
+            MoneyFormat.applySettings(symbol, false, decimals, loc);
         } catch (Exception e) {
             MoneyFormat.reset();
         }

@@ -101,11 +101,11 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
         if (percent >= 90) {
             holder.binding.textAlert.setVisibility(View.VISIBLE);
             holder.binding.textAlert.setText(
-                    String.format("⚠️ Đã dùng %d%% ngân sách!", percent));
+                    holder.itemView.getContext().getString(R.string.j1_alert_used_pct, percent));
         } else if (percent >= 80) {
             holder.binding.textAlert.setVisibility(View.VISIBLE);
             holder.binding.textAlert.setText(
-                    String.format("Cảnh báo: %d%% ngân sách đã sử dụng", percent));
+                    holder.itemView.getContext().getString(R.string.j1_alert_warning_pct, percent));
         } else {
             holder.binding.textAlert.setVisibility(View.GONE);
         }

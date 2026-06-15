@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MoneyFormat {
-    /** Mã tiền tệ: VND, USD, EUR, ... */
-    private static volatile String currencyCode = "VND";
+    /** Mã tiền tệ hiển thị sau số tiền. */
+    private static volatile String currencyCode = "vnd";
     /** Vị trí ký hiệu tiền: true = trước số, false = sau số. Mặc định false (sau). */
     private static volatile boolean symbolBefore = false;
     private static volatile int decimals = 0;
@@ -26,15 +26,15 @@ public final class MoneyFormat {
      * @param loc    locale cho định dạng số
      */
     public static void applySettings(String code, boolean before, int dec, Locale loc) {
-        currencyCode = (code != null && !code.isEmpty()) ? code : "VND";
-        symbolBefore = before;
+        currencyCode = normalizeCurrencyCode(code);
+        symbolBefore = false;
         decimals = Math.max(0, dec);
         locale = loc != null ? loc : new Locale("vi", "VN");
         formatCache.clear();
     }
 
     public static void reset() {
-        applySettings("VND", false, 0, new Locale("vi", "VN"));
+        applySettings("vnd", false, 0, new Locale("vi", "VN"));
     }
 
     private static DecimalFormat getFormat() {
@@ -42,8 +42,8 @@ public final class MoneyFormat {
         if (df == null) {
             df = (DecimalFormat) NumberFormat.getInstance(locale);
             DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-            symbols.setDecimalSeparator(',');
-            symbols.setGroupingSeparator('.');
+            symbols.setDecimalSeparator('.');
+            symbols.setGroupingSeparator(',');
             df.setDecimalFormatSymbols(symbols);
             df.setMaximumFractionDigits(decimals);
             df.setMinimumFractionDigits(0);
@@ -62,7 +62,7 @@ public final class MoneyFormat {
     }
 
     /**
-     * Format số tiền. Mặc định: {@code 500000 -> "500,000 VND"}.
+     * Format số tiền. Mặc định: {@code 500000 -> "500,000 vnd"}.
      *
      * <p>Ký hiệu luôn đứng SAU số tiền. Muốn đứng trước dùng
      * {@link #applySettings(String, boolean, int, Locale)}.
@@ -119,5 +119,12 @@ public final class MoneyFormat {
     @Deprecated
     public static String formatCompact(double amount) {
         return formatCompact((long) Math.round(amount));
+    }
+
+    private static String normalizeCurrencyCode(String code) {
+        if (code == null || code.trim().isEmpty()) return "vnd";
+        String normalized = code.trim();
+        if ("đ".equals(normalized) || "₫".equals(normalized)) return "vnd";
+        return normalized.toLowerCase(Locale.ROOT);
     }
 }

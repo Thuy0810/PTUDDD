@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.ActivitySettingsBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.util.BackupManager;
@@ -27,7 +28,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Cài đặt");
+            getSupportActionBar().setTitle(getString(R.string.settings));
         }
 
         binding.switchDark.setChecked(PrefsHelper.isDarkMode(this));
@@ -53,20 +54,20 @@ public class SettingsActivity extends AppCompatActivity {
 
         binding.btnChangePassword.setOnClickListener(v -> {
             EditText input = new EditText(this);
-            input.setHint("Mật khẩu mới");
+            input.setHint(getString(R.string.j3_new_password_hint));
             input.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
             new AlertDialog.Builder(this)
-                    .setTitle("Đổi mật khẩu")
+                    .setTitle(getString(R.string.change_password))
                     .setView(input)
-                    .setPositiveButton("Lưu", (d, w) -> {
+                    .setPositiveButton(getString(R.string.save), (d, w) -> {
                         String pw = input.getText().toString();
                         if (pw.length() < 6) {
-                            Toast.makeText(this, "Mật khẩu >= 6 ký tự", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.j3_password_min_length), Toast.LENGTH_SHORT).show();
                             return;
                         }
                         authRepo.changePassword(pw)
                                 .addOnSuccessListener(x ->
-                                        Toast.makeText(this, "Đã đổi mật khẩu", Toast.LENGTH_SHORT).show())
+                                        Toast.makeText(this, getString(R.string.j3_password_changed), Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e ->
                                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
                     })
@@ -80,8 +81,8 @@ public class SettingsActivity extends AppCompatActivity {
             String uid = authRepo.getUid();
             if (uid == null) return;
             BackupManager.exportUserData(this, uid,
-                    () -> Toast.makeText(this, "Đã xuất", Toast.LENGTH_SHORT).show(),
-                    () -> Toast.makeText(this, "Lỗi xuất", Toast.LENGTH_SHORT).show());
+                    () -> Toast.makeText(this, getString(R.string.j3_export_done), Toast.LENGTH_SHORT).show(),
+                    () -> Toast.makeText(this, getString(R.string.j3_export_error), Toast.LENGTH_SHORT).show());
         });
 
         binding.layoutCurrencySymbol.setOnClickListener(v -> showCurrencySymbolPicker());
@@ -90,86 +91,73 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void updateCurrencyDisplay() {
-        binding.textCurrencySymbol.setText(PrefsHelper.getCurrencySymbol(this));
-        binding.textCurrencyPosition.setText(
-                PrefsHelper.isCurrencySymbolBefore(this) ? "Trước số" : "Sau số");
-        String loc = PrefsHelper.getCurrencyLocale(this);
-        binding.textCurrencyLocale.setText(getLocaleDisplayName(loc));
+        binding.textCurrencySymbol.setText("vnd");
+        binding.textCurrencyPosition.setText(getString(R.string.j3_currency_position_after));
+        binding.textCurrencyLocale.setText(getString(R.string.j3_currency_format_comma));
     }
 
     private String getLocaleDisplayName(String localeTag) {
-        switch (localeTag) {
-            case "vi_VN": return "Việt Nam (1.234.567)";
-            case "en_US": return "US (1,234,567.00)";
-            case "ja_JP": return "Nhật Bản (1,234,567)";
-            case "de_DE": return "Đức (1.234.567,00)";
-            default: return localeTag;
-        }
+        return "Dấu phẩy (500,000 vnd)";
     }
 
     private void showCurrencySymbolPicker() {
-        String[] symbols = {"đ", "$", "€", "¥", "£", "₫", "₹", "₩", "R$", "₽"};
+        String[] symbols = {"vnd"};
         int current = java.util.Arrays.asList(symbols).indexOf(
                 PrefsHelper.getCurrencySymbol(this));
         if (current < 0) current = 0;
 
         new AlertDialog.Builder(this)
-                .setTitle("Ký hiệu tiền tệ")
+                .setTitle(getString(R.string.j3_currency_symbol_title))
                 .setSingleChoiceItems(symbols, current, (d, which) -> {
                     PrefsHelper.setCurrencySymbol(this, symbols[which]);
                     MoneyFormat.applySettings(
                             symbols[which],
-                            PrefsHelper.isCurrencySymbolBefore(this),
+                            false,
                             PrefsHelper.getCurrencyDecimals(this),
-                            parseLocale(PrefsHelper.getCurrencyLocale(this)));
+                            parseLocale("vi_VN"));
                     updateCurrencyDisplay();
                     d.dismiss();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showCurrencyPositionPicker() {
-        String[] labels = {"Trước số (đ 1.000)", "Sau số (1.000 đ)"};
-        boolean before = PrefsHelper.isCurrencySymbolBefore(this);
+        String[] labels = {getString(R.string.j3_currency_position_after_full)};
 
         new AlertDialog.Builder(this)
-                .setTitle("Vị trí ký hiệu")
-                .setSingleChoiceItems(labels, before ? 0 : 1, (d, which) -> {
-                    boolean symbolBefore = (which == 0);
-                    PrefsHelper.setCurrencyPosition(this, symbolBefore);
+                .setTitle(getString(R.string.j3_currency_position_title))
+                .setSingleChoiceItems(labels, 0, (d, which) -> {
+                    PrefsHelper.setCurrencyPosition(this, false);
                     MoneyFormat.applySettings(
-                            PrefsHelper.getCurrencySymbol(this),
-                            symbolBefore,
+                            "vnd",
+                            false,
                             PrefsHelper.getCurrencyDecimals(this),
-                            parseLocale(PrefsHelper.getCurrencyLocale(this)));
+                            parseLocale("vi_VN"));
                     updateCurrencyDisplay();
                     d.dismiss();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showCurrencyLocalePicker() {
-        String[] locales = {"vi_VN", "en_US", "ja_JP", "de_DE"};
-        String[] labels = {"Việt Nam (1.234.567 đ)", "US (USD 1,234.56)", "Nhật Bản (¥1,234)", "Đức (1.234,56 €)"};
-        String current = PrefsHelper.getCurrencyLocale(this);
-        int idx = java.util.Arrays.asList(locales).indexOf(current);
-        if (idx < 0) idx = 0;
+        String[] locales = {"vi_VN"};
+        String[] labels = {getString(R.string.j3_currency_format_comma)};
 
         new AlertDialog.Builder(this)
-                .setTitle("Định dạng số")
-                .setSingleChoiceItems(labels, idx, (d, which) -> {
+                .setTitle(getString(R.string.j3_number_format_title))
+                .setSingleChoiceItems(labels, 0, (d, which) -> {
                     PrefsHelper.setCurrencyLocale(this, locales[which]);
                     MoneyFormat.applySettings(
-                            PrefsHelper.getCurrencySymbol(this),
-                            PrefsHelper.isCurrencySymbolBefore(this),
+                            "vnd",
+                            false,
                             PrefsHelper.getCurrencyDecimals(this),
                             parseLocale(locales[which]));
                     updateCurrencyDisplay();
                     d.dismiss();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

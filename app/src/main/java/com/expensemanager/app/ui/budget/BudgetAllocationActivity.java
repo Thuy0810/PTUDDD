@@ -1,7 +1,6 @@
 package com.expensemanager.app.ui.budget;
 
 import android.content.Context;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -15,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Budget;
@@ -28,7 +28,7 @@ import com.expensemanager.app.databinding.ActivityBudgetAllocationBinding;
 import com.expensemanager.app.databinding.ItemBudgetAllocSimpleBinding;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import android.util.Log;
 import java.util.ArrayList;
@@ -159,7 +159,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         if (next) cal.add(java.util.Calendar.MONTH, 1);
         int month = cal.get(java.util.Calendar.MONTH) + 1;
         int year = cal.get(java.util.Calendar.YEAR);
-        return "Thang " + month + "/" + year;
+        return getString(R.string.j1_month_year_label, month, year);
     }
 
     private void loadData() {
@@ -277,28 +277,28 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         String monthKey = getMonthKey();
 
         EditText input = new EditText(this);
-        input.setHint("Ví dụ: 15000000");
+        input.setHint(getString(R.string.j1_income_example_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(input);
         if (expectedIncomeOverride >= 0) {
-            input.setText(String.valueOf(expectedIncomeOverride));
+            input.setText(MoneyInputFormatter.format(expectedIncomeOverride));
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Thu nhập dự kiến")
+                .setTitle(getString(R.string.j1_expected_income))
                 .setView(input)
-                .setPositiveButton("Lưu", (d, w) -> {
-                    Long val = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (val == null) {
-                        Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long val = MoneyInputFormatter.getRawValue(input);
+                    if (val <= 0) {
+                        Toast.makeText(this, getString(R.string.j1_invalid_number), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     expectedIncomeOverride = val;
                     prefs.edit().putLong("income_" + monthKey, val).apply();
                     updateUI();
                 })
-                .setNegativeButton("Hủy", null)
-                .setNeutralButton("Xóa", (d, w) -> {
+                .setNegativeButton(getString(R.string.cancel), null)
+                .setNeutralButton(getString(R.string.delete), (d, w) -> {
                     expectedIncomeOverride = -1;
                     prefs.edit().remove("income_" + monthKey).apply();
                     updateUI();
@@ -319,7 +319,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         }
 
         if (expenseCategories.isEmpty()) {
-            addPlaceholderItem("Chua co danh muc chi tieu", 0);
+            addPlaceholderItem(getString(R.string.j1_no_expense_category), 0);
         }
     }
 
@@ -429,44 +429,44 @@ public class BudgetAllocationActivity extends AppCompatActivity {
 
     private void confirmDeleteBudget(Category cat) {
         new AlertDialog.Builder(this)
-                .setTitle("Xóa ngân sách")
-                .setMessage("Xóa ngân sách cho danh mục \"" + cat.getName() + "\"?")
-                .setPositiveButton("Xóa", (d, w) -> {
+                .setTitle(getString(R.string.j1_delete_budget_title))
+                .setMessage(getString(R.string.j1_delete_budget_message, cat.getName()))
+                .setPositiveButton(getString(R.string.delete), (d, w) -> {
                     String monthKey = getMonthKey();
                     String docId = uid + "_" + monthKey + "_" + cat.getId();
                     budgetRepo.delete(uid, docId);
                     allocatedMap.remove(cat.getId());
                     updateUI();
-                    Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.success_delete), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(this);
-        input.setHint("So tien phan bo");
+        input.setHint(getString(R.string.j1_allocation_amount_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(input);
         if (currentAmount > 0) {
-            input.setText(String.valueOf(currentAmount));
+            input.setText(MoneyInputFormatter.format(currentAmount));
         }
 
         String monthKey = getMonthKey();
 
         new AlertDialog.Builder(this)
-                .setTitle("Phan bo: " + cat.getName())
+                .setTitle(getString(R.string.j1_allocate_to, cat.getName()))
                 .setView(input)
-                .setPositiveButton("Luu", (d, w) -> {
-                    Long amount = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (amount == null) {
-                        Toast.makeText(this, "So tien khong hop le",
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long amount = MoneyInputFormatter.getRawValue(input);
+                    if (amount <= 0) {
+                        Toast.makeText(this, getString(R.string.error_invalid_amount),
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
                     saveBudget(cat, amount, monthKey);
                 })
-                .setNegativeButton("Huy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -487,9 +487,9 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 },
                 e -> {
                     Log.e("BudgetAlloc", "saveBudget FAILED: " + e.getMessage());
-                    Toast.makeText(this, "Lỗi lưu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.j1_save_error, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
-        Toast.makeText(this, "Đang lưu...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.j1_saving_progress), Toast.LENGTH_SHORT).show();
     }
 
     private void saveAllAllocations() {
@@ -500,7 +500,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         Log.d("BudgetAlloc", "saveAllAllocations: total=" + total + ", month=" + monthKey);
 
         if (total == 0) {
-            Toast.makeText(this, "Chưa có phân bổ nào để lưu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j1_no_allocation_to_save), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -521,21 +521,21 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 done[0]++;
                 Log.d("BudgetAlloc", "  saved OK: catId=" + catId + ", done=" + done[0] + "/" + total);
                 if (done[0] >= total && !anyError[0]) {
-                    Toast.makeText(this, "Đã lưu tất cả phân bổ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j1_saved_all_allocations), Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }, e -> {
                 anyError[0] = true;
                 done[0]++;
                 Log.e("BudgetAlloc", "  save FAILED: catId=" + catId + ", error=" + e.getMessage());
-                Toast.makeText(this, "Lỗi lưu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.j1_save_error, e.getMessage()), Toast.LENGTH_LONG).show();
             });
         }
     }
 
     private void showAddCategoryDialog() {
         if (expenseCategories.isEmpty()) {
-            Toast.makeText(this, "Chua co danh muc", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j1_no_category), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -545,7 +545,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Chon danh muc")
+                .setTitle(getString(R.string.select_category))
                 .setItems(names, (d, which) -> {
                     showEditDialog(expenseCategories.get(which), 0);
                 })
@@ -556,7 +556,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         if (uid == null) return;
 
         final EditText input = new EditText(this);
-        input.setHint("Tên nhóm");
+        input.setHint(getString(R.string.j1_group_name_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
 
         final String[] groupLabels = {"Thiết yếu", "Nhu cầu", "Khoản muốn có", "Khác"};
@@ -583,12 +583,12 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         container.addView(radioView);
 
         new AlertDialog.Builder(this)
-                .setTitle("Tạo nhóm")
+                .setTitle(getString(R.string.j1_create_group))
                 .setView(container)
-                .setPositiveButton("Tạo", (d, w) -> {
+                .setPositiveButton(getString(R.string.create), (d, w) -> {
                     String name = input.getText().toString().trim();
                     if (name.isEmpty()) {
-                        Toast.makeText(this, "Nhập tên nhóm", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j1_enter_group_name), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Category group = new Category();
@@ -596,10 +596,10 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                     group.setType(Category.TYPE_EXPENSE);
                     group.setGroup(groupValues[selectedGroup[0]]);
                     new CategoryRepository().add(uid, group);
-                    Toast.makeText(this, "Đã tạo nhóm: " + name, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j1_group_created, name), Toast.LENGTH_SHORT).show();
                     loadData();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

@@ -35,7 +35,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kỳ:"
+                        android:text="@string/s1_period_label"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
 
@@ -54,7 +54,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_marginStart="8dp"
-                        android:text="Chọn ngày"
+                        android:text="@string/recurring_select_date"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -69,7 +69,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ví:"
+                        android:text="@string/s1_wallet_label"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
 
@@ -96,7 +96,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="Tất cả"
+                        android:text="@string/s1_all"
                         android:textSize="13sp"
                         android:textColor="@color/text_primary" />
 
@@ -105,7 +105,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="Thu"
+                        android:text="@string/s1_income_short"
                         android:textSize="13sp"
                         android:textColor="@color/text_primary" />
 
@@ -114,7 +114,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="Chi"
+                        android:text="@string/s1_expense_short"
                         android:textSize="13sp"
                         android:textColor="@color/text_primary" />
 
@@ -123,7 +123,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="Chuyển tiền"
+                        android:text="@string/transfer"
                         android:textSize="13sp"
                         android:textColor="@color/text_primary" />
                 </RadioGroup>
@@ -182,7 +182,7 @@
                             android:id="@+id/textTotalIncome"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 đ"
+                            android:text="0 vnd"
                             android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -213,7 +213,7 @@
                             android:id="@+id/textTotalExpense"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 đ"
+                            android:text="0 vnd"
                             android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -244,7 +244,7 @@
                             android:id="@+id/textTotalBalance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 đ"
+                            android:text="0 vnd"
                             android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -280,7 +280,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chi tiêu theo danh mục"
+                    android:text="@string/s1_expense_by_category"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -311,7 +311,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chi tiêu theo ngày"
+                    android:text="@string/s1_expense_by_day"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -383,7 +383,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Danh sách giao dịch"
+                    android:text="@string/s1_transaction_list"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -401,7 +401,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:padding="24dp"
-                    android:text="Chưa có giao dịch nào"
+                    android:text="@string/empty_transactions"
                     android:textColor="@color/text_secondary"
                     android:visibility="gone" />
             </LinearLayout>

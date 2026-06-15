@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nhấn giữ để xóa"
+            android:text="@string/s3_long_press_delete"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
     </LinearLayout>

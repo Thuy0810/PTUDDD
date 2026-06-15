@@ -48,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif-medium"
-                        android:text="0 VND"
+                        android:text="0 vnd"
                         android:textColor="@color/white"
                         android:textSize="30sp"
                         android:textStyle="bold" />
@@ -76,7 +76,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="0 VND"
+                            android:text="0 vnd"
                             android:textColor="@color/white"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -156,7 +156,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif-medium"
-                        android:text="0 VND"
+                        android:text="0 vnd"
                         android:textColor="@color/income_green"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -208,7 +208,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif-medium"
-                        android:text="0 VND"
+                        android:text="0 vnd"
                         android:textColor="@color/expense_red"
                         android:textSize="16sp"
                         android:textStyle="bold" />

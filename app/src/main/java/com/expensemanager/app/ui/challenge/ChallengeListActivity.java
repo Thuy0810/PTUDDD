@@ -31,7 +31,7 @@ import com.expensemanager.app.databinding.ActivityChallengeListBinding;
 import com.expensemanager.app.ui.adapter.RecurringAdapter;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
@@ -105,6 +105,7 @@ public class ChallengeListActivity extends AppCompatActivity {
         View view = li.inflate(R.layout.dialog_recurring, null);
         EditText editNote = view.findViewById(R.id.editRecurringNote);
         EditText editAmount = view.findViewById(R.id.editRecurringAmount);
+        MoneyInputFormatter.attach(editAmount);
         Spinner spinnerCat = view.findViewById(R.id.spinnerRecurringCategory);
         Spinner spinnerWallet = view.findViewById(R.id.spinnerRecurringWallet);
         Spinner spinnerCycle = view.findViewById(R.id.spinnerRecurringCycle);
@@ -129,17 +130,18 @@ public class ChallengeListActivity extends AppCompatActivity {
         walletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerWallet.setAdapter(walletAdapter);
 
-        String[] cycleLabels = {"Ngày", "Tuần", "Tháng", "Năm"};
+        String[] cycleLabels = {
+                getString(R.string.j3_period_day),
+                getString(R.string.j3_period_week),
+                getString(R.string.j3_period_month),
+                getString(R.string.j3_period_year)
+        };
         ArrayAdapter<String> cycleAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, java.util.Arrays.asList(cycleLabels));
         cycleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCycle.setAdapter(cycleAdapter);
 
-        String[] monthNames = {
-                "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
-                "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
-                "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
-        };
+        String[] monthNames = getResources().getStringArray(R.array.month_labels);
         ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, java.util.Arrays.asList(monthNames));
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -208,9 +210,8 @@ public class ChallengeListActivity extends AppCompatActivity {
                 .setView(view)
                 .setPositiveButton(R.string.create, (d, w) -> {
                     String note = editNote.getText().toString().trim();
-                    Long amount = MoneyValueParser.tryParseStrict(
-                            editAmount.getText().toString().trim());
-                    if (amount == null) {
+                    long amount = MoneyInputFormatter.getRawValue(editAmount);
+                    if (amount <= 0) {
                         Toast.makeText(this, R.string.error_invalid_amount, Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -281,45 +282,42 @@ public class ChallengeListActivity extends AppCompatActivity {
 
     private String getDayLabelForCycle(String cycle) {
         switch (cycle) {
-            case RecurringRule.CYCLE_WEEKLY: return "Thứ trong tuần";
-            case RecurringRule.CYCLE_YEARLY: return "Ngày trong tháng";
-            default: return "Ngày trong tháng";
+            case RecurringRule.CYCLE_WEEKLY: return getString(R.string.j3_day_of_week_label);
+            case RecurringRule.CYCLE_YEARLY: return getString(R.string.recurring_day_of_month);
+            default: return getString(R.string.recurring_day_of_month);
         }
     }
 
     private String[] buildDayLabels(String cycle) {
         switch (cycle) {
             case RecurringRule.CYCLE_WEEKLY:
-                return new String[]{
-                        "Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4",
-                        "Thứ 5", "Thứ 6", "Thứ 7"
-                };
+                return getResources().getStringArray(R.array.day_of_week_labels);
             case RecurringRule.CYCLE_YEARLY:
                 String[] days = new String[31];
-                for (int i = 0; i < 31; i++) days[i] = "Ngày " + (i + 1);
+                for (int i = 0; i < 31; i++) days[i] = getString(R.string.recurring_day_n, i + 1);
                 return days;
             case RecurringRule.CYCLE_MONTHLY:
             default:
                 String[] monthly = new String[32];
-                for (int i = 0; i < 31; i++) monthly[i] = "Ngày " + (i + 1);
-                monthly[31] = "Ngày cuối tháng";
+                for (int i = 0; i < 31; i++) monthly[i] = getString(R.string.recurring_day_n, i + 1);
+                monthly[31] = getString(R.string.recurring_last_day_of_month);
                 return monthly;
         }
     }
 
     private void showEditDialog(String uid, RecurringRule r) {
         EditText input = new EditText(this);
-        input.setHint(R.string.hint_amount);
+        input.setHint(R.string.amount);
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf(r.getAmount()));
+        MoneyInputFormatter.attach(input);
+        input.setText(MoneyInputFormatter.format(r.getAmount()));
 
         new AlertDialog.Builder(this)
                 .setTitle(r.getNote())
                 .setView(input)
                 .setPositiveButton(R.string.save, (d, w) -> {
-                    Long amount = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (amount == null) {
+                    long amount = MoneyInputFormatter.getRawValue(input);
+                    if (amount <= 0) {
                         Toast.makeText(this, R.string.error_invalid_amount,
                                 Toast.LENGTH_SHORT).show();
                         return;
@@ -331,7 +329,7 @@ public class ChallengeListActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.cancel, null)
                 .setNeutralButton(R.string.delete, (d, w) -> {
                     recurringRepo.delete(uid, r.getId());
-                    Toast.makeText(this, R.string.success_deleted, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.success_delete, Toast.LENGTH_SHORT).show();
                 })
                 .show();
     }

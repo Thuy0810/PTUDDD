@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cài đặt ngân sách"
+            android:text="@string/budget_settings"
             android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Thiết lập các thông số cho ngân sách của bạn"
+            android:text="@string/s1_budget_settings_desc"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Ngôn ngữ"
+            android:text="@string/language"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -58,7 +58,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
             android:layout_weight="1"
-                android:text="Tiếng Việt"
+                android:text="@string/language_vietnamese"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp" />
 
@@ -74,7 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Đơn vị tiền tệ"
+            android:text="@string/s1_currency_unit"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -92,7 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="VND (₫)"
+                android:text="vnd"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp" />
 
@@ -108,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Số thập phân"
+            android:text="@string/s1_decimal_places"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -142,7 +142,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Vị trí ký hiệu tiền"
+            android:text="@string/s1_symbol_position"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -160,7 +160,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Sau số tiền"
+                android:text="@string/s1_after_amount"
                 android:textColor="@color/text_primary"
                 android:textSize="15sp" />
 
@@ -191,7 +191,7 @@
                 android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Hủy"
+                android:text="@string/cancel"
                 app:cornerRadius="12dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -201,7 +201,7 @@
                 android:layout_height="52dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Lưu"
+                android:text="@string/save"
                 app:cornerRadius="12dp" />
         </LinearLayout>
     </LinearLayout>

@@ -253,7 +253,7 @@ public final class PrefsHelper {
     // ========== Currency settings ==========
 
     public static String getCurrencySymbol(Context ctx) {
-        return prefs(ctx).getString(KEY_CURRENCY_SYMBOL, "đ");
+        return prefs(ctx).getString(KEY_CURRENCY_SYMBOL, "vnd");
     }
 
     public static void setCurrencySymbol(Context ctx, String symbol) {
@@ -261,7 +261,7 @@ public final class PrefsHelper {
     }
 
     public static boolean isCurrencySymbolBefore(Context ctx) {
-        return prefs(ctx).getBoolean(KEY_CURRENCY_POSITION, true);
+        return false;
     }
 
     public static void setCurrencyPosition(Context ctx, boolean before) {

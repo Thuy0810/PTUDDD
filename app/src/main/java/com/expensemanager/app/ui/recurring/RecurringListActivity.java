@@ -199,7 +199,7 @@ public class RecurringListActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.cancel, null)
                 .setNeutralButton(R.string.delete, (d, w) -> {
                     recurringRepo.delete(uid, rule.getId());
-                    Toast.makeText(this, R.string.success_deleted, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.success_delete, Toast.LENGTH_SHORT).show();
                 });
 
         AlertDialog dialog = builder.create();
@@ -459,9 +459,11 @@ public class RecurringListActivity extends AppCompatActivity {
                     Toast.makeText(this, R.string.success_recurring_created,
                             Toast.LENGTH_SHORT).show();
                 }),
-                e -> runOnUiThread(() -> Toast.makeText(this,
-                        R.string.error_saving_failed, Toast.LENGTH_SHORT).show());
+                e -> runOnUiThread(() ->
+                        Toast.makeText(this,
+                                R.string.error_saving_failed, Toast.LENGTH_SHORT).show())
         );
+
         return true;
     }
 }

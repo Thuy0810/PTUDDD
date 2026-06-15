@@ -25,7 +25,7 @@ import com.expensemanager.app.domain.usecase.GoalService;
 import com.expensemanager.app.ui.adapter.GoalAdapter;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class GoalListActivity extends AppCompatActivity {
 
     private void showAddDialog(String uid) {
         if (wallets.isEmpty()) {
-            Toast.makeText(this, "Chưa có ví. Vui lòng tạo ví trước.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_no_wallet), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -95,6 +95,7 @@ public class GoalListActivity extends AppCompatActivity {
         EditText editTarget = view.findViewById(R.id.editGoalTarget);
         EditText editDeadline = view.findViewById(R.id.editGoalDeadline);
         Spinner spinnerWallet = view.findViewById(R.id.spinnerGoalWallet);
+        MoneyInputFormatter.attach(editTarget);
 
         List<String> walletNames = new ArrayList<>();
         for (Wallet w : wallets) walletNames.add(w.getName());
@@ -116,18 +117,17 @@ public class GoalListActivity extends AppCompatActivity {
         });
 
         new AlertDialog.Builder(this)
-                .setTitle("Mục tiêu tiết kiệm mới")
+                .setTitle(getString(R.string.j3_new_goal_title))
                 .setView(view)
-                .setPositiveButton("Tạo", (d, w) -> {
+                .setPositiveButton(getString(R.string.create), (d, w) -> {
                     String title = editTitle.getText().toString().trim();
                     if (title.isEmpty()) {
-                        Toast.makeText(this, "Nhập tên mục tiêu", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j3_enter_goal_name), Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Long target = MoneyValueParser.tryParseStrict(
-                            editTarget.getText().toString().trim());
-                    if (target == null) {
-                        Toast.makeText(this, "Nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
+                    long target = MoneyInputFormatter.getRawValue(editTarget);
+                    if (target <= 0) {
+                        Toast.makeText(this, getString(R.string.j3_enter_valid_amount), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     int walletPos = spinnerWallet.getSelectedItemPosition();
@@ -141,15 +141,15 @@ public class GoalListActivity extends AppCompatActivity {
                     g.setCompleted(false);
                     g.setDeadline(new Timestamp(selectedCal[0].getTime()));
                     goalRepo.add(uid, g);
-                    Toast.makeText(this, "Đã tạo mục tiêu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.j3_goal_created), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showUpdateDialog(String uid, SavingsGoal g) {
         if (wallets.isEmpty()) {
-            Toast.makeText(this, "Không có ví nào", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j3_no_wallets), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -159,10 +159,11 @@ public class GoalListActivity extends AppCompatActivity {
         EditText editTarget = view.findViewById(R.id.editGoalTarget);
         Spinner spinnerWallet = view.findViewById(R.id.spinnerGoalWallet);
         view.findViewById(R.id.editGoalDeadline).setEnabled(false);
+        MoneyInputFormatter.attach(editTarget);
 
         editTitle.setText(g.getTitle());
         editTitle.setEnabled(false);
-        editTarget.setText(String.valueOf(g.getTargetAmount()));
+        editTarget.setText(MoneyInputFormatter.format(g.getTargetAmount()));
         editTarget.setEnabled(false);
 
         List<String> walletNames = new ArrayList<>();
@@ -182,8 +183,9 @@ public class GoalListActivity extends AppCompatActivity {
         }
 
         EditText editContribute = new EditText(this);
-        editContribute.setHint("Số tiền đóng góp thêm");
+        editContribute.setHint(getString(R.string.j3_contribute_amount_hint));
         editContribute.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(editContribute);
 
         android.widget.LinearLayout container = new android.widget.LinearLayout(this);
         container.setOrientation(android.widget.LinearLayout.VERTICAL);
@@ -192,7 +194,7 @@ public class GoalListActivity extends AppCompatActivity {
         container.addView(editTarget);
 
         android.widget.TextView label = new android.widget.TextView(this);
-        label.setText("Chọn ví nguồn:");
+        label.setText(getString(R.string.j3_select_source_wallet));
         label.setTextSize(13);
         label.setTextColor(getResources().getColor(R.color.text_secondary, null));
         label.setPadding(0, 16, 0, 4);
@@ -200,7 +202,7 @@ public class GoalListActivity extends AppCompatActivity {
         container.addView(spinnerWallet);
 
         android.widget.TextView label2 = new android.widget.TextView(this);
-        label2.setText("Đóng góp thêm:");
+        label2.setText(getString(R.string.j3_contribute_more));
         label2.setTextSize(13);
         label2.setTextColor(getResources().getColor(R.color.text_secondary, null));
         label2.setPadding(0, 16, 0, 4);
@@ -210,11 +212,10 @@ public class GoalListActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(g.getTitle())
                 .setView(container)
-                .setPositiveButton("Lưu", (d, which) -> {
-                    Long contribute = MoneyValueParser.tryParseStrict(
-                            editContribute.getText().toString().trim());
-                    if (contribute == null) {
-                        Toast.makeText(this, "Số không hợp lệ", Toast.LENGTH_SHORT).show();
+                .setPositiveButton(getString(R.string.save), (d, which) -> {
+                    long contribute = MoneyInputFormatter.getRawValue(editContribute);
+                    if (contribute <= 0) {
+                        Toast.makeText(this, getString(R.string.j3_invalid_number), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     int walletPos = spinnerWallet.getSelectedItemPosition();
@@ -223,15 +224,15 @@ public class GoalListActivity extends AppCompatActivity {
                     // Sử dụng service atomic — không tự trừ ví trong Activity.
                     goalService.contributeToGoal(uid, g.getId(), contribute, wallet.getId())
                             .addOnSuccessListener(unused ->
-                                    Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show())
+                                    Toast.makeText(this, getString(R.string.j3_updated), Toast.LENGTH_SHORT).show())
                             .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Lỗi: " + e.getMessage(),
+                                    Toast.makeText(this, getString(R.string.j3_error_prefix, e.getMessage()),
                                             Toast.LENGTH_LONG).show());
                 })
-                .setNegativeButton("Hủy", null)
-                .setNeutralButton("Xóa mục tiêu", (d, which) -> {
+                .setNegativeButton(getString(R.string.cancel), null)
+                .setNeutralButton(getString(R.string.j3_delete_goal), (d, which) -> {
                     goalRepo.delete(uid, g.getId());
-                    Toast.makeText(this, "Đã xóa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.success_delete), Toast.LENGTH_SHORT).show();
                 })
                 .show();
     }

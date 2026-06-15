@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nhấn giữ để thêm mục tiêu mới"
+            android:text="@string/s3_long_press_add_goal"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
     </LinearLayout>
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:gravity="center"
-        android:text="Chưa có mục tiêu nào.\nNhấn nút + để thêm!"
+        android:text="@string/s3_empty_goals"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
         android:visibility="gone" />
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_margin="16dp"
-        android:text="Thêm mục tiêu"
+        android:text="@string/add_goal"
         android:textColor="@color/white"
         app:icon="@drawable/ic_add"
         app:iconTint="@color/white" />

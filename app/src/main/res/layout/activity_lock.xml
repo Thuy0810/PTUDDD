@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Nhập PIN để mở app"
+        android:text="@string/s3_enter_pin_to_unlock"
         android:textColor="@color/text_secondary"
         android:textSize="14sp" />
 
@@ -63,7 +63,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="16dp"
-        android:text="Mở khóa"
+        android:text="@string/biometric_title"
         app:cornerRadius="14dp" />
 
     <com.google.android.material.button.MaterialButton
@@ -72,7 +72,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="12dp"
-        android:text="Vân tay / Face ID"
+        android:text="@string/s3_fingerprint_faceid"
         android:visibility="gone"
         app:cornerRadius="14dp" />
 </LinearLayout>

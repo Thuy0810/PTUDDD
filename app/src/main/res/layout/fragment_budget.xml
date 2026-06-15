@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Tháng này"
+            android:text="@string/report_this_month"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -49,7 +49,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_tab_active"
             android:gravity="center"
-            android:text="Tổng quan"
+            android:text="@string/nav_home"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -60,7 +60,7 @@
             android:layout_height="36dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Chi tiêu"
+            android:text="@string/expense"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -99,7 +99,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tổng ngân sách tháng"
+                        android:text="@string/s2_total_month_budget"
                         android:textColor="@color/text_on_dark"
                         android:textSize="13sp" />
 
@@ -108,7 +108,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="0 đ"
+                        android:text="0 vnd"
                         android:textColor="@color/white"
                         android:textSize="28sp"
                         android:textStyle="bold" />
@@ -136,7 +136,7 @@
                                 android:id="@+id/textTotalSpent"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0 đ"
+                                android:text="0 vnd"
                                 android:textColor="@color/white"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -159,7 +159,7 @@
                                 android:id="@+id/textTotalRemaining"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0 đ"
+                                android:text="0 vnd"
                                 android:textColor="@color/white"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -186,7 +186,7 @@
                 android:layout_height="52dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="12dp"
-                android:text="Phân bổ ngân sách"
+                android:text="@string/budget_allocation"
                 app:cornerRadius="12dp" />
 
             <!-- Theo danh muc -->
@@ -195,7 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Theo danh mục"
+                android:text="@string/s2_by_category"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -235,7 +235,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Chi tiêu theo ngày/tháng"
+                android:text="@string/s2_expense_by_day_month"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
         </LinearLayout>

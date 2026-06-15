@@ -92,11 +92,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             Category cat = categoryMap.get(t.getCategoryId());
             if (cat != null) {
                 categoryName = cat.getName();
-                String emoji = cat.getIcon();
+                String emoji = cat.getIconKey();
                 if (!TextUtils.isEmpty(emoji) && emoji.length() <= 4) {
                     iconEmoji = emoji;
                 }
-                String color = cat.getColor();
+                String color = cat.getColorHex();
                 if (!TextUtils.isEmpty(color)) {
                     try {
                         iconBgColor = Color.parseColor(color);

@@ -91,7 +91,7 @@ public class EditProfileActivity extends AppCompatActivity {
         binding.btnSave.setEnabled(false);
         binding.layoutLoading.setVisibility(View.VISIBLE);
 
-        authRepo.updateProfile(name)
+        authRepo.updateDisplayName(name)
                 .addOnSuccessListener(unused -> {
                     setResult(RESULT_OK);
                     finish();

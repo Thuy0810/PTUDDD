@@ -37,6 +37,8 @@ public class HomeViewModel extends ViewModel {
     private final MediatorLiveData<FinancialInsights> insights = new MediatorLiveData<>();
     private final MediatorLiveData<List<String>> budgetAlerts = new MediatorLiveData<>();
     private final MediatorLiveData<List<Transaction>> recentTransactions = new MediatorLiveData<>();
+    private final MediatorLiveData<Map<String, Category>> categoryMap = new MediatorLiveData<>();
+    private final MediatorLiveData<Map<String, Wallet>> walletMap = new MediatorLiveData<>();
 
     private List<Transaction> monthTx = new ArrayList<>();
     private List<Transaction> allTx = new ArrayList<>();
@@ -80,7 +82,7 @@ public class HomeViewModel extends ViewModel {
             }
         }
 
-        double balance = BalanceCalculator.totalAssets(wallets, allTx);
+        long balance = BalanceCalculator.totalAssets(wallets, allTx);
         String topName = "";
         double topAmt = 0;
         Map<String, Category> catMap = CategoryRepository.toMap(categories);
@@ -135,10 +137,20 @@ public class HomeViewModel extends ViewModel {
             return db.compareTo(da);
         });
         recentTransactions.setValue(sorted.size() > 5 ? sorted.subList(0, 5) : sorted);
+
+        // Map danh mục / ví để adapter tra cứu tên & icon (tránh hiển thị "đã xóa").
+        categoryMap.setValue(catMap);
+        Map<String, Wallet> wMap = new HashMap<>();
+        for (Wallet w : wallets) {
+            if (w != null && w.getId() != null) wMap.put(w.getId(), w);
+        }
+        walletMap.setValue(wMap);
     }
 
     public LiveData<HomeSummary> getSummary() { return summary; }
     public LiveData<FinancialInsights> getInsights() { return insights; }
     public LiveData<List<String>> getBudgetAlerts() { return budgetAlerts; }
     public LiveData<List<Transaction>> getRecentTransactions() { return recentTransactions; }
+    public LiveData<Map<String, Category>> getCategoryMap() { return categoryMap; }
+    public LiveData<Map<String, Wallet>> getWalletMap() { return walletMap; }
 }

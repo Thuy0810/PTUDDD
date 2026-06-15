@@ -33,7 +33,7 @@ import com.expensemanager.app.databinding.FragmentBudgetOverviewBinding;
 import com.expensemanager.app.ui.budget.BudgetAllocationActivity;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -123,7 +123,7 @@ public class BudgetOverviewFragment extends Fragment {
     }
 
     private void updateMonthLabel() {
-        String label = "Tháng " + selectedMonth;
+        String label = getString(R.string.j1_month_label, selectedMonth);
         binding.textMonth.setText(label);
     }
 
@@ -251,10 +251,10 @@ public class BudgetOverviewFragment extends Fragment {
     private void buildSections() {
         Map<String, BudgetSectionAdapter.Section> sectionMap = new HashMap<>();
 
-        BudgetSectionAdapter.Section essential = new BudgetSectionAdapter.Section("Thiết yếu");
-        BudgetSectionAdapter.Section needs = new BudgetSectionAdapter.Section("Nhu cầu");
-        BudgetSectionAdapter.Section wants = new BudgetSectionAdapter.Section("Khoản muốn có");
-        BudgetSectionAdapter.Section other = new BudgetSectionAdapter.Section("Khác");
+        BudgetSectionAdapter.Section essential = new BudgetSectionAdapter.Section(getString(R.string.j1_group_essential));
+        BudgetSectionAdapter.Section needs = new BudgetSectionAdapter.Section(getString(R.string.j1_group_need));
+        BudgetSectionAdapter.Section wants = new BudgetSectionAdapter.Section(getString(R.string.j1_group_want));
+        BudgetSectionAdapter.Section other = new BudgetSectionAdapter.Section(getString(R.string.j1_group_other));
 
         sectionMap.put("essential", essential);
         sectionMap.put("need", needs);
@@ -301,34 +301,34 @@ public class BudgetOverviewFragment extends Fragment {
         if (extraSaving > 0) {
             binding.textExtraSaving.setText(MoneyFormat.formatLong(extraSaving));
         } else {
-            binding.textExtraSaving.setText("0đ");
+            binding.textExtraSaving.setText(MoneyFormat.formatLong(0L));
         }
     }
 
     private void showEditDialog(Category cat, long currentAmount) {
         EditText input = new EditText(requireContext());
-        input.setHint("Số tiền phân bổ");
+        input.setHint(getString(R.string.j1_allocation_amount_hint));
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(input);
         if (currentAmount > 0) {
-            input.setText(String.valueOf(currentAmount));
+            input.setText(MoneyInputFormatter.format(currentAmount));
         }
 
         String monthKey = String.format("%04d-%02d", selectedYear, selectedMonth);
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Phân bổ: " + cat.getName())
+                .setTitle(getString(R.string.j1_allocate_to, cat.getName()))
                 .setView(input)
-                .setPositiveButton("Lưu", (d, w) -> {
-                    Long parsed = MoneyValueParser.tryParseStrict(
-                            input.getText().toString().trim());
-                    if (parsed == null) {
-                        Toast.makeText(requireContext(), "Số tiền không hợp lệ",
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    long parsed = MoneyInputFormatter.getRawValue(input);
+                    if (parsed <= 0) {
+                        Toast.makeText(requireContext(), getString(R.string.error_invalid_amount),
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
                     saveBudget(cat, parsed, monthKey);
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -342,7 +342,7 @@ public class BudgetOverviewFragment extends Fragment {
         b.setMonth(monthKey);
         b.setLimitAmount(amount);
         budgetRepo.addOrUpdate(uid, b);
-        Toast.makeText(requireContext(), "Da luu ngan sach", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), getString(R.string.j1_budget_saved), Toast.LENGTH_SHORT).show();
     }
 
     @Override

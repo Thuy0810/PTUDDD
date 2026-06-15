@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/reccurring_type"
+            android:text="@string/recurring_type"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="@string/amount"
-            app:suffixText="VND">
+            app:suffixText="vnd">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editRecurringAmount"
@@ -177,7 +177,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/reccurring_start_date"
+                    android:text="@string/recurring_start_date"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
@@ -187,7 +187,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="@string/reccurring_select_date"
+                    android:text="@string/recurring_select_date"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -202,7 +202,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/reccurring_end_date"
+                    android:text="@string/recurring_end_date"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
@@ -212,7 +212,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="@string/reccurring_no_end"
+                    android:text="@string/recurring_no_end"
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>

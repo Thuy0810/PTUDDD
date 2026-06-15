@@ -18,9 +18,9 @@ import androidx.annotation.NonNull;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Wallet;
-import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.databinding.DialogWalletPaymentBinding;
+import com.expensemanager.app.util.MoneyInputFormatter;
 import com.google.firebase.Timestamp;
 
 import java.util.HashMap;
@@ -73,6 +73,7 @@ public class WalletPaymentDialog extends Dialog {
             );
         }
 
+        MoneyInputFormatter.attach(binding.editInitialBalance);
         setupTypeCards();
         binding.btnCreate.setOnClickListener(v -> createWallet());
     }
@@ -111,18 +112,18 @@ public class WalletPaymentDialog extends Dialog {
         String balanceStr = binding.editInitialBalance.getText().toString().trim();
 
         if (name.isEmpty()) {
-            Toast.makeText(getContext(), "Nhập tên ví", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getContext().getString(R.string.j2_enter_wallet_name), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double balance = 0;
+        long balance = 0L;
         if (!balanceStr.isEmpty()) {
-            try {
-                balance = Double.parseDouble(balanceStr);
-            } catch (NumberFormatException e) {
-                Toast.makeText(getContext(), "Số dư không hợp lệ", Toast.LENGTH_SHORT).show();
+            long parsedBalance = MoneyInputFormatter.getRawValue(binding.editInitialBalance);
+            if (parsedBalance <= 0) {
+                Toast.makeText(getContext(), getContext().getString(R.string.error_invalid_amount), Toast.LENGTH_SHORT).show();
                 return;
             }
+            balance = parsedBalance;
         }
 
         Wallet wallet = new Wallet();
@@ -135,7 +136,7 @@ public class WalletPaymentDialog extends Dialog {
         wallet.setIcon(TYPE_ICONS.get(selectedType));
 
         walletRepo.add(uid, wallet);
-        Toast.makeText(getContext(), "Đã tạo ví thanh toán", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getContext().getString(R.string.j2_payment_wallet_created), Toast.LENGTH_SHORT).show();
         dismiss();
     }
 }

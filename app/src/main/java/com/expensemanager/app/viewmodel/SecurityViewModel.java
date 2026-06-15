@@ -25,11 +25,11 @@ public class SecurityViewModel extends AndroidViewModel {
 
     public SecurityViewModel(@NonNull Application app) {
         super(app);
-        PrefsHelper prefs = new PrefsHelper(app);
-        pinEnabled.setValue(prefs.isPinEnabled());
-        biometricEnabled.setValue(prefs.isBiometricEnabled());
-        reminderEnabled.setValue(prefs.isReminderEnabled());
-        reminderTime.setValue(prefs.getReminderTime());
+        pinEnabled.setValue(PrefsHelper.isPinEnabled(app));
+        biometricEnabled.setValue(PrefsHelper.isBiometricEnabled(app));
+        reminderEnabled.setValue(PrefsHelper.isReminderEnabled(app));
+        reminderTime.setValue(formatReminderTime(
+                PrefsHelper.getReminderHour(app), PrefsHelper.getReminderMinute(app)));
     }
 
     public LiveData<Boolean> pinEnabled() { return pinEnabled; }
@@ -42,49 +42,65 @@ public class SecurityViewModel extends AndroidViewModel {
      * Đặt PIN mới — yêu cầu gọi với PIN cũ nếu đã có.
      */
     public void setPin(String oldPin, String newPin) {
-        PrefsHelper prefs = new PrefsHelper(getApplication());
+        Application app = getApplication();
         if (newPin == null || newPin.length() < 4) {
             pinError.setValue("PIN phải có ít nhất 4 số");
             return;
         }
-        if (prefs.isPinEnabled() && !prefs.verifyPin(oldPin)) {
+        if (PrefsHelper.isPinEnabled(app) && !PrefsHelper.verifyPin(app, oldPin)) {
             pinError.setValue("PIN cũ không đúng");
             return;
         }
-        prefs.setPin(newPin);
-        prefs.setPinEnabled(true);
+        String hash = PrefsHelper.hashPin(app, newPin);
+        PrefsHelper.setPinEnabled(app, true, hash);
         pinError.setValue(null);
         pinEnabled.setValue(true);
     }
 
     public void disablePin(String oldPin) {
-        PrefsHelper prefs = new PrefsHelper(getApplication());
-        if (prefs.isPinEnabled() && !prefs.verifyPin(oldPin)) {
+        Application app = getApplication();
+        if (PrefsHelper.isPinEnabled(app) && !PrefsHelper.verifyPin(app, oldPin)) {
             pinError.setValue("PIN không đúng");
             return;
         }
-        prefs.setPinEnabled(false);
-        prefs.setBiometricEnabled(false);
+        PrefsHelper.disablePin(app);
+        PrefsHelper.setBiometricEnabled(app, false);
         pinEnabled.setValue(false);
         biometricEnabled.setValue(false);
     }
 
     public void setBiometricEnabled(boolean enabled) {
-        PrefsHelper prefs = new PrefsHelper(getApplication());
-        if (enabled && !prefs.isPinEnabled()) return;
-        prefs.setBiometricEnabled(enabled);
+        Application app = getApplication();
+        if (enabled && !PrefsHelper.isPinEnabled(app)) return;
+        PrefsHelper.setBiometricEnabled(app, enabled);
         biometricEnabled.setValue(enabled);
     }
 
     public void setReminderEnabled(boolean enabled) {
-        PrefsHelper prefs = new PrefsHelper(getApplication());
-        prefs.setReminderEnabled(enabled);
+        PrefsHelper.setReminderEnabled(getApplication(), enabled);
         reminderEnabled.setValue(enabled);
     }
 
     public void setReminderTime(String time) {
-        PrefsHelper prefs = new PrefsHelper(getApplication());
-        prefs.setReminderTime(time);
+        int[] parsed = parseReminderTime(time);
+        PrefsHelper.setReminderTime(getApplication(), parsed[0], parsed[1]);
         reminderTime.setValue(time);
+    }
+
+    private static String formatReminderTime(int hour, int minute) {
+        return String.format(java.util.Locale.US, "%02d:%02d", hour, minute);
+    }
+
+    private static int[] parseReminderTime(String time) {
+        if (time == null) return new int[]{21, 0};
+        String[] parts = time.trim().split(":");
+        if (parts.length != 2) return new int[]{21, 0};
+        try {
+            int hour = Math.max(0, Math.min(23, Integer.parseInt(parts[0])));
+            int minute = Math.max(0, Math.min(59, Integer.parseInt(parts[1])));
+            return new int[]{hour, minute};
+        } catch (NumberFormatException e) {
+            return new int[]{21, 0};
+        }
     }
 }

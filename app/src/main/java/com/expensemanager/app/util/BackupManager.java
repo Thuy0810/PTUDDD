@@ -127,7 +127,7 @@ public final class BackupManager {
             share.putExtra(Intent.EXTRA_STREAM,
                     FileProvider.getUriForFile(ctx, ctx.getPackageName() + ".fileprovider", file));
             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            ctx.startActivity(Intent.createChooser(share, "Sao luu du lieu"));
+            ctx.startActivity(Intent.createChooser(share, "Sao lưu dữ liệu"));
             onDone.run();
         } catch (Exception e) {
             Log.e(TAG, "writeAndShareBackup: failed", e);

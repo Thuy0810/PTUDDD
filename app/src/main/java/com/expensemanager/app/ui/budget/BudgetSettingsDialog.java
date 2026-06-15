@@ -21,7 +21,7 @@ public class BudgetSettingsDialog extends Dialog {
     private final SharedPreferences prefs;
 
     private String selectedLanguage = "Tiếng Việt";
-    private String selectedCurrency = "VND (₫)";
+    private String selectedCurrency = "vnd";
     private String selectedDecimal = "0";
     private String selectedSymbolPosition = "Sau số tiền";
 
@@ -52,7 +52,7 @@ public class BudgetSettingsDialog extends Dialog {
 
     private void loadSavedSettings() {
         selectedLanguage = prefs.getString("language", "Tiếng Việt");
-        selectedCurrency = prefs.getString("currency", "VND (₫)");
+        selectedCurrency = prefs.getString("currency", "vnd");
         selectedDecimal = prefs.getString("decimalPlaces", "0");
         selectedSymbolPosition = prefs.getString("symbolPosition", "Sau số tiền");
 
@@ -73,9 +73,9 @@ public class BudgetSettingsDialog extends Dialog {
     }
 
     private void showLanguagePicker() {
-        String[] items = {"Tiếng Việt", "English"};
+        String[] items = {getContext().getString(R.string.language_vietnamese)};
         new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle("Ngôn ngữ")
+                .setTitle(getContext().getString(R.string.language))
                 .setItems(items, (d, which) -> {
                     selectedLanguage = items[which];
                     binding.textLanguageValue.setText(selectedLanguage);
@@ -84,9 +84,9 @@ public class BudgetSettingsDialog extends Dialog {
     }
 
     private void showCurrencyPicker() {
-        String[] items = {"VND (₫)", "USD ($)", "EUR (€)", "JPY (¥)"};
+        String[] items = {"vnd"};
         new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle("Đơn vị tiền tệ")
+                .setTitle(getContext().getString(R.string.j1_currency_unit))
                 .setItems(items, (d, which) -> {
                     selectedCurrency = items[which];
                     binding.textCurrencyValue.setText(selectedCurrency);
@@ -97,7 +97,7 @@ public class BudgetSettingsDialog extends Dialog {
     private void showDecimalPicker() {
         String[] items = {"0", "1", "2"};
         new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle("Số thập phân")
+                .setTitle(getContext().getString(R.string.j1_decimal_places))
                 .setItems(items, (d, which) -> {
                     selectedDecimal = items[which];
                     binding.textDecimalValue.setText(selectedDecimal);
@@ -106,9 +106,9 @@ public class BudgetSettingsDialog extends Dialog {
     }
 
     private void showSymbolPositionPicker() {
-        String[] items = {"Trước số tiền", "Sau số tiền"};
+        String[] items = {getContext().getString(R.string.j1_after_amount)};
         new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle("Vị trí ký hiệu tiền")
+                .setTitle(getContext().getString(R.string.j1_symbol_position))
                 .setItems(items, (d, which) -> {
                     selectedSymbolPosition = items[which];
                     binding.textSymbolPositionValue.setText(selectedSymbolPosition);
@@ -126,7 +126,7 @@ public class BudgetSettingsDialog extends Dialog {
         editor.putString("symbolPosition", selectedSymbolPosition);
         editor.apply();
 
-        Toast.makeText(getContext(), "Đã lưu cài đặt", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getContext().getString(R.string.j1_settings_saved), Toast.LENGTH_SHORT).show();
         dismiss();
     }
 }

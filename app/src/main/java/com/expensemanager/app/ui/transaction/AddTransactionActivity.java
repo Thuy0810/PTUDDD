@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.ActivityAddTransactionBinding;
 import com.expensemanager.app.data.model.Category;
 import com.expensemanager.app.data.model.Transaction;
@@ -17,6 +18,7 @@ import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.util.CategorySuggester;
+import com.expensemanager.app.util.MoneyInputFormatter;
 import com.expensemanager.app.util.QuickParseUtil;
 import com.google.firebase.Timestamp;
 
@@ -49,13 +51,14 @@ public class AddTransactionActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Giao dich");
+            getSupportActionBar().setTitle(getString(R.string.j2_transaction_title));
         }
+        MoneyInputFormatter.attach(binding.editAmount);
 
         editTxId = getIntent().getStringExtra(EXTRA_TX_ID);
         if (editTxId != null) {
             binding.btnDelete.setVisibility(android.view.View.VISIBLE);
-            getSupportActionBar().setTitle("Sua giao dich");
+            getSupportActionBar().setTitle(getString(R.string.edit_transaction));
         }
 
         String uid = authRepo.getUid();
@@ -117,7 +120,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         QuickParseUtil.ParseResult r = QuickParseUtil.parse(text);
         if (r.amount != null) {
-            binding.editAmount.setText(String.valueOf(r.amount.longValue()));
+            binding.editAmount.setText(MoneyInputFormatter.format(r.amount.longValue()));
         }
         if (r.note != null && !r.note.isEmpty()) {
             binding.editNote.setText(r.note);
@@ -200,7 +203,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                     } else {
                         binding.radioExpense.setChecked(true);
                     }
-                    binding.editAmount.setText(String.valueOf(t.getAmount()));
+                    binding.editAmount.setText(MoneyInputFormatter.format(t.getAmount()));
                     binding.editNote.setText(t.getNote() != null ? t.getNote() : "");
 
                     setupCategorySpinner(t.getType());
@@ -213,29 +216,20 @@ public class AddTransactionActivity extends AppCompatActivity {
         String uid = authRepo.getUid();
         if (uid == null) return;
 
-        String amountStr = binding.editAmount.getText() != null
-                ? binding.editAmount.getText().toString().trim() : "0";
-        long amount;
-        try {
-            String normalized = amountStr.replace(",", "").replace(".", "").trim();
-            amount = Long.parseLong(normalized);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "So tien khong hop le", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        long amount = MoneyInputFormatter.getRawValue(binding.editAmount);
         if (amount <= 0) {
-            Toast.makeText(this, "Nhap so tien > 0", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.j2_enter_amount_gt_zero), Toast.LENGTH_SHORT).show();
             return;
         }
 
         Category cat = (Category) binding.spinnerCategory.getSelectedItem();
         Wallet wallet = (Wallet) binding.spinnerWallet.getSelectedItem();
         if (cat == null) {
-            Toast.makeText(this, "Chon danh muc", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_select_category), Toast.LENGTH_SHORT).show();
             return;
         }
         if (wallet == null) {
-            Toast.makeText(this, "Chon vi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_select_wallet), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -264,12 +258,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         binding.btnSave.setEnabled(false);
         txRepo.addAtomic(uid, t, wallet.getId())
                 .addOnSuccessListener(unused -> {
-                    Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.success_saved), Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     binding.btnSave.setEnabled(true);
-                    Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.j2_cannot_save, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -278,21 +272,21 @@ public class AddTransactionActivity extends AppCompatActivity {
         txRepo.updateAtomic(uid, original, updated,
                 original.getWalletId(), wallet.getId())
                 .addOnSuccessListener(unused -> {
-                    Toast.makeText(this, "Da luu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.success_saved), Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     binding.btnSave.setEnabled(true);
-                    Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.j2_cannot_save, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
     }
 
     private void showDeleteConfirm() {
         new AlertDialog.Builder(this)
-                .setTitle("Xoa giao dich")
-                .setMessage("Ban co that su muon xoa giao dich nay?")
-                .setPositiveButton("Xoa", (d, w) -> deleteTransaction())
-                .setNegativeButton("Huy", null)
+                .setTitle(getString(R.string.j2_delete_transaction_title))
+                .setMessage(getString(R.string.j2_delete_transaction_message))
+                .setPositiveButton(getString(R.string.delete), (d, w) -> deleteTransaction())
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -303,12 +297,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         binding.btnDelete.setEnabled(false);
         txRepo.deleteAtomic(uid, originalTransaction, originalTransaction.getWalletId())
                 .addOnSuccessListener(unused -> {
-                    Toast.makeText(this, "Da xoa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.success_delete), Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     binding.btnDelete.setEnabled(true);
-                    Toast.makeText(this, "Khong the xoa: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.j2_cannot_delete, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
     }
 

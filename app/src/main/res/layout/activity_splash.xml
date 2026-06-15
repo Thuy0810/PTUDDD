@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Quản lý chi tiêu thông minh"
+        android:text="@string/s3_app_tagline"
             android:textColor="@color/text_on_dark"
         android:textSize="14sp" />
 </LinearLayout>

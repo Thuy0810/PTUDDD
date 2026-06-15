@@ -83,7 +83,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Còn lại"
+                    android:text="@string/budget_remaining_short"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>

@@ -206,27 +206,30 @@ public class TransactionRepository {
 
     @NonNull
     public Task<Void> deleteAtomic(String uid, Transaction t, String walletId) {
+        final Transaction requested = t;
         return db.runTransaction(transaction -> {
             DocumentReference txRef = null;
-            if (t.getId() != null) {
+            if (requested.getId() != null) {
                 txRef = db.collection("users").document(uid)
-                        .collection("transactions").document(t.getId());
+                        .collection("transactions").document(requested.getId());
             }
 
             // Đọc lại transaction từ Firestore để chắc chắn dùng dữ liệu mới nhất
+            Transaction actualTransaction = requested;
             if (txRef != null) {
                 DocumentSnapshot fresh = transaction.get(txRef);
                 if (fresh.exists()) {
                     Transaction actual = fresh.toObject(Transaction.class);
                     if (actual != null) {
-                        t = actual;
+                        actual.setId(fresh.getId());
+                        actualTransaction = actual;
                     }
                 }
             }
 
             // Xử lý transfer riêng
-            if (Transaction.TYPE_TRANSFER.equals(t.getType())) {
-                return deleteTransfer(transaction, uid, t);
+            if (Transaction.TYPE_TRANSFER.equals(actualTransaction.getType())) {
+                return deleteTransfer(transaction, uid, actualTransaction);
             }
 
             // Xử lý income/expense thông thường
@@ -248,8 +251,8 @@ public class TransactionRepository {
             }
             if (walletRef != null) {
                 // Hoàn tác: income thì trừ, expense thì cộng
-                long change = Transaction.TYPE_INCOME.equals(t.getType())
-                        ? -t.getAmount() : t.getAmount();
+                long change = Transaction.TYPE_INCOME.equals(actualTransaction.getType())
+                        ? -actualTransaction.getAmount() : actualTransaction.getAmount();
                 transaction.update(walletRef, "currentBalance", balance + change,
                         "updatedAt",
                         com.google.firebase.firestore.FieldValue.serverTimestamp());
@@ -259,7 +262,7 @@ public class TransactionRepository {
     }
 
     private Void deleteTransfer(com.google.firebase.firestore.Transaction transaction,
-                                String uid, Transaction t) {
+                                String uid, Transaction t) throws FirebaseFirestoreException {
         String fromId = t.getFromWalletId();
         String toId = t.getToWalletId();
         if (fromId != null) {

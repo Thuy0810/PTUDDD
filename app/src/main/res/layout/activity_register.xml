@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Tạo tài khoản mới"
+            android:text="@string/s3_create_new_account"
             android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nhanh chóng và dễ dàng"
+            android:text="@string/s3_quick_and_easy"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
@@ -139,7 +139,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đã có tài khoản? "
+                android:text="@string/s3_has_account_prefix"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 

@@ -125,7 +125,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="Tiền tệ"
+                    android:text="@string/s2_currency"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -144,7 +144,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Ký hiệu tiền tệ"
+                        android:text="@string/s2_currency_symbol"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -152,7 +152,7 @@
                         android:id="@+id/textCurrencySymbol"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="đ"
+                        android:text="vnd"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -177,7 +177,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Vị trí ký hiệu"
+                        android:text="@string/s2_symbol_position"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -185,7 +185,7 @@
                         android:id="@+id/textCurrencyPosition"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Trước số"
+                        android:text="@string/s2_after_number"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -210,7 +210,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Định dạng số"
+                        android:text="@string/s2_number_format"
                         android:textColor="@color/text_primary"
                         android:textSize="15sp" />
 
@@ -218,7 +218,7 @@
                         android:id="@+id/textCurrencyLocale"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Việt Nam"
+                        android:text="@string/s2_comma_separator"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
                 </LinearLayout>

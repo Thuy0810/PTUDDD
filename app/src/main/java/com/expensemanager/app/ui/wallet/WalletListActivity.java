@@ -22,7 +22,7 @@ import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.ui.adapter.WalletAdapter;
 import com.expensemanager.app.util.MoneyFormat;
-import com.expensemanager.app.util.MoneyValueParser;
+import com.expensemanager.app.util.MoneyInputFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,8 +93,9 @@ public class WalletListActivity extends AppCompatActivity {
         EditText editName = view.findViewById(R.id.editWalletName);
         EditText editBalance = view.findViewById(R.id.editWalletBalance);
         Spinner spinnerType = view.findViewById(R.id.spinnerWalletType);
+        MoneyInputFormatter.attach(editBalance);
 
-        String[] types = {"Tien mat", "Ngan hang", "Vi dien tu", "Tiet kiem"};
+        String[] types = getResources().getStringArray(R.array.wallet_type_labels);
         String[] typeKeys = {"cash", "bank", "ewallet", "savings"};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, types);
@@ -109,24 +110,23 @@ public class WalletListActivity extends AppCompatActivity {
         view.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String name = editName.getText().toString().trim();
             if (name.isEmpty()) {
-                Toast.makeText(this, "Nhap ten vi", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.j2_enter_wallet_name), Toast.LENGTH_SHORT).show();
                 return;
             }
             int pos = spinnerType.getSelectedItemPosition();
             String typeKey = typeKeys[pos];
-            long balance = MoneyValueParser.tryParse(
-                    editBalance.getText().toString().trim(), 0L);
+            long balance = MoneyInputFormatter.getRawValue(editBalance);
             Wallet wallet = new Wallet(null, name, typeKey, balance);
             wallet.setCurrentBalance(balance);
             view.findViewById(R.id.btnCreate).setEnabled(false);
             walletRepo.add(uid, wallet)
                     .addOnSuccessListener(unused -> {
-                        Toast.makeText(this, "Da them vi", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j2_wallet_added), Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     })
                     .addOnFailureListener(e -> {
                         view.findViewById(R.id.btnCreate).setEnabled(true);
-                        Toast.makeText(this, "Khong the them: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.j2_cannot_add, e.getMessage()), Toast.LENGTH_LONG).show();
                     });
         });
         dialog.show();
@@ -138,15 +138,16 @@ public class WalletListActivity extends AppCompatActivity {
         EditText editName = view.findViewById(R.id.editWalletName);
         EditText editBalance = view.findViewById(R.id.editWalletBalance);
         Spinner spinnerType = view.findViewById(R.id.spinnerWalletType);
+        MoneyInputFormatter.attach(editBalance);
 
         editName.setText(wallet.getName());
         if (wallet.getCurrentBalance() > 0) {
-            editBalance.setText(String.valueOf(wallet.getCurrentBalance()));
+            editBalance.setText(MoneyInputFormatter.format(wallet.getCurrentBalance()));
         }
         editBalance.setVisibility(View.GONE);
-        view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText("Luu");
+        view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText(getString(R.string.save));
 
-        String[] types = {"Tien mat", "Ngan hang", "Vi dien tu", "Tiet kiem"};
+        String[] types = getResources().getStringArray(R.array.wallet_type_labels);
         String[] typeKeys = {"cash", "bank", "ewallet", "savings"};
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, types);
@@ -160,6 +161,7 @@ public class WalletListActivity extends AppCompatActivity {
             }
         }
 
+        final AlertDialog[] dialogRef = new AlertDialog[1];
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.edit_wallet)
                 .setView(view)
@@ -168,7 +170,7 @@ public class WalletListActivity extends AppCompatActivity {
                     walletRepo.countTransactions(uid, wallet.getId())
                             .addOnSuccessListener(count -> {
                                 if (count > 0L) {
-                                    showArchiveConfirm(uid, wallet, dialog);
+                                    showArchiveConfirm(uid, wallet, dialogRef[0]);
                                 } else {
                                     showDeleteConfirm(uid, wallet);
                                 }
@@ -177,11 +179,12 @@ public class WalletListActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .create();
+        dialogRef[0] = dialog;
 
         view.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String name = editName.getText().toString().trim();
             if (name.isEmpty()) {
-                Toast.makeText(this, "Nhap ten vi", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.j2_enter_wallet_name), Toast.LENGTH_SHORT).show();
                 return;
             }
             int pos = spinnerType.getSelectedItemPosition();
@@ -190,12 +193,12 @@ public class WalletListActivity extends AppCompatActivity {
             view.findViewById(R.id.btnCreate).setEnabled(false);
             walletRepo.update(uid, wallet)
                     .addOnSuccessListener(unused -> {
-                        Toast.makeText(this, "Da cap nhat", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.j2_wallet_updated), Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     })
                     .addOnFailureListener(e -> {
                         view.findViewById(R.id.btnCreate).setEnabled(true);
-                        Toast.makeText(this, "Khong the luu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.j2_cannot_save, e.getMessage()), Toast.LENGTH_LONG).show();
                     });
         });
 
@@ -204,38 +207,37 @@ public class WalletListActivity extends AppCompatActivity {
 
     private void showArchiveConfirm(String uid, Wallet wallet, AlertDialog parent) {
         new AlertDialog.Builder(this)
-                .setTitle("Luu tru vi")
-                .setMessage("Vi \"" + wallet.getName()
-                        + "\" dang co giao dich. Vi se duoc luu tru (khong xoa).")
-                .setPositiveButton("Luu tru", (dl, wl) -> {
+                .setTitle(getString(R.string.j2_archive_wallet_title))
+                .setMessage(getString(R.string.j2_archive_wallet_message, wallet.getName()))
+                .setPositiveButton(getString(R.string.j2_archive), (dl, wl) -> {
                     walletRepo.archive(uid, wallet.getId())
                             .addOnSuccessListener(unused -> {
-                                Toast.makeText(this, "Da luu tru vi", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, getString(R.string.j2_wallet_archived), Toast.LENGTH_SHORT).show();
                                 parent.dismiss();
                             })
                             .addOnFailureListener(e ->
                                     Toast.makeText(this,
-                                            "Loi: " + e.getMessage(),
+                                            getString(R.string.j2_error_generic, e.getMessage()),
                                             Toast.LENGTH_LONG).show());
                 })
-                .setNegativeButton("Huy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
     private void showDeleteConfirm(String uid, Wallet wallet) {
         new AlertDialog.Builder(this)
-                .setTitle("Xoa vi")
-                .setMessage("Ban co chat muon xoa vi \"" + wallet.getName() + "\"?")
-                .setPositiveButton("Xoa", (dl, wl) -> {
+                .setTitle(getString(R.string.j2_delete_wallet_title))
+                .setMessage(getString(R.string.j2_delete_wallet_message, wallet.getName()))
+                .setPositiveButton(getString(R.string.delete), (dl, wl) -> {
                     walletRepo.delete(uid, wallet.getId())
                             .addOnSuccessListener(unused ->
-                                    Toast.makeText(this, "Da xoa vi", Toast.LENGTH_SHORT).show())
+                                    Toast.makeText(this, getString(R.string.j2_wallet_deleted), Toast.LENGTH_SHORT).show())
                             .addOnFailureListener(e ->
                                     Toast.makeText(this,
-                                            "Khong the xoa: " + e.getMessage(),
+                                            getString(R.string.j2_cannot_delete, e.getMessage()),
                                             Toast.LENGTH_LONG).show());
                 })
-                .setNegativeButton("Huy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

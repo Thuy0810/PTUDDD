@@ -9,7 +9,7 @@
         style="@style/Widget.ExpenseManager.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tên nhóm">
+        android:hint="@string/s2_group_name">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editGroupName"
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Phân loại nhóm"
+        android:text="@string/s2_group_category"
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Thiết yếu"
+            android:text="@string/s2_essential"
             android:textColor="@color/text_primary" />
 
         <RadioButton
@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Nhu cầu"
+            android:text="@string/s2_need"
             android:textColor="@color/text_primary" />
 
         <RadioButton
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Khoản muốn có"
+            android:text="@string/s2_want"
             android:textColor="@color/text_primary" />
 
         <RadioButton
@@ -60,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Khác"
+            android:text="@string/wallet_other"
             android:textColor="@color/text_primary" />
     </RadioGroup>
 </LinearLayout>
