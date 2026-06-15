@@ -118,32 +118,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 binding.viewIconBg.setBackgroundResource(R.drawable.bg_circle_primary);
             }
 
-            // --- Category / Type label ---
-            if (Transaction.TYPE_TRANSFER.equals(type)) {
-                binding.textCategory.setText(R.string.transfer);
-            } else {
-                binding.textCategory.setText(categoryName);
-            }
+            // --- Category label ---
+            binding.textCategory.setText(categoryName);
 
-            // --- Wallet / transfer route ---
+            // --- Wallet ---
             String walletText = "";
-            if (Transaction.TYPE_TRANSFER.equals(type)) {
-                Wallet from = walletMap.get(t.getFromWalletId());
-                Wallet to = walletMap.get(t.getToWalletId());
-                String fromName = from != null ? from.getName()
-                        : binding.getRoot().getContext().getString(R.string.wallet_deleted);
-                String toName = to != null ? to.getName()
-                        : binding.getRoot().getContext().getString(R.string.wallet_deleted);
-                walletText = fromName + " → " + toName;
-            } else {
-                Wallet w = walletMap.get(t.getWalletId());
-                if (w != null) {
-                    walletText = binding.getRoot().getContext()
-                            .getString(R.string.wallet_label, w.getName());
-                } else if (t.getWalletId() != null && !t.getWalletId().isEmpty()) {
-                    walletText = binding.getRoot().getContext()
-                            .getString(R.string.wallet_deleted);
-                }
+            Wallet w = walletMap.get(t.getWalletId());
+            if (w != null) {
+                walletText = binding.getRoot().getContext()
+                        .getString(R.string.wallet_label, w.getName());
+            } else if (t.getWalletId() != null && !t.getWalletId().isEmpty()) {
+                walletText = binding.getRoot().getContext()
+                        .getString(R.string.wallet_deleted);
             }
             binding.textWallet.setText(walletText);
 
@@ -162,11 +148,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             // --- Amount ---
             String amountStr;
             int amountColor;
-            if (Transaction.TYPE_TRANSFER.equals(type)) {
-                amountStr = MoneyFormat.format(t.getAmount());
-                amountColor = ContextCompat.getColor(
-                        binding.getRoot().getContext(), R.color.text_secondary);
-            } else if (Transaction.TYPE_INCOME.equals(type)) {
+            if (Transaction.TYPE_INCOME.equals(type)) {
                 amountStr = MoneyFormat.formatSigned(t.getAmount(), Transaction.TYPE_INCOME);
                 amountColor = ContextCompat.getColor(
                         binding.getRoot().getContext(), R.color.income_green);

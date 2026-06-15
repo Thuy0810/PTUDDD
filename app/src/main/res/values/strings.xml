@@ -28,7 +28,6 @@
     <string name="edit_transaction">Sửa giao dịch</string>
     <string name="income">Thu nhập</string>
     <string name="expense">Chi tiêu</string>
-    <string name="transfer">Chuyển tiền</string>
     <string name="amount">Số tiền</string>
     <string name="amount_hint">0</string>
     <string name="note">Ghi chú</string>
@@ -204,14 +203,10 @@
     <string name="wallet_label">Ví: %1$s</string>
     <string name="wallet_deleted">Ví đã xóa</string>
     <string name="category_deleted">Danh mục đã xóa</string>
-    <string name="transfer_route">%1$s ← %2$s</string>
     <string name="transaction_income">Thu nhập</string>
     <string name="transaction_expense">Chi tiêu</string>
-    <string name="transaction_transfer">Chuyển tiền</string>
     <!-- Transaction Detail BottomSheet -->
     <string name="time">Giờ</string>
-    <string name="wallet_from">Ví nguồn</string>
-    <string name="wallet_to">Ví nhận</string>
     <string name="created_at">Ngày tạo</string>
     <string name="delete_confirm_title">Xóa giao dịch?</string>
     <string name="delete_transaction_confirm">Bạn có chắc muốn xóa giao dịch này?</string>
@@ -405,13 +400,6 @@
     <string name="s2_essential">Thiết yếu</string>
     <string name="s2_need">Nhu cầu</string>
     <string name="s2_want">Khoản muốn có</string>
-    <!-- group s3 -->
-    <string name="s3_transfer_amount">Số tiền chuyển</string>
-    <string name="s3_from_wallet">Từ ví</string>
-    <string name="s3_to_wallet">Đến ví</string>
-    <string name="s3_note_optional">Ghi chú (tùy chọn)</string>
-    <string name="s3_transfer_note_hint">Ví dụ: Trả tiền tháng</string>
-    <string name="s3_confirm_transfer">Xác nhận chuyển tiền</string>
     <string name="s3_food_drink">Ăn uống</string>
     <string name="s3_app_tagline">Quản lý chi tiêu thông minh</string>
     <string name="s3_welcome">Chào mừng bạn!</string>
@@ -500,7 +488,6 @@
     <string name="j2_select_from_to_wallet">Chọn ví nguồn và ví đích</string>
     <string name="j2_select_two_diff_wallets">Chọn hai ví khác nhau</string>
     <string name="j2_warn_insufficient_balance">Cảnh báo: số dư ví nguồn không đủ (%1$s)</string>
-    <string name="j2_transferred">Đã chuyển %1$s</string>
     <string name="j2_payment_wallet_created">Đã tạo ví thanh toán</string>
     <string name="j2_transaction_title">Giao dịch</string>
     <string name="j2_delete_transaction_title">Xóa giao dịch</string>
@@ -561,7 +548,7 @@
     <string name="j3_vs_previous_period">%1$s%2$s%% so với kỳ trước</string>
     <string name="j3_top_category_value">%1$s: %2$s</string>
     <string name="j3_no_data">Chưa có dữ liệu</string>
-    <string name="j3_monthly_analysis">Chi tiêu TB: %1$s | Chuyển tiền: %2$s</string>
+    <string name="j3_monthly_analysis">Chi tiêu TB: %1$s</string>
     <string name="j3_day_of_week_label">Thứ trong tuần</string>
     <string name="j3_overdue_with_date">QUÁ HẠN! %1$s</string>
     <string name="j3_deadline_with_date">Hạn: %1$s</string>

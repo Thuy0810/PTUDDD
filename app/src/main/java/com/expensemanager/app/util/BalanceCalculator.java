@@ -19,10 +19,7 @@ public final class BalanceCalculator {
         String wid = wallet.getId();
         if (wid == null) return balance;
         for (Transaction t : all) {
-            if (Transaction.TYPE_TRANSFER.equals(t.getType())) {
-                if (wid.equals(t.getFromWalletId())) balance -= t.getAmount();
-                if (wid.equals(t.getToWalletId())) balance += t.getAmount();
-            } else if (wid.equals(t.getWalletId())) {
+            if (wid.equals(t.getWalletId())) {
                 if (Transaction.TYPE_INCOME.equals(t.getType())) {
                     balance += t.getAmount();
                 } else if (Transaction.TYPE_EXPENSE.equals(t.getType())) {

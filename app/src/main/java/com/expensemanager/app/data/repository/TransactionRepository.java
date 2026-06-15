@@ -138,13 +138,11 @@ public class TransactionRepository {
      * <ul>
      *   <li>income: +amount</li>
      *   <li>expense: -amount</li>
-     *   <li>transfer: -amount (ví nguồn mới ghi)</li>
      * </ul>
      */
     private long balanceChange(Transaction t) {
         if (Transaction.TYPE_INCOME.equals(t.getType())) return t.getAmount();
         if (Transaction.TYPE_EXPENSE.equals(t.getType())) return -t.getAmount();
-        if (Transaction.TYPE_TRANSFER.equals(t.getType())) return -t.getAmount();
         return 0L;
     }
 
@@ -227,11 +225,6 @@ public class TransactionRepository {
                 }
             }
 
-            // Xử lý transfer riêng
-            if (Transaction.TYPE_TRANSFER.equals(actualTransaction.getType())) {
-                return deleteTransfer(transaction, uid, actualTransaction);
-            }
-
             // Xử lý income/expense thông thường
             DocumentReference walletRef = null;
             if (walletId != null) {
@@ -259,38 +252,6 @@ public class TransactionRepository {
             }
             return null;
         });
-    }
-
-    private Void deleteTransfer(com.google.firebase.firestore.Transaction transaction,
-                                String uid, Transaction t) throws FirebaseFirestoreException {
-        String fromId = t.getFromWalletId();
-        String toId = t.getToWalletId();
-        if (fromId != null) {
-            DocumentReference fromRef = db.collection("users").document(uid)
-                    .collection("wallets").document(fromId);
-            DocumentSnapshot fromSnap = transaction.get(fromRef);
-            Long fromBalance = MoneyValueParser.toLong(fromSnap.get("currentBalance"));
-            if (fromBalance == null) fromBalance = 0L;
-            transaction.update(fromRef, "currentBalance", fromBalance + t.getAmount(),
-                    "updatedAt",
-                    com.google.firebase.firestore.FieldValue.serverTimestamp());
-        }
-        if (toId != null) {
-            DocumentReference toRef = db.collection("users").document(uid)
-                    .collection("wallets").document(toId);
-            DocumentSnapshot toSnap = transaction.get(toRef);
-            Long toBalance = MoneyValueParser.toLong(toSnap.get("currentBalance"));
-            if (toBalance == null) toBalance = 0L;
-            transaction.update(toRef, "currentBalance", toBalance - t.getAmount(),
-                    "updatedAt",
-                    com.google.firebase.firestore.FieldValue.serverTimestamp());
-        }
-        // Xoá transaction document
-        if (t.getId() != null) {
-            transaction.delete(db.collection("users").document(uid)
-                    .collection("transactions").document(t.getId()));
-        }
-        return null;
     }
 
     /**

@@ -10,7 +10,6 @@ import java.util.Map;
 public class Transaction {
     public static final String TYPE_INCOME = "income";
     public static final String TYPE_EXPENSE = "expense";
-    public static final String TYPE_TRANSFER = "transfer";
 
     @DocumentId
     private String id;
@@ -18,8 +17,6 @@ public class Transaction {
     private long amount;
     private String categoryId;
     private String walletId;
-    private String fromWalletId;
-    private String toWalletId;
     private String note;
     private Timestamp date;
     private String mood;
@@ -44,12 +41,6 @@ public class Transaction {
 
     public String getWalletId() { return walletId; }
     public void setWalletId(String walletId) { this.walletId = walletId; }
-
-    public String getFromWalletId() { return fromWalletId; }
-    public void setFromWalletId(String fromWalletId) { this.fromWalletId = fromWalletId; }
-
-    public String getToWalletId() { return toWalletId; }
-    public void setToWalletId(String toWalletId) { this.toWalletId = toWalletId; }
 
     public String getNote() { return note != null ? note : ""; }
     public void setNote(String note) { this.note = note; }
@@ -78,7 +69,6 @@ public class Transaction {
 
     public boolean isIncome()    { return TYPE_INCOME.equals(type); }
     public boolean isExpense()   { return TYPE_EXPENSE.equals(type); }
-    public boolean isTransfer()  { return TYPE_TRANSFER.equals(type); }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -86,8 +76,6 @@ public class Transaction {
         map.put("amount", amount);
         map.put("categoryId", categoryId != null ? categoryId : "");
         map.put("walletId", walletId != null ? walletId : "");
-        if (fromWalletId != null) map.put("fromWalletId", fromWalletId);
-        if (toWalletId != null) map.put("toWalletId", toWalletId);
         map.put("note", getNote());
         map.put("date", date != null ? date : Timestamp.now());
         if (mood != null) map.put("mood", mood);

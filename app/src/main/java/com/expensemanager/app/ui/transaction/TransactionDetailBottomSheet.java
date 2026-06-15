@@ -84,12 +84,9 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         if (transaction.isIncome()) {
             amountColor = ContextCompat.getColor(requireContext(), R.color.income_green);
             binding.textType.setText(R.string.transaction_income);
-        } else if (transaction.isExpense()) {
+        } else {
             amountColor = ContextCompat.getColor(requireContext(), R.color.expense_red);
             binding.textType.setText(R.string.transaction_expense);
-        } else {
-            amountColor = ContextCompat.getColor(requireContext(), R.color.text_primary);
-            binding.textType.setText(R.string.transaction_transfer);
         }
         binding.textAmount.setTextColor(amountColor);
 
@@ -100,40 +97,17 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         binding.textDate.setText(dateFmt.format(date));
         binding.textTime.setText(timeFmt.format(date));
 
-        // Category (not for transfer)
-        if (!transaction.isTransfer()) {
-            binding.layoutCategory.setVisibility(View.VISIBLE);
-            Category cat = categoryMap != null ? categoryMap.get(transaction.getCategoryId()) : null;
-            binding.textCategory.setText(
-                    cat != null ? cat.getName() : getString(R.string.category_deleted));
-        } else {
-            binding.layoutCategory.setVisibility(View.GONE);
-        }
+        // Category
+        binding.layoutCategory.setVisibility(View.VISIBLE);
+        Category cat = categoryMap != null ? categoryMap.get(transaction.getCategoryId()) : null;
+        binding.textCategory.setText(
+                cat != null ? cat.getName() : getString(R.string.category_deleted));
 
-        // Wallet (not for transfer)
-        if (!transaction.isTransfer()) {
-            binding.layoutWallet.setVisibility(View.VISIBLE);
-            Wallet w = walletMap != null ? walletMap.get(transaction.getWalletId()) : null;
-            binding.textWallet.setText(
-                    w != null ? w.getName() : getString(R.string.wallet_deleted));
-        } else {
-            binding.layoutWallet.setVisibility(View.GONE);
-        }
-
-        // From/To wallet (transfer only)
-        if (transaction.isTransfer()) {
-            Wallet from = walletMap != null ? walletMap.get(transaction.getFromWalletId()) : null;
-            Wallet to = walletMap != null ? walletMap.get(transaction.getToWalletId()) : null;
-            binding.layoutFromWallet.setVisibility(View.VISIBLE);
-            binding.layoutToWallet.setVisibility(View.VISIBLE);
-            binding.textFromWallet.setText(
-                    from != null ? from.getName() : getString(R.string.wallet_deleted));
-            binding.textToWallet.setText(
-                    to != null ? to.getName() : getString(R.string.wallet_deleted));
-        } else {
-            binding.layoutFromWallet.setVisibility(View.GONE);
-            binding.layoutToWallet.setVisibility(View.GONE);
-        }
+        // Wallet
+        binding.layoutWallet.setVisibility(View.VISIBLE);
+        Wallet w = walletMap != null ? walletMap.get(transaction.getWalletId()) : null;
+        binding.textWallet.setText(
+                w != null ? w.getName() : getString(R.string.wallet_deleted));
 
         // Note
         String note = transaction.getNote();

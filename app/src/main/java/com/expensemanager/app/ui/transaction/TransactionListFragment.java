@@ -276,9 +276,7 @@ public class TransactionListFragment extends Fragment {
                 String walletId = wallets.get(idx).getId();
                 List<Transaction> walletFiltered = new ArrayList<>();
                 for (Transaction t : filtered) {
-                    if (walletId.equals(t.getWalletId())
-                            || walletId.equals(t.getFromWalletId())
-                            || walletId.equals(t.getToWalletId())) {
+                    if (walletId.equals(t.getWalletId())) {
                         walletFiltered.add(t);
                     }
                 }

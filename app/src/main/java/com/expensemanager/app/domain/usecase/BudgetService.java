@@ -144,7 +144,7 @@ public final class BudgetService {
 
     /**
      * Tính số tiền đã chi cho một budget, chỉ tính expense (ràng buộc 9),
-     * bỏ qua income và transfer.
+     * bỏ qua income.
      *
      * @param b budget
      * @param allTransactionsOfMonth tập giao dịch (thường là của tháng tương ứng)

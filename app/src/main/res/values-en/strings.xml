@@ -28,7 +28,6 @@
     <string name="edit_transaction">Edit transaction</string>
     <string name="income">Income</string>
     <string name="expense">Expense</string>
-    <string name="transfer">Transfer</string>
     <string name="amount">Amount</string>
     <string name="amount_hint">0</string>
     <string name="note">Note</string>
@@ -204,14 +203,10 @@
     <string name="wallet_label">Wallet: %1$s</string>
     <string name="wallet_deleted">Wallet deleted</string>
     <string name="category_deleted">Category deleted</string>
-    <string name="transfer_route">%1$s ← %2$s</string>
     <string name="transaction_income">Income</string>
     <string name="transaction_expense">Expense</string>
-    <string name="transaction_transfer">Transfer</string>
     <!-- Transaction Detail BottomSheet -->
     <string name="time">Time</string>
-    <string name="wallet_from">Source wallet</string>
-    <string name="wallet_to">Destination wallet</string>
     <string name="created_at">Created on</string>
     <string name="delete_confirm_title">Delete transaction?</string>
     <string name="delete_transaction_confirm">Are you sure you want to delete this transaction?</string>
@@ -405,13 +400,6 @@
     <string name="s2_essential">Essential</string>
     <string name="s2_need">Needs</string>
     <string name="s2_want">Wants</string>
-    <!-- group s3 -->
-    <string name="s3_transfer_amount">Transfer amount</string>
-    <string name="s3_from_wallet">From wallet</string>
-    <string name="s3_to_wallet">To wallet</string>
-    <string name="s3_note_optional">Note (optional)</string>
-    <string name="s3_transfer_note_hint">Example: Monthly payment</string>
-    <string name="s3_confirm_transfer">Confirm transfer</string>
     <string name="s3_food_drink">Food &amp; drink</string>
     <string name="s3_app_tagline">Smart expense management</string>
     <string name="s3_welcome">Welcome!</string>
@@ -500,7 +488,6 @@
     <string name="j2_select_from_to_wallet">Select source and destination wallets</string>
     <string name="j2_select_two_diff_wallets">Select two different wallets</string>
     <string name="j2_warn_insufficient_balance">Warning: source wallet balance is insufficient (%1$s)</string>
-    <string name="j2_transferred">Transferred %1$s</string>
     <string name="j2_payment_wallet_created">Payment wallet created</string>
     <string name="j2_transaction_title">Transaction</string>
     <string name="j2_delete_transaction_title">Delete transaction</string>
@@ -561,7 +548,7 @@
     <string name="j3_vs_previous_period">%1$s%2$s%% vs. previous period</string>
     <string name="j3_top_category_value">%1$s: %2$s</string>
     <string name="j3_no_data">No data yet</string>
-    <string name="j3_monthly_analysis">Avg. spending: %1$s | Transfers: %2$s</string>
+    <string name="j3_monthly_analysis">Avg. spending: %1$s</string>
     <string name="j3_day_of_week_label">Day of week</string>
     <string name="j3_overdue_with_date">OVERDUE! %1$s</string>
     <string name="j3_deadline_with_date">Deadline: %1$s</string>

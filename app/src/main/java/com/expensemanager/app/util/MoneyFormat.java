@@ -84,10 +84,8 @@ public final class MoneyFormat {
     /**
      * Format số tiền có dấu cộng/trừ cho thu/chi.
      *
-     * <p>Chuyển tiền (TRANSFER) trả về số không dấu.
-     *
      * @param amount số tiền
-     * @param type   {@code "income"}, {@code "expense"}, {@code "transfer"}
+     * @param type   {@code "income"}, {@code "expense"}
      */
     public static String formatSigned(long amount, String type) {
         String base = format(amount);

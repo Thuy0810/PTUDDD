@@ -32,7 +32,6 @@
         <activity android:name=".ui.transaction.AddTransactionActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.transaction.QuickAddActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.wallet.WalletListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
-        <activity android:name=".ui.wallet.TransferActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.category.CategoryListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.budget.BudgetListActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.budget.BudgetAllocationActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />

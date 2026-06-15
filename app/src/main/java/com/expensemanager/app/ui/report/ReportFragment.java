@@ -62,7 +62,7 @@ public class ReportFragment extends Fragment {
     private final Calendar selectedDate = Calendar.getInstance();
     private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
     private String selectedWalletId = null;
-    private String selectedType = "all"; // all/income/expense/transfer
+    private String selectedType = "all"; // all/income/expense
 
     private TransactionRepository txRepo;
     private String currentUid;
@@ -199,7 +199,6 @@ public class ReportFragment extends Fragment {
             if (checkedId == R.id.radioAll) selectedType = "all";
             else if (checkedId == R.id.radioIncome) selectedType = "income";
             else if (checkedId == R.id.radioExpense) selectedType = "expense";
-            else if (checkedId == R.id.radioTransfer) selectedType = "transfer";
             applyFiltersAndBind();
         });
     }
@@ -352,19 +351,13 @@ public class ReportFragment extends Fragment {
 
     private boolean passesWalletFilter(Transaction t) {
         if (selectedWalletId == null) return true;
-        String tw = t.getWalletId();
-        if (Transaction.TYPE_TRANSFER.equals(t.getType())) {
-            return selectedWalletId.equals(t.getFromWalletId())
-                    || selectedWalletId.equals(t.getToWalletId());
-        }
-        return selectedWalletId.equals(tw);
+        return selectedWalletId.equals(t.getWalletId());
     }
 
     private boolean passesTypeFilter(Transaction t) {
         switch (selectedType) {
             case "income": return Transaction.TYPE_INCOME.equals(t.getType());
             case "expense": return Transaction.TYPE_EXPENSE.equals(t.getType());
-            case "transfer": return Transaction.TYPE_TRANSFER.equals(t.getType());
             default: return true;
         }
     }
@@ -444,13 +437,9 @@ public class ReportFragment extends Fragment {
     private void bindMonthData(List<Transaction> txs) {
         if (binding == null) return;
 
-        double income = 0, expense = 0, transfer = 0;
+        double income = 0, expense = 0;
         Map<String, Double> byCat = new HashMap<>();
         for (Transaction t : txs) {
-            if (Transaction.TYPE_TRANSFER.equals(t.getType())) {
-                transfer += t.getAmount();
-                continue;
-            }
             if (Transaction.TYPE_INCOME.equals(t.getType())) income += t.getAmount();
             if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
                 expense += t.getAmount();
@@ -499,7 +488,7 @@ public class ReportFragment extends Fragment {
         }
         double avgExpense = txCount > 0 ? expense / txCount : 0;
         binding.textMonthlyAnalysis.setText(getString(R.string.j3_monthly_analysis,
-                MoneyFormat.format(avgExpense), MoneyFormat.format(transfer)));
+                MoneyFormat.format(avgExpense)));
     }
 
     private String findTopCategory(Map<String, Double> byCat) {
