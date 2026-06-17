@@ -590,6 +590,7 @@
     <string name="j3_vs_previous_period">%1$s%2$s%% so với kỳ trước</string>
     <string name="j3_top_category_value">%1$s: %2$s</string>
     <string name="j3_no_data">Chưa có dữ liệu</string>
+    <string name="j3_no_chart_data">Chưa có dữ liệu biểu đồ</string>
     <string name="j3_monthly_analysis">Chi tiêu TB: %1$s</string>
     <string name="j3_day_of_week_label">Thứ trong tuần</string>
     <string name="j3_overdue_with_date">QUÁ HẠN! %1$s</string>

@@ -50,50 +50,43 @@
             android:paddingTop="18dp"
             android:paddingBottom="90dp">
 
-            <!-- Month selector -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Month selector: thanh trang bo goc, shadow nhe (theo thiet ke) -->
+            <LinearLayout
+                android:id="@+id/layoutMonth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="1dp">
+                android:background="@drawable/bg_month_selector"
+                android:clickable="true"
+                android:focusable="true"
+                android:elevation="2dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="12dp">
 
-                <LinearLayout
-                    android:id="@+id/layoutMonth"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_chevron_left"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/textMonth"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_month_selector"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="12dp">
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/s2_month_5"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_chevron_left"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:id="@+id/textMonth"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/s2_month_5"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/text_secondary" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="@color/text_secondary" />
+            </LinearLayout>
 
             <!-- Overview gradient card -->
             <LinearLayout

@@ -146,6 +146,14 @@
                     android:paddingVertical="7dp"
                     android:visibility="gone">
 
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="6dp"
+                        android:contentDescription="@string/budget_remaining_label"
+                        android:src="@drawable/ic_target_ring"
+                        app:tint="@color/white" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -396,10 +404,23 @@
                 android:orientation="horizontal"
                 android:padding="14dp">
 
-                <View
-                    android:layout_width="4dp"
-                    android:layout_height="36dp"
-                    android:background="@color/expense_red" />
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp">
+
+                    <View
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:background="@drawable/bg_circle_red" />
+
+                    <ImageView
+                        android:layout_width="19dp"
+                        android:layout_height="19dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/alert_over_budget"
+                        android:src="@drawable/ic_alert_tri"
+                        app:tint="@color/expense_red" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/textAlerts"
@@ -436,15 +457,17 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="18dp"
-                        android:background="@drawable/bg_pill_orange" />
+                    <ImageView
+                        android:layout_width="19dp"
+                        android:layout_height="19dp"
+                        android:contentDescription="@string/financial_health"
+                        android:src="@drawable/ic_pulse"
+                        app:tint="@color/brand_blue" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:text="@string/financial_health"
                         android:textColor="@color/text_primary"

@@ -291,6 +291,14 @@ public class ReportFragment extends Fragment {
     }
 
     private void setupChartListeners() {
+        // Trang thai rong tieng Viet + tranh truc am khi chua co du lieu
+        int faint = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_secondary);
+        binding.pieChart.setNoDataText(getString(R.string.j3_no_chart_data));
+        binding.pieChart.setNoDataTextColor(faint);
+        binding.barChart.setNoDataText(getString(R.string.j3_no_chart_data));
+        binding.barChart.setNoDataTextColor(faint);
+        binding.barChart.getAxisLeft().setAxisMinimum(0f);
+
         binding.pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(com.github.mikephil.charting.data.Entry e, Highlight h) {
