@@ -4,23 +4,18 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Card peeking out the top of the wallet (accent) -->
+    <!-- Card peeking out the top -->
     <path
-        android:fillColor="#FB8C2E"
+        android:fillColor="#000000"
         android:pathData="M42,29 H66 A3,3 0 0 1 69,32 V42 A3,3 0 0 1 66,45 H42 A3,3 0 0 1 39,42 V32 A3,3 0 0 1 42,29 Z" />
 
     <!-- Wallet body -->
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="#000000"
         android:pathData="M35,38 H73 A7,7 0 0 1 80,45 V65 A7,7 0 0 1 73,72 H35 A7,7 0 0 1 28,65 V45 A7,7 0 0 1 35,38 Z" />
 
-    <!-- Clasp / snap closure (accent) -->
+    <!-- Clasp button (cut-out detail) -->
     <path
-        android:fillColor="#FB8C2E"
-        android:pathData="M65,50 H75 A3,3 0 0 1 78,53 V57 A3,3 0 0 1 75,60 H65 A3,3 0 0 1 62,57 V53 A3,3 0 0 1 65,50 Z" />
-
-    <!-- Clasp button -->
-    <path
-        android:fillColor="#2563EB"
+        android:fillColor="#FFFFFF"
         android:pathData="M67.5,55 A2.5,2.5 0 1 0 72.5,55 A2.5,2.5 0 1 0 67.5,55 Z" />
 </vector>
