@@ -1,5 +1,6 @@
 package com.expensemanager.app.ui.transaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -307,12 +308,36 @@ public class AddTransactionActivity extends AppCompatActivity {
         txRepo.addAtomic(uid, t, wallet.getId())
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(this, getString(R.string.success_saved), Toast.LENGTH_SHORT).show();
-                    finish();
+                    // Vừa thêm khoản THU mới → gợi ý "giao việc cho tiền".
+                    if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                        promptAssignMoney();
+                    } else {
+                        finish();
+                    }
                 })
                 .addOnFailureListener(e -> {
                     binding.btnSave.setEnabled(true);
                     Toast.makeText(this, getString(R.string.j2_cannot_save, e.getMessage()), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    /** Sau khi thêm khoản thu, gợi ý phân bổ ("giao việc") cho số tiền mới. */
+    private void promptAssignMoney() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.assign_money_title))
+                .setMessage(getString(R.string.assign_money_prompt))
+                .setPositiveButton(getString(R.string.assign_now), (d, w) -> {
+                    Intent i = new Intent(this,
+                            com.expensemanager.app.ui.budget.BudgetAllocationActivity.class);
+                    i.putExtra(
+                            com.expensemanager.app.ui.budget.BudgetAllocationActivity.EXTRA_MONTH_KEY,
+                            com.expensemanager.app.util.DateUtils.currentMonthKey());
+                    startActivity(i);
+                    finish();
+                })
+                .setNegativeButton(getString(R.string.later), (d, w) -> finish())
+                .setOnCancelListener(d -> finish())
+                .show();
     }
 
     private void performUpdate(String uid, Transaction original, Transaction updated, Wallet wallet) {

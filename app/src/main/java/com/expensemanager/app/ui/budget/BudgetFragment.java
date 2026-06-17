@@ -42,6 +42,7 @@ public class BudgetFragment extends Fragment {
     private BudgetAdapter adapter;
     private List<Category> allCategories = new ArrayList<>();
     private List<Budget> currentBudgets = new ArrayList<>();
+    private long monthIncome = 0L;
 
     @Nullable
     @Override
@@ -85,11 +86,11 @@ public class BudgetFragment extends Fragment {
         binding.tabOverview.setOnClickListener(v -> updateTabUI(true));
         binding.tabExpense.setOnClickListener(v -> updateTabUI(false));
 
-        binding.btnAllocate.setOnClickListener(v -> {
-            Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
-            i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, DateUtils.currentMonthKey());
-            startActivity(i);
-        });
+        binding.btnAllocate.setOnClickListener(v -> openAllocation());
+
+        // Giao viec cho tien
+        binding.cardAssignMoney.setOnClickListener(v -> openAllocation());
+        binding.btnAssignMoney.setOnClickListener(v -> openAllocation());
 
         // Ke hoach khac: Muc tieu + Thu thach
         binding.btnPlanGoals.setOnClickListener(v ->
@@ -98,6 +99,12 @@ public class BudgetFragment extends Fragment {
         binding.btnPlanChallenge.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(),
                         com.expensemanager.app.ui.challenge.ChallengeListActivity.class)));
+    }
+
+    private void openAllocation() {
+        Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
+        i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, DateUtils.currentMonthKey());
+        startActivity(i);
     }
 
     private void updateTabUI(boolean showOverview) {
@@ -136,6 +143,7 @@ public class BudgetFragment extends Fragment {
             currentBudgets = list != null ? list : new ArrayList<>();
             adapter.setItems(currentBudgets);
             updateTotalSummary();
+            updateAssignCard();
         });
     }
 
@@ -144,6 +152,7 @@ public class BudgetFragment extends Fragment {
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
             Map<String, Long> spentMap = new HashMap<>();
             long totalSpent = 0L;
+            long income = 0L;
             if (txs != null) {
                 for (Transaction t : txs) {
                     if (Transaction.TYPE_EXPENSE.equals(t.getType())) {
@@ -153,11 +162,15 @@ public class BudgetFragment extends Fragment {
                             long prev = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
                             spentMap.put(catId, prev + t.getAmount());
                         }
+                    } else if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                        income += t.getAmount();
                     }
                 }
             }
+            monthIncome = income;
             adapter.setSpentMap(spentMap);
             updateTotalSummaryWithSpent(spentMap, totalSpent);
+            updateAssignCard();
         });
     }
 
@@ -186,6 +199,26 @@ public class BudgetFragment extends Fragment {
         if (totalRemaining < 0) {
             binding.textTotalRemaining.setTextColor(
                     requireContext().getColor(R.color.expense_red));
+        }
+    }
+
+    /** Cập nhật thẻ "Giao việc cho tiền": tiền chưa giao = thu nhập tháng − tổng đã phân bổ. */
+    private void updateAssignCard() {
+        if (binding == null) return;
+        long totalBudget = 0L;
+        for (Budget b : currentBudgets) {
+            totalBudget += b.getLimitAmount();
+        }
+        long unassigned = monthIncome - totalBudget;
+        if (unassigned > 0) {
+            binding.textUnassigned.setText(
+                    getString(R.string.unassigned_amount, MoneyFormat.formatLong(unassigned)));
+            binding.textUnassigned.setTextColor(
+                    requireContext().getColor(R.color.brand_orange_dark));
+        } else {
+            binding.textUnassigned.setText(getString(R.string.all_assigned));
+            binding.textUnassigned.setTextColor(
+                    requireContext().getColor(R.color.income_green));
         }
     }
 

@@ -20,7 +20,10 @@ import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.data.model.HomeSummary;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.repository.AuthRepository;
+import com.expensemanager.app.data.repository.BudgetRepository;
+import com.expensemanager.app.data.model.Budget;
 import com.expensemanager.app.databinding.FragmentHomeBinding;
+import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.ui.category.CategoryListActivity;
 import com.expensemanager.app.ui.goal.GoalListActivity;
@@ -40,6 +43,9 @@ public class HomeFragment extends Fragment {
     private HomeViewModel viewModel;
     private TransactionAdapter transactionAdapter;
     private final AuthRepository authRepo = new AuthRepository();
+    private final BudgetRepository budgetRepo = new BudgetRepository();
+    private long lastMonthIncome = 0L;
+    private long lastTotalBudget = 0L;
 
     @Nullable
     @Override
@@ -86,6 +92,22 @@ public class HomeFragment extends Fragment {
         binding.layoutBalance.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), WalletListActivity.class)));
 
+        // Nhac "giao viec cho tien" -> tab Ke hoach
+        binding.textUnassignedHint.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.budgetFragment));
+        String uidForBudget = authRepo.getUid();
+        if (uidForBudget != null) {
+            budgetRepo.observeMonth(uidForBudget, DateUtils.currentMonthKey())
+                    .observe(getViewLifecycleOwner(), list -> {
+                        long total = 0L;
+                        if (list != null) {
+                            for (Budget b : list) total += b.getLimitAmount();
+                        }
+                        lastTotalBudget = total;
+                        updateUnassignedHint();
+                    });
+        }
+
         binding.textGreeting.setText(greetingByTime());
 
         authRepo.observeProfile().observe(getViewLifecycleOwner(), p -> {
@@ -130,6 +152,9 @@ public class HomeFragment extends Fragment {
         binding.textIncome.setText(MoneyFormat.format(s.monthIncome));
         binding.textExpense.setText(MoneyFormat.format(s.monthExpense));
 
+        lastMonthIncome = (long) s.monthIncome;
+        updateUnassignedHint();
+
         binding.textTodayExpense.setText(MoneyFormat.format(s.todayExpense));
 
         if (s.topCategoryName != null && !s.topCategoryName.isEmpty()) {
@@ -137,6 +162,19 @@ public class HomeFragment extends Fragment {
             binding.textTopCategory.setText(s.topCategoryName);
         } else {
             binding.textTopCategory.setVisibility(View.GONE);
+        }
+    }
+
+    /** Nhắc nếu thu nhập tháng còn chưa được phân bổ (giao việc) hết. */
+    private void updateUnassignedHint() {
+        if (binding == null) return;
+        long unassigned = lastMonthIncome - lastTotalBudget;
+        if (unassigned > 0) {
+            binding.textUnassignedHint.setText(
+                    getString(R.string.home_unassigned_hint, MoneyFormat.formatLong(unassigned)));
+            binding.textUnassignedHint.setVisibility(View.VISIBLE);
+        } else {
+            binding.textUnassignedHint.setVisibility(View.GONE);
         }
     }
 

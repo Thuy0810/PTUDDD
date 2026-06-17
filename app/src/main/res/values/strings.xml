@@ -65,6 +65,14 @@
     <string name="nav_profile">Cá nhân</string>
     <string name="nav_plan">Kế hoạch</string>
     <string name="save_transaction">Lưu giao dịch</string>
+    <!-- Giao việc cho tiền -->
+    <string name="assign_money_title">Giao việc cho tiền</string>
+    <string name="assign_now">Giao việc ngay</string>
+    <string name="later">Để sau</string>
+    <string name="unassigned_amount">Chưa giao việc: %1$s</string>
+    <string name="all_assigned">Đã giao hết — mọi đồng đều có nhiệm vụ ✓</string>
+    <string name="assign_money_prompt">Bạn vừa thêm một khoản thu. Giao việc cho khoản tiền này ngay?</string>
+    <string name="home_unassigned_hint">Còn %1$s chưa giao việc — chạm để phân bổ</string>
     <!-- Home quick actions -->
     <string name="quick_actions">Thao tác nhanh</string>
     <string name="qa_wallets">Ví</string>

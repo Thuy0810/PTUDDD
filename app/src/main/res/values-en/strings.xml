@@ -23,6 +23,14 @@
     <string name="nav_profile">Profile</string>
     <string name="nav_plan">Plan</string>
     <string name="save_transaction">Save transaction</string>
+    <!-- Give every dong a job -->
+    <string name="assign_money_title">Give your money a job</string>
+    <string name="assign_now">Assign now</string>
+    <string name="later">Later</string>
+    <string name="unassigned_amount">Unassigned: %1$s</string>
+    <string name="all_assigned">All assigned — every dong has a job ✓</string>
+    <string name="assign_money_prompt">You just added income. Want to assign this money now?</string>
+    <string name="home_unassigned_hint">%1$s still unassigned — tap to allocate</string>
     <!-- Home quick actions -->
     <string name="quick_actions">Quick actions</string>
     <string name="qa_wallets">Wallets</string>

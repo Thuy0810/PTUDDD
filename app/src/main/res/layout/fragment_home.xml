@@ -319,6 +319,21 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <!-- Nhắc: còn tiền chưa giao việc -> tab Ke hoach -->
+        <TextView
+            android:id="@+id/textUnassignedHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_yellow_chip"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp"
+            android:textColor="@color/brand_orange_dark"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <!-- === THAO TAC NHANH (shortcut grid) === -->
         <TextView
             android:layout_width="wrap_content"
