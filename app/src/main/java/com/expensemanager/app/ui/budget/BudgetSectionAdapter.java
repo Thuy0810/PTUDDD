@@ -152,7 +152,6 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
 
             Category cat = item.category;
             cardBinding.textCategoryName.setText(cat.getName());
-            cardBinding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
             cardBinding.textAllocated.setText(MoneyFormat.formatLong(item.allocated));
             cardBinding.textSpent.setText(MoneyFormat.formatLong(item.spent));
             cardBinding.textRemaining.setText(
@@ -166,14 +165,25 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
                         itemView.getContext().getColor(R.color.expense_red));
             }
 
+            // Icon danh muc: icon vector (kieu net) theo thiet ke
+            int catColor = itemView.getContext().getColor(R.color.primary);
             if (cat.getColorHex() != null) {
-                try {
-                    int color = Color.parseColor(cat.getColorHex());
-                    GradientDrawable bg = new GradientDrawable();
-                    bg.setShape(GradientDrawable.OVAL);
-                    bg.setColor(color);
-                    cardBinding.viewCategoryBg.setBackground(bg);
-                } catch (Exception ignored) {}
+                try { catColor = Color.parseColor(cat.getColorHex()); } catch (Exception ignored) {}
+            }
+            if (com.expensemanager.app.util.CategoryIcons.isEmoji(cat.getIconKey())) {
+                cardBinding.imageCategoryIcon.setVisibility(View.GONE);
+                cardBinding.textCategoryIcon.setVisibility(View.VISIBLE);
+                cardBinding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
+                GradientDrawable bg = new GradientDrawable();
+                bg.setShape(GradientDrawable.OVAL);
+                bg.setColor(com.expensemanager.app.util.CategoryIcons.softTint(catColor));
+                cardBinding.viewCategoryBg.setBackground(bg);
+            } else {
+                cardBinding.textCategoryIcon.setVisibility(View.GONE);
+                cardBinding.imageCategoryIcon.setVisibility(View.VISIBLE);
+                com.expensemanager.app.util.CategoryIcons.apply(
+                        cardBinding.imageCategoryIcon, cardBinding.viewCategoryBg,
+                        cat.getIconKey(), catColor, cat.getType());
             }
 
             // Toggle expand/collapse

@@ -19,6 +19,7 @@ import com.expensemanager.app.data.model.FinancialHealthStatus;
 import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.data.model.HomeSummary;
 import com.expensemanager.app.data.model.Transaction;
+import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.databinding.FragmentHomeBinding;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
@@ -34,6 +35,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private HomeViewModel viewModel;
     private TransactionAdapter transactionAdapter;
+    private final AuthRepository authRepo = new AuthRepository();
 
     @Nullable
     @Override
@@ -65,6 +67,31 @@ public class HomeFragment extends Fragment {
 
         binding.cardBudgetShortcut.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.budgetFragment));
+
+        binding.textGreeting.setText(greetingByTime());
+
+        authRepo.observeProfile().observe(getViewLifecycleOwner(), p -> {
+            if (p == null || binding == null) return;
+            String name = p.getDisplayName();
+            if (name == null || name.trim().isEmpty()) {
+                String email = p.getEmail();
+                name = (email != null && email.contains("@"))
+                        ? email.substring(0, email.indexOf('@'))
+                        : getString(R.string.user);
+            }
+            binding.textUserName.setText(name);
+            binding.textAvatarInitial.setText(
+                    name.substring(0, 1).toUpperCase(Locale.getDefault()));
+        });
+    }
+
+    /** Loi chao theo thoi diem trong ngay. */
+    private String greetingByTime() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (hour < 11) return getString(R.string.greeting_morning);
+        if (hour < 13) return getString(R.string.greeting_noon);
+        if (hour < 18) return getString(R.string.greeting_afternoon);
+        return getString(R.string.greeting_evening);
     }
 
     private void setupRecyclerView() {
@@ -85,20 +112,13 @@ public class HomeFragment extends Fragment {
         binding.textIncome.setText(MoneyFormat.format(s.monthIncome));
         binding.textExpense.setText(MoneyFormat.format(s.monthExpense));
 
-        if (s.todayExpense > 0) {
-            binding.textTodayExpense.setText(getString(
-                    R.string.today_expense_value, MoneyFormat.format(s.todayExpense)));
-        } else {
-            binding.textTodayExpense.setText("");
-        }
+        binding.textTodayExpense.setText(MoneyFormat.format(s.todayExpense));
 
         if (s.topCategoryName != null && !s.topCategoryName.isEmpty()) {
-            binding.textTopCategory.setText(getString(
-                    R.string.top_category_value,
-                    s.topCategoryName,
-                    MoneyFormat.format(s.topCategoryAmount)));
+            binding.textTopCategory.setVisibility(View.VISIBLE);
+            binding.textTopCategory.setText(s.topCategoryName);
         } else {
-            binding.textTopCategory.setText("");
+            binding.textTopCategory.setVisibility(View.GONE);
         }
     }
 

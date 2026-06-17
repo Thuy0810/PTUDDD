@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- === MAU NEN === -->
-    <color name="background">#FFF8EF</color>
-    <color name="colorBackground">#FFF8EF</color>
+    <!-- === MAU NEN (REDESIGN: xanh duong + cam) === -->
+    <color name="background">#F4F7FE</color>
+    <color name="colorBackground">#F4F7FE</color>
     <color name="colorSurface">#FFFFFF</color>
     <color name="background_card">#FFFFFF</color>
     <color name="card_bg">#FFFFFF</color>
 
-    <!-- === MAU CHINH (CAM VANG - EGGU STYLE) === -->
-    <color name="primary">#FFB84D</color>
-    <color name="colorPrimary">#FFB84D</color>
-    <color name="colorPrimaryContainer">#FFD080</color>
-    <color name="primary_dark">#E09E30</color>
-    <color name="primary_light">#FFD080</color>
-    <color name="accent">#FFB84D</color>
-    <color name="colorOnPrimary">#1F2937</color>
+    <!-- === MAU CHINH (XANH DUONG - theo thiet ke) === -->
+    <color name="primary">#2563EB</color>
+    <color name="colorPrimary">#2563EB</color>
+    <color name="colorPrimaryContainer">#DBEAFE</color>
+    <color name="primary_dark">#1D4ED8</color>
+    <color name="primary_light">#DBEAFE</color>
+    <color name="accent">#FB8C2E</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
 
     <!-- === MAU TIEU DIEM === -->
     <color name="income_green">#4CAF50</color>
@@ -40,8 +40,8 @@
     <color name="text_on_dark">#B3FFFFFF</color>
 
     <!-- === MAU PHU === -->
-    <color name="divider">#F3E8DC</color>
-    <color name="colorDivider">#F3E8DC</color>
+    <color name="divider">#EEF1F7</color>
+    <color name="colorDivider">#EEF1F7</color>
     <color name="colorDisabled">#D1D5DB</color>
     <color name="card_shadow">#1A000000</color>
     <color name="overlay">#80000000</color>
@@ -62,7 +62,7 @@
     <color name="budget_danger">#EF4444</color>
 
     <!-- === MAU THANH TIEN DO === -->
-    <color name="progress_background">#FFF3E0</color>
+    <color name="progress_background">#E4E9F4</color>
 
     <!-- === MAU CO DINH === -->
     <color name="white">#FFFFFF</color>
@@ -83,6 +83,30 @@
     <color name="brand_green">#4CAF50</color>
     <color name="line_1">#EEF1F7</color>
     <color name="line_2">#E4E9F4</color>
+
+    <!-- === DANH MUC (CATEGORY) — dùng cho redesign xanh+cam === -->
+    <color name="cat_food_fg">#EA7317</color>
+    <color name="cat_food_bg">#FFF1E3</color>
+    <color name="cat_transport_fg">#2563EB</color>
+    <color name="cat_transport_bg">#DBEAFE</color>
+    <color name="cat_shopping_fg">#7C3AED</color>
+    <color name="cat_shopping_bg">#EEE7FE</color>
+    <color name="cat_bills_fg">#0891B2</color>
+    <color name="cat_bills_bg">#D8F3FA</color>
+    <color name="cat_fun_fg">#DB2777</color>
+    <color name="cat_fun_bg">#FCE7F3</color>
+    <color name="cat_health_fg">#16A34A</color>
+    <color name="cat_health_bg">#E9F7EA</color>
+    <color name="cat_income_fg">#16A34A</color>
+    <color name="cat_income_bg">#E9F7EA</color>
+    <color name="cat_other_fg">#6B7280</color>
+    <color name="cat_other_bg">#EEF1F7</color>
+
+    <!-- ngưỡng ngân sách -->
+    <color name="budget_track">#E4E9F4</color>
+    <color name="brand_faint">#9AA3B2</color>
+    <color name="brand_red_light">#FFECEC</color>
+    <color name="brand_green_light">#E9F7EA</color>
 
     <!-- === ALPHA UTILITIES === -->
     <!-- #B3FFFFFF = 70% white on dark backgrounds -->

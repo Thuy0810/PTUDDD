@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardBackgroundColor="@color/card_bg"
-    app:cardCornerRadius="14dp"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/brand_surface"
+    app:cardCornerRadius="18dp"
     app:cardElevation="1dp">
 
     <LinearLayout
@@ -18,11 +18,13 @@
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="14dp">
+            android:padding="13dp">
 
-            <!-- Left: icon + name -->
+            <!-- Left: icon badge + name -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -47,24 +49,31 @@
                         android:gravity="center"
                         android:text="🏠"
                         android:textSize="16sp" />
+
+                    <ImageView
+                        android:id="@+id/imageCategoryIcon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
                 </FrameLayout>
 
                 <TextView
                     android:id="@+id/textCategoryName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="11dp"
                     android:text="@string/s2_rent_house"
                     android:textColor="@color/text_primary"
-                    android:textSize="15sp"
+                    android:textSize="13.5sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Right: expand arrow -->
             <ImageView
                 android:id="@+id/iconExpand"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:src="@drawable/ic_expand"
                 app:tint="@color/text_hint" />
         </LinearLayout>
@@ -75,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="14dp"
+            android:paddingHorizontal="13dp"
             android:paddingBottom="14dp"
             android:visibility="gone">
 
@@ -83,7 +92,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/divider" />
+                android:background="@color/line_1" />
 
             <!-- Row: Phan bo -->
             <LinearLayout
@@ -98,7 +107,7 @@
                     android:layout_weight="1"
                     android:text="@string/s2_allocated"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textAllocated"
@@ -106,7 +115,7 @@
                     android:layout_height="wrap_content"
                     android:text="0 vnd"
                     android:textColor="@color/text_primary"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -123,7 +132,7 @@
                     android:layout_weight="1"
                     android:text="@string/budget_spent"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textSpent"
@@ -131,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:text="0 vnd"
                     android:textColor="@color/expense_red"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -141,10 +150,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                app:indicatorColor="@color/primary"
-                app:trackColor="@color/progress_background"
-                app:trackCornerRadius="4dp"
-                app:trackThickness="6dp" />
+                app:indicatorColor="@color/brand_blue"
+                app:trackColor="@color/budget_track"
+                app:trackCornerRadius="99dp"
+                app:trackThickness="7dp" />
 
             <!-- Row: Con lai -->
             <LinearLayout
@@ -159,7 +168,7 @@
                     android:layout_weight="1"
                     android:text="@string/budget_remaining_short"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/textRemaining"
@@ -167,21 +176,22 @@
                     android:layout_height="wrap_content"
                     android:text="0 vnd"
                     android:textColor="@color/income_green"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Nut sua -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEdit"
-                style="@style/Widget.ExpenseManager.Button.Outlined"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
+                android:layout_height="38dp"
                 android:layout_marginTop="12dp"
                 android:text="@string/s2_edit"
-                android:textColor="@color/primary"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/primary" />
+                android:textColor="@color/brand_blue_dark"
+                app:cornerRadius="10dp"
+                app:strokeColor="@color/line_2"
+                app:strokeWidth="1.5dp" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

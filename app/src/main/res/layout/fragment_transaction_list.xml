@@ -1,148 +1,237 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/white"
     android:orientation="vertical">
 
-    <!-- Filter bar -->
-    <com.google.android.material.card.MaterialCardView
+    <!-- ===== Top app bar ===== -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="@color/card_bg"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="10dp">
 
-        <LinearLayout
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:contentDescription="@string/s2_all"
+            android:src="@drawable/ic_back"
+            app:tint="@color/text_primary" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="@string/nav_transactions"
+            android:textColor="@color/text_primary"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnSearchIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="9dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/search_hint"
+            android:src="@drawable/ic_search"
+            app:tint="@color/text_primary" />
+    </LinearLayout>
+
+    <!-- ===== Search field (kept for ViewBinding wiring) ===== -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="18dp"
+        android:layout_marginBottom="6dp"
+        app:boxBackgroundColor="@color/brand_blue_soft"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:startIconDrawable="@drawable/ic_search"
+        app:startIconTint="@color/text_secondary"
+        app:hintEnabled="false"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:background="@android:color/transparent"
+            android:hint="@string/search_hint"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+    <!-- ===== Segmented control: Tất cả | Thu | Chi ===== -->
+    <RadioGroup
+        android:id="@+id/radioGroupType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="18dp"
+        android:background="@drawable/bg_seg_container"
+        android:orientation="horizontal"
+        android:padding="4dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editSearch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/search_hint" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <RadioButton
+            android:id="@+id/radioAll"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_seg_selector"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="@string/s2_all"
+            android:textColor="@color/seg_text_selector"
+            android:textSize="13.5sp"
+            android:textStyle="bold" />
 
-            <!-- Date range -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+        <RadioButton
+            android:id="@+id/radioIncome"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_seg_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:text="@string/s2_income_short"
+            android:textColor="@color/seg_text_selector"
+            android:textSize="13.5sp"
+            android:textStyle="bold" />
 
-                <Button
-                    android:id="@+id/btnDateRange"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="@string/report_this_month"
-                    android:textSize="12sp" />
+        <RadioButton
+            android:id="@+id/radioExpense"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_seg_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:text="@string/s2_expense_short"
+            android:textColor="@color/seg_text_selector"
+            android:textSize="13.5sp"
+            android:textStyle="bold" />
+    </RadioGroup>
 
-                <Spinner
-                    android:id="@+id/spinnerWallet"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_spinner_dropdown"
-                    android:padding="4dp" />
+    <!-- ===== Filter chips row (wallet spinner, date range, sort spinner) ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="18dp">
 
-                <Spinner
-                    android:id="@+id/spinnerSort"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_spinner_dropdown"
-                    android:padding="4dp" />
-            </LinearLayout>
+        <!-- Ví ▾ : Spinner kept (Java reads spinnerWallet) -->
+        <Spinner
+            android:id="@+id/spinnerWallet"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_fchip"
+            android:paddingHorizontal="12dp" />
 
-            <!-- Type + Amount range -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+        <!-- Tháng 6 ▾ : date range chip (kept btnDateRange) -->
+        <Button
+            android:id="@+id/btnDateRange"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_fchip"
+            android:drawableStart="@drawable/ic_calendar"
+            android:drawablePadding="6dp"
+            android:gravity="center"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingHorizontal="10dp"
+            android:stateListAnimator="@null"
+            android:text="@string/j2_this_month"
+            android:textAllCaps="false"
+            android:textColor="@color/text_primary"
+            android:textSize="12.5sp"
+            android:minWidth="0dp"
+            android:drawableTint="@color/text_secondary"
+            style="@style/Widget.AppCompat.Button.Borderless" />
 
-                <RadioGroup
-                    android:id="@+id/radioGroupType"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+        <!-- Bộ lọc / Sort : Spinner kept (Java reads spinnerSort) -->
+        <Spinner
+            android:id="@+id/spinnerSort"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_fchip"
+            android:paddingHorizontal="12dp" />
+    </LinearLayout>
 
-                    <RadioButton
-                        android:id="@+id/radioAll"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/s2_all"
-                        android:textSize="12sp" />
+    <!-- ===== Amount range filter (kept for ViewBinding wiring) ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="18dp">
 
-                    <RadioButton
-                        android:id="@+id/radioIncome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="@string/s2_income_short"
-                        android:textSize="12sp" />
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/s2_from"
+            android:src="@drawable/ic_sliders"
+            app:tint="@color/text_secondary" />
 
-                    <RadioButton
-                        android:id="@+id/radioExpense"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="@string/s2_expense_short"
-                        android:textSize="12sp" />
-                </RadioGroup>
+        <EditText
+            android:id="@+id/editMinAmount"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_fchip"
+            android:gravity="center"
+            android:hint="@string/s2_from"
+            android:inputType="number"
+            android:paddingHorizontal="8dp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="12.5sp" />
 
-                <EditText
-                    android:id="@+id/editMinAmount"
-                    android:layout_width="72dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_spinner_dropdown"
-                    android:gravity="center"
-                    android:hint="@string/s2_from"
-                    android:inputType="number"
-                    android:paddingHorizontal="8dp"
-                    android:textSize="12sp" />
+        <EditText
+            android:id="@+id/editMaxAmount"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_fchip"
+            android:gravity="center"
+            android:hint="@string/s2_to"
+            android:inputType="number"
+            android:paddingHorizontal="8dp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="12.5sp" />
+    </LinearLayout>
 
-                <EditText
-                    android:id="@+id/editMaxAmount"
-                    android:layout_width="72dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="4dp"
-                    android:background="@drawable/bg_spinner_dropdown"
-                    android:gravity="center"
-                    android:hint="@string/s2_to"
-                    android:inputType="number"
-                    android:paddingHorizontal="8dp"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
+    <!-- ===== Transaction list ===== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerTransactions"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="8dp" />
+        android:clipToPadding="false"
+        android:paddingTop="6dp"
+        android:paddingBottom="90dp" />
 
+    <!-- ===== Empty state ===== -->
     <TextView
         android:id="@+id/textEmpty"
         android:layout_width="match_parent"
@@ -150,5 +239,6 @@
         android:gravity="center"
         android:padding="32dp"
         android:text="@string/empty_transactions"
+        android:textColor="@color/text_secondary"
         android:visibility="gone" />
 </LinearLayout>

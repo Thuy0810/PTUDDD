@@ -17,12 +17,22 @@ import com.expensemanager.app.ui.transaction.QuickAddActivity;
 import com.expensemanager.app.util.MoneyFormat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.graphics.Typeface;
+import androidx.core.content.ContextCompat;
 import com.expensemanager.app.worker.RecurringTransactionWorker;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
+
+    // Cac tab cua bottom nav tuy bien
+    private final int[] navContainers = {R.id.nav_home, R.id.nav_budget, R.id.nav_report, R.id.nav_profile};
+    private final int[] navIcons = {R.id.nav_home_icon, R.id.nav_budget_icon, R.id.nav_report_icon, R.id.nav_profile_icon};
+    private final int[] navLabels = {R.id.nav_home_label, R.id.nav_budget_label, R.id.nav_report_label, R.id.nav_profile_label};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,30 +45,36 @@ public class MainActivity extends AppCompatActivity {
             navController = navHost.getNavController();
         }
 
-        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav
-                = findViewById(R.id.bottomNav);
-        if (bottomNav != null) {
-            bottomNav.setOnItemSelectedListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.nav_home) {
-                    if (navController != null) navController.navigate(R.id.homeFragment);
-                    return true;
-                } else if (id == R.id.nav_budget) {
-                    if (navController != null) navController.navigate(R.id.budgetFragment);
-                    return true;
-                } else if (id == R.id.nav_add) {
-                    showAddModeSheet();
-                    return true;
-                } else if (id == R.id.nav_report) {
-                    if (navController != null) navController.navigate(R.id.reportFragment);
-                    return true;
-                } else if (id == R.id.nav_profile) {
-                    if (navController != null) navController.navigate(R.id.profileFragment);
-                    return true;
-                }
-                return false;
+        // Bottom nav tuy bien: 4 tab + FAB cam noi giua
+        findViewById(R.id.nav_home).setOnClickListener(v -> {
+            if (navController != null) navController.navigate(R.id.homeFragment);
+            setActiveTab(0);
+        });
+        findViewById(R.id.nav_budget).setOnClickListener(v -> {
+            if (navController != null) navController.navigate(R.id.budgetFragment);
+            setActiveTab(1);
+        });
+        findViewById(R.id.nav_report).setOnClickListener(v -> {
+            if (navController != null) navController.navigate(R.id.reportFragment);
+            setActiveTab(2);
+        });
+        findViewById(R.id.nav_profile).setOnClickListener(v -> {
+            if (navController != null) navController.navigate(R.id.profileFragment);
+            setActiveTab(3);
+        });
+        findViewById(R.id.nav_add).setOnClickListener(v -> showAddModeSheet());
+
+        // Dong bo tab sang theo dich den hien tai
+        if (navController != null) {
+            navController.addOnDestinationChangedListener((controller, destination, args) -> {
+                int dest = destination.getId();
+                if (dest == R.id.homeFragment) setActiveTab(0);
+                else if (dest == R.id.budgetFragment) setActiveTab(1);
+                else if (dest == R.id.reportFragment) setActiveTab(2);
+                else if (dest == R.id.profileFragment) setActiveTab(3);
             });
         }
+        setActiveTab(0);
 
         // Lên lịch worker cho giao dịch định kỳ
         RecurringTransactionWorker.schedule(this);
@@ -70,6 +86,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         checkOverdueGoals();
+    }
+
+    /** To mau tab dang chon (xanh) va cac tab con lai (xam nhat). */
+    private void setActiveTab(int active) {
+        int blue = ContextCompat.getColor(this, R.color.brand_blue);
+        int faint = ContextCompat.getColor(this, R.color.brand_faint);
+        for (int i = 0; i < navContainers.length; i++) {
+            boolean on = (i == active);
+            ImageView icon = findViewById(navIcons[i]);
+            TextView label = findViewById(navLabels[i]);
+            if (icon != null) icon.setColorFilter(on ? blue : faint);
+            if (label != null) {
+                label.setTextColor(on ? blue : faint);
+                label.setTypeface(null, on ? Typeface.BOLD : Typeface.NORMAL);
+            }
+        }
     }
 
     /** Hiển thị bottom sheet chọn cách thêm giao dịch: nhập thường hoặc nhập nhanh. */

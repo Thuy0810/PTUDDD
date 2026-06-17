@@ -10,27 +10,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
         android:paddingBottom="24dp">
 
-        <!-- === HEADER: Tong so du (gradient xanh) === -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- === HEADER: Tong so du (gradient xanh, full-bleed, bo goc duoi) === -->
+        <LinearLayout
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp">
+            android:background="@drawable/bg_auth_header"
+            android:orientation="vertical"
+            android:paddingHorizontal="18dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="36dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_home_header"
-                android:orientation="vertical"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="26dp"
-                android:paddingBottom="24dp">
-
+                <!-- Loi chao + chuong + avatar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -44,44 +37,102 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/textGreeting"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:letterSpacing="0.04"
-                            android:text="@string/balance"
+                            android:text="@string/greeting_morning"
                             android:textColor="@color/brand_text_on_blue"
                             android:textSize="13sp" />
 
                         <TextView
-                            android:id="@+id/textBalance"
+                            android:id="@+id/textUserName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="1dp"
                             android:fontFamily="sans-serif-medium"
-                            android:text="0 vnd"
+                            android:text="@string/user"
                             android:textColor="@color/white"
-                            android:textSize="32sp"
+                            android:textSize="19sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
                     <FrameLayout
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:layout_gravity="top">
-
-                        <View
-                            android:layout_width="52dp"
-                            android:layout_height="52dp"
-                            android:alpha="0.18"
-                            android:background="@drawable/bg_circle_login" />
+                        android:id="@+id/btnNotification"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_circle_glass"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <ImageView
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
-                            android:contentDescription="@string/balance"
-                            android:src="@drawable/ic_balance_white" />
+                            android:contentDescription="@string/notifications"
+                            android:src="@drawable/ic_bell_stroke"
+                            app:tint="@color/white" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="9dp"
+                            android:layout_marginEnd="9dp"
+                            android:background="@drawable/bg_badge_orange" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle_glass">
+
+                        <TextView
+                            android:id="@+id/textAvatarInitial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="?"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
                     </FrameLayout>
                 </LinearLayout>
+
+                <!-- So du -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/balance_short"
+                        android:textColor="@color/brand_text_on_blue"
+                        android:textSize="13sp" />
+
+                    <ImageView
+                        android:layout_width="19dp"
+                        android:layout_height="19dp"
+                        android:contentDescription="@string/balance"
+                        android:src="@drawable/ic_wallet_stroke"
+                        app:tint="@color/white" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="0 vnd"
+                    android:textColor="@color/white"
+                    android:textSize="33sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:id="@+id/layoutBudgetRemaining"
@@ -112,14 +163,20 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- === NOI DUNG (co padding, keo len de de len header) === -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-22dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="18dp">
 
         <!-- === THU / CHI THANG === -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
@@ -135,42 +192,50 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <FrameLayout
-                        android:layout_width="38dp"
-                        android:layout_height="38dp">
-
-                        <View
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:background="@drawable/bg_circle_green" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/month_income"
-                            android:src="@drawable/ic_income_green" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/month_income"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:background="@drawable/bg_circle_green" />
+
+                            <ImageView
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/month_income"
+                                android:src="@drawable/ic_income_arrow" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:text="@string/month_income"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/textIncome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="9dp"
                         android:fontFamily="sans-serif-medium"
                         android:text="0 vnd"
                         android:textColor="@color/income_green"
-                        android:textSize="17sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -188,69 +253,128 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <FrameLayout
-                        android:layout_width="38dp"
-                        android:layout_height="38dp">
-
-                        <View
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:background="@drawable/bg_circle_red" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/month_expense"
-                            android:src="@drawable/ic_expense_red" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/month_expense"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:background="@drawable/bg_circle_red" />
+
+                            <ImageView
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/month_expense"
+                                android:src="@drawable/ic_expense_arrow" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:text="@string/month_expense"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/textExpense"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="9dp"
                         android:fontFamily="sans-serif-medium"
                         android:text="0 vnd"
                         android:textColor="@color/expense_red"
-                        android:textSize="17sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- === THONG TIN THEM === -->
-        <LinearLayout
+        <!-- === THONG TIN THEM (the) === -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/brand_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp">
 
-            <TextView
-                android:id="@+id/textTodayExpense"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
 
-            <TextView
-                android:id="@+id/textTopCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="11dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/today_spent_label"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/textTodayExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/expense_red"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line_1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="11dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/top_category_label"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/textTopCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_pill_orange"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="5dp"
+                        android:textColor="@color/brand_orange_dark"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- === CANH BAO NGAN SACH === -->
         <com.google.android.material.card.MaterialCardView
@@ -543,7 +667,7 @@
                             android:layout_height="17dp"
                             android:layout_gravity="center"
                             android:contentDescription="@string/nav_budget"
-                            android:src="@drawable/ic_wallet_menu"
+                            android:src="@drawable/ic_wallet_stroke"
                             app:tint="@color/brand_blue" />
                     </FrameLayout>
 
@@ -659,5 +783,6 @@
             android:layout_marginTop="10dp"
             android:clipToPadding="false"
             android:nestedScrollingEnabled="false" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -86,20 +86,17 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                    OnItemClick listener) {
 
             String categoryName = "";
-            String iconEmoji = getDefaultIcon(type);
-            int iconBgColor = getDefaultBgColor(type);
+            String iconKey = null;
+            int iconColor = getDefaultBgColor(type);
 
             Category cat = categoryMap.get(t.getCategoryId());
             if (cat != null) {
                 categoryName = cat.getName();
-                String emoji = cat.getIconKey();
-                if (!TextUtils.isEmpty(emoji) && emoji.length() <= 4) {
-                    iconEmoji = emoji;
-                }
+                iconKey = cat.getIconKey();
                 String color = cat.getColorHex();
                 if (!TextUtils.isEmpty(color)) {
                     try {
-                        iconBgColor = Color.parseColor(color);
+                        iconColor = Color.parseColor(color);
                     } catch (Exception ignored) {}
                 }
             } else if (t.getCategoryId() != null && !t.getCategoryId().isEmpty()) {
@@ -107,15 +104,20 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         .getString(R.string.category_deleted);
             }
 
-            // --- Icon ---
-            binding.textCategoryIcon.setText(iconEmoji);
-            try {
+            // --- Icon: ưu tiên icon vector (kiểu nét) theo thiết kế; emoji thì hiện chữ ---
+            if (com.expensemanager.app.util.CategoryIcons.isEmoji(iconKey)) {
+                binding.imageCategoryIcon.setVisibility(View.GONE);
+                binding.textCategoryIcon.setVisibility(View.VISIBLE);
+                binding.textCategoryIcon.setText(iconKey);
                 GradientDrawable bg = new GradientDrawable();
                 bg.setShape(GradientDrawable.OVAL);
-                bg.setColor(iconBgColor);
+                bg.setColor(com.expensemanager.app.util.CategoryIcons.softTint(iconColor));
                 binding.viewIconBg.setBackground(bg);
-            } catch (Exception e) {
-                binding.viewIconBg.setBackgroundResource(R.drawable.bg_circle_primary);
+            } else {
+                binding.textCategoryIcon.setVisibility(View.GONE);
+                binding.imageCategoryIcon.setVisibility(View.VISIBLE);
+                com.expensemanager.app.util.CategoryIcons.apply(
+                        binding.imageCategoryIcon, binding.viewIconBg, iconKey, iconColor, type);
             }
 
             // --- Category label ---

@@ -25,6 +25,18 @@
     <string name="email_hint_example">email@cua-ban.com</string>
     <string name="password_hint_min">Ít nhất 6 ký tự</string>
 
+    <!-- Redesign: Splash -->
+    <string name="app_version">Phiên bản 1.0.0</string>
+
+    <!-- Redesign: Home header greeting -->
+    <string name="balance_short">Số dư</string>
+    <string name="greeting_morning">Chào buổi sáng,</string>
+    <string name="greeting_noon">Chào buổi trưa,</string>
+    <string name="greeting_afternoon">Chào buổi chiều,</string>
+    <string name="greeting_evening">Chào buổi tối,</string>
+    <string name="today_spent_label">Hôm nay đã chi</string>
+    <string name="top_category_label">Danh mục chi nhiều nhất</string>
+
     <!-- Redesign: Home budget shortcut -->
     <string name="budget_shortcut_title">Ngân sách tháng %1$s</string>
     <string name="budget_detail">Chi tiết</string>

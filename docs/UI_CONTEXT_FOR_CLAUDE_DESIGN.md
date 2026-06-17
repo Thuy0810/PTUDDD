@@ -28,15 +28,15 @@ giao dịch định kỳ, và theo dõi "sức khỏe tài chính".
 
 ## 3. Điều hướng (Bottom Navigation — TỐI ĐA 5 mục, gồm cả nút ＋)
 Thanh menu dưới chỉ có đúng 5 mục theo thứ tự:
-**Tổng quan | Giao dịch | ＋ Thêm | Báo cáo | Cá nhân**
+**Tổng quan | Ngân sách | ＋ Thêm | Báo cáo | Cá nhân**
 - Nút **＋ Thêm** nằm GIỮA thanh nav (nổi bật, tô cam), mở màn Thêm giao dịch.
 - Tab đang chọn tô xanh `#2563EB`.
-- **"Ngân sách" KHÔNG nằm trên thanh menu** (vì giới hạn 5 mục). Truy cập Ngân sách qua:
-  một mục/thẻ lối tắt ở màn **Tổng quan** và một mục trong danh sách màn **Cá nhân**.
+- **"Giao dịch" KHÔNG nằm trên thanh menu** (vì giới hạn 5 mục). Truy cập danh sách giao dịch
+  qua nút **"Xem tất cả"** ở mục Giao dịch gần đây trên màn **Tổng quan**.
 
-## 4. Các màn hình chính (4 tab bấm chuyển được + màn Ngân sách)
-> 4 tab trên thanh menu: Tổng quan, Giao dịch, Báo cáo, Cá nhân. Màn Ngân sách (4.2)
-> KHÔNG phải tab — mở từ lối tắt ở Tổng quan hoặc mục trong Cá nhân.
+## 4. Các màn hình chính (4 tab bấm chuyển được + màn Giao dịch)
+> 4 tab trên thanh menu: Tổng quan, Ngân sách, Báo cáo, Cá nhân. Màn Giao dịch (4.3)
+> KHÔNG phải tab — mở từ nút "Xem tất cả" ở Tổng quan.
 
 ### 4.1. TỔNG QUAN (Trang chủ)
 - Header gradient xanh: nhãn "Số dư", **tổng số dư** lớn (trắng), icon ví.
@@ -47,10 +47,10 @@ Thanh menu dưới chỉ có đúng 5 mục theo thứ tự:
 - Thẻ **Sức khỏe tài chính**: điểm số (nhãn pill cam) + trạng thái chữ + 3 chỉ số:
   *Tỉ lệ tiết kiệm* (xanh lá), *% dùng ngân sách* (đỏ), *So với tháng trước* (xanh dương);
   khối dự báo nền xanh nhạt: *Ngân sách/ngày* và *Dự báo chi cuối tháng*.
-- **Lối tắt "Ngân sách"** (thẻ hoặc hàng có icon) để mở màn Ngân sách (4.2).
-- Mục **Giao dịch gần đây** + nút "Xem tất cả" (pill cam) + danh sách vài giao dịch.
+- Mục **Giao dịch gần đây** + nút "Xem tất cả" (pill cam) mở màn Giao dịch (4.3)
+  + danh sách vài giao dịch.
 
-### 4.2. NGÂN SÁCH (không phải tab — mở từ Tổng quan / Cá nhân)
+### 4.2. NGÂN SÁCH (tab trên thanh menu)
 - Bộ chọn tháng (yyyy-MM).
 - Thẻ tổng quan tháng: hạn mức tổng, đã chi, còn lại, % dùng + thanh tiến độ.
 - Nút "Đặt ngân sách tháng" và "Phân bổ" (đặt ngân sách theo từng danh mục).
@@ -58,7 +58,7 @@ Thanh menu dưới chỉ có đúng 5 mục theo thứ tự:
   thanh tiến độ đổi màu: **xanh an toàn / cam ≥80% / đỏ ≥100%**.
 - Ngưỡng cảnh báo mặc định 80% và 90%.
 
-### 4.3. GIAO DỊCH
+### 4.3. GIAO DỊCH (không phải tab — mở từ nút "Xem tất cả" ở Tổng quan)
 - Thanh lọc: theo loại (Tất cả/Thu/Chi), ví, ngày, số tiền, ô tìm kiếm.
 - Danh sách giao dịch nhóm theo ngày: icon danh mục (tròn), tên danh mục + ghi chú,
   tên ví, số tiền (thu xanh lá `+`, chi đỏ `-`).
@@ -76,7 +76,7 @@ Thanh menu dưới chỉ có đúng 5 mục theo thứ tự:
 ### 4.5. CÁ NHÂN
 - Đầu trang: avatar + tên người dùng + email (nút sửa hồ sơ).
 - Danh sách mục (mỗi mục 1 hàng, icon trái + mũi tên phải):
-  **Ngân sách, Ví của tôi, Danh mục, Mục tiêu tiết kiệm, Giao dịch định kỳ,
+  **Ví của tôi, Danh mục, Mục tiêu tiết kiệm, Giao dịch định kỳ,
   Thử thách tiết kiệm, Bảo mật (PIN/vân tay), Cài đặt, Đăng xuất.**
 
 ## 5. Màn phụ (mở từ Cá nhân / các tab) — vẽ nếu còn thời gian
@@ -96,8 +96,8 @@ Thanh menu dưới chỉ có đúng 5 mục theo thứ tự:
 
 ## 6. Yêu cầu khi vẽ
 1. Vẽ artifact HTML interactive, khung điện thoại ~390px. Thanh menu dưới đúng 5 mục
-   (Tổng quan, Giao dịch, ＋, Báo cáo, Cá nhân) — 4 tab bấm chuyển được + nút ＋ ở giữa.
-   Vẽ thêm màn Ngân sách (mở từ Tổng quan/Cá nhân).
+   (Tổng quan, Ngân sách, ＋, Báo cáo, Cá nhân) — 4 tab bấm chuyển được + nút ＋ ở giữa.
+   Vẽ thêm màn Giao dịch (mở từ nút "Xem tất cả" ở Tổng quan).
 2. Bám sát chức năng & dữ liệu mô tả ở trên; dùng dữ liệu mẫu tiếng Việt hợp lý.
 3. **Được phép tinh chỉnh nhẹ UX/UI cho chuẩn hơn** (khoảng cách, thứ bậc thông tin,
    gom nhóm, trạng thái rỗng, vi tương tác) — NHƯNG không được bỏ tính năng nào ở trên.
