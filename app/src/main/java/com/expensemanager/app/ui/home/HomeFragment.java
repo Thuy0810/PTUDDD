@@ -14,8 +14,6 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.R;
-import com.expensemanager.app.data.model.FinancialAlertType;
-import com.expensemanager.app.data.model.FinancialHealthStatus;
 import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.data.model.HomeSummary;
 import com.expensemanager.app.data.model.Transaction;
@@ -180,101 +178,6 @@ public class HomeFragment extends Fragment {
 
     private void bindInsights(FinancialInsights fi) {
         if (fi == null) return;
-
-        binding.textHealthScore.setText(String.valueOf(fi.healthScore));
-
-        // Trạng thái
-        FinancialHealthStatus status = fi.status;
-        if (status == null) status = FinancialHealthStatus.fromScore(fi.healthScore);
-        binding.textHealthStatus.setText(getStatusLabel(status));
-
-        // Màu score theo trạng thái
-        int scoreColor;
-        switch (status) {
-            case EXCELLENT:
-                scoreColor = ContextCompat.getColor(requireContext(), R.color.income_green);
-                break;
-            case GOOD:
-                scoreColor = ContextCompat.getColor(requireContext(), R.color.primary);
-                break;
-            case WARNING:
-                scoreColor = ContextCompat.getColor(requireContext(), R.color.warning);
-                break;
-            default:
-                scoreColor = ContextCompat.getColor(requireContext(), R.color.expense_red);
-                break;
-        }
-        binding.textHealthScore.setTextColor(scoreColor);
-
-        // Tỷ lệ tiết kiệm
-        if (fi.incomeAmount > 0 && !Double.isNaN(fi.savingRate)) {
-            int pct = (int) Math.round(fi.savingRate * 100);
-            binding.textSavingRate.setText(pct + "%");
-            binding.textSavingRate.setTextColor(
-                    pct >= 20
-                            ? ContextCompat.getColor(requireContext(), R.color.income_green)
-                            : ContextCompat.getColor(requireContext(), R.color.warning));
-        } else {
-            binding.textSavingRate.setText("--");
-        }
-
-        // Tỷ lệ sử dụng ngân sách
-        if (!Double.isNaN(fi.budgetUsageRate) && fi.budgetUsageRate > 0) {
-            int pct = (int) Math.round(fi.budgetUsageRate * 100);
-            binding.textBudgetUsage.setText(pct + "%");
-            binding.textBudgetUsage.setTextColor(
-                    pct >= 100
-                            ? ContextCompat.getColor(requireContext(), R.color.expense_red)
-                            : pct >= 80
-                                    ? ContextCompat.getColor(requireContext(), R.color.warning)
-                                    : ContextCompat.getColor(requireContext(), R.color.income_green));
-        } else {
-            binding.textBudgetUsage.setText("--");
-        }
-
-        // So với tháng trước
-        if (!Double.isNaN(fi.expenseChangeRate) && fi.expenseChangeRate != 0) {
-            int pct = (int) Math.round(Math.abs(fi.expenseChangeRate) * 100);
-            String sign = fi.expenseChangeRate < 0 ? "-" : "+";
-            binding.textExpenseChange.setText(sign + pct + "%");
-            binding.textExpenseChange.setTextColor(
-                    fi.expenseChangeRate < 0
-                            ? ContextCompat.getColor(requireContext(), R.color.income_green)
-                            : ContextCompat.getColor(requireContext(), R.color.expense_red));
-        } else {
-            binding.textExpenseChange.setText("--");
-        }
-
-        // Dự đoán
-        if (fi.dailyAllowanceAmount > 0) {
-            binding.textDailyAllowance.setText(
-                    MoneyFormat.format(fi.dailyAllowanceAmount));
-        } else {
-            binding.textDailyAllowance.setText("--");
-        }
-
-        if (fi.predictedMonthExpense > 0) {
-            binding.textPrediction.setText(
-                    MoneyFormat.format(fi.predictedMonthExpense));
-        } else {
-            binding.textPrediction.setText("--");
-        }
-
-        // Alerts: chỉ hiển thị 1 cảnh báo quan trọng nhất
-        if (fi.alerts != null && !fi.alerts.isEmpty()) {
-            binding.cardAlerts.setVisibility(View.VISIBLE);
-            FinancialAlertType top = fi.alerts.get(0);
-            String alertLabel;
-            if (top == FinancialAlertType.CASH_RUNOUT_RISK && fi.projectedRunOutDay > 0) {
-                alertLabel = getString(R.string.alert_cash_runout, fi.projectedRunOutDay);
-            } else {
-                alertLabel = getAlertLabel(top);
-            }
-            binding.textAlerts.setText(alertLabel);
-        } else {
-            binding.cardAlerts.setVisibility(View.GONE);
-        }
-
         bindBudgetShortcut(fi);
     }
 
@@ -307,35 +210,6 @@ public class HomeFragment extends Fragment {
                 getString(R.string.budget_spent_value, MoneyFormat.format(spent)));
         binding.textBudgetLimit.setText(
                 getString(R.string.budget_limit_value, MoneyFormat.format(limit)));
-    }
-
-    private String getAlertLabel(FinancialAlertType type) {
-        if (type == null) return "";
-        switch (type) {
-            case OVER_BUDGET:
-                return getString(R.string.alert_over_budget);
-            case NEAR_BUDGET_LIMIT:
-                return getString(R.string.alert_near_budget);
-            case EXPENSE_INCREASED:
-                return getString(R.string.alert_expense_increased);
-            case MISSING_RECORDS:
-                return getString(R.string.alert_missing_records);
-            case ABNORMAL_SPENDING:
-                return getString(R.string.alert_abnormal_spending);
-            case CASH_RUNOUT_RISK:
-                return getString(R.string.alert_cash_runout_generic);
-            default:
-                return "";
-        }
-    }
-
-    private String getStatusLabel(FinancialHealthStatus status) {
-        switch (status) {
-            case EXCELLENT:  return getString(R.string.health_excellent);
-            case GOOD:      return getString(R.string.health_good);
-            case WARNING:    return getString(R.string.health_warning);
-            default:         return getString(R.string.health_critical);
-        }
     }
 
     private void bindRecentTransactions(List<Transaction> txs) {

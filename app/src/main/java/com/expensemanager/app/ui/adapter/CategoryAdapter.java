@@ -18,10 +18,12 @@ import java.util.Map;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
     public interface OnItemLongClick { void onLongClick(Category c); }
+    public interface OnItemClick { void onClick(Category c); }
 
     private List<Category> items = new ArrayList<>();
     private Map<String, String> parentNames = new HashMap<>();
     private OnItemLongClick listener;
+    private OnItemClick clickListener;
 
     public void setItems(List<Category> items) {
         this.items = items != null ? items : new ArrayList<>();
@@ -35,6 +37,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
     }
 
     public void setOnItemLongClick(OnItemLongClick listener) { this.listener = listener; }
+
+    public void setOnItemClick(OnItemClick listener) { this.clickListener = listener; }
 
     @NonNull
     @Override
@@ -74,6 +78,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
                 holder.binding.textCategoryIcon, holder.binding.viewCategoryBg,
                 c.getIconKey(), color, c.getType());
 
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) clickListener.onClick(c);
+        });
         holder.itemView.setOnLongClickListener(v -> {
             if (listener != null) listener.onLongClick(c);
             return true;

@@ -20,6 +20,12 @@ public final class CategoryIcons {
 
     private CategoryIcons() {}
 
+    /** Các khóa icon hiển thị trong bộ chọn (giữ thứ tự, không trùng drawable). */
+    public static final String[] PICKER_KEYS = {
+            "food", "transport", "shopping", "bills", "education", "entertainment",
+            "health", "family", "home", "saving", "salary", "bonus", "gift", "sales", "other"
+    };
+
     private static final Map<String, Integer> MAP = new HashMap<>();
     static {
         // Icon từ thư viện Iconics (Google Material) — dùng dưới dạng drawable XML.

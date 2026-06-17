@@ -28,6 +28,7 @@ import com.expensemanager.app.databinding.ActivityGoalListBinding;
 import com.expensemanager.app.domain.usecase.GoalService;
 import com.expensemanager.app.ui.adapter.GoalAdapter;
 import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.GoalIcons;
 import com.expensemanager.app.util.MoneyFormat;
 import com.expensemanager.app.util.MoneyInputFormatter;
 import com.google.firebase.Timestamp;
@@ -97,7 +98,11 @@ public class GoalListActivity extends AppCompatActivity {
         EditText editTarget = view.findViewById(R.id.editGoalTarget);
         EditText editDeadline = view.findViewById(R.id.editGoalDeadline);
         Spinner spinnerWallet = view.findViewById(R.id.spinnerGoalWallet);
+        LinearLayout iconPicker = view.findViewById(R.id.goalIconPicker);
         MoneyInputFormatter.attach(editTarget);
+
+        final String[] iconHolder = { GoalIcons.DEFAULT_KEY };
+        populateIconPicker(iconPicker, iconHolder, null);
 
         List<String> walletNames = new ArrayList<>();
         for (Wallet w : wallets) walletNames.add(w.getName());
@@ -137,6 +142,7 @@ public class GoalListActivity extends AppCompatActivity {
 
                     SavingsGoal g = new SavingsGoal();
                     g.setTitle(title);
+                    g.setIconKey(iconHolder[0]);
                     g.setTargetAmount(target);
                     g.setSavedAmount(0L);
                     g.setWalletId(wallet.getId());
@@ -169,6 +175,25 @@ public class GoalListActivity extends AppCompatActivity {
         info.setTextColor(getResources().getColor(R.color.text_primary, null));
         info.setPadding(0, 0, 0, 8);
         container.addView(info);
+
+        // Nhãn + bộ chọn icon (cập nhật ngay khi chọn)
+        android.widget.TextView iconLabel = new android.widget.TextView(this);
+        iconLabel.setText(getString(R.string.goal_icon));
+        iconLabel.setTextSize(13);
+        iconLabel.setTextColor(getResources().getColor(R.color.text_secondary, null));
+        iconLabel.setPadding(0, 8, 0, 4);
+        container.addView(iconLabel);
+
+        android.widget.HorizontalScrollView iconScroll = new android.widget.HorizontalScrollView(this);
+        iconScroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout iconPicker = new LinearLayout(this);
+        iconPicker.setOrientation(LinearLayout.HORIZONTAL);
+        iconScroll.addView(iconPicker);
+        container.addView(iconScroll);
+
+        final String[] iconHolder = { g.getIconKey() != null ? g.getIconKey() : GoalIcons.DEFAULT_KEY };
+        populateIconPicker(iconPicker, iconHolder, key ->
+                goalRepo.updateIcon(uid, g.getId(), key));
 
         // Nhãn + spinner chọn ví nguồn
         android.widget.TextView label = new android.widget.TextView(this);
@@ -368,6 +393,63 @@ public class GoalListActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show();
+    }
+
+    /** Callback khi người dùng chọn một icon trong bộ chọn. */
+    private interface OnIconSelected { void onSelected(String iconKey); }
+
+    /**
+     * Đổ các icon chọn được vào container.
+     * @param container   LinearLayout ngang chứa các icon
+     * @param selectedHolder mảng 1 phần tử giữ khóa icon đang chọn (đọc & ghi)
+     * @param onChange    callback khi đổi icon (có thể null — chỉ cập nhật holder)
+     */
+    private void populateIconPicker(LinearLayout container, String[] selectedHolder,
+                                    OnIconSelected onChange) {
+        container.removeAllViews();
+        float d = getResources().getDisplayMetrics().density;
+        int size = (int) (44 * d);
+        int gap = (int) (8 * d);
+        int pad = (int) (10 * d);
+        final List<ImageView> chips = new ArrayList<>();
+
+        if (selectedHolder[0] == null) selectedHolder[0] = GoalIcons.DEFAULT_KEY;
+
+        for (String key : GoalIcons.PICKER_KEYS) {
+            ImageView iv = new ImageView(this);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.setMargins(0, gap, gap, gap);
+            iv.setLayoutParams(lp);
+            iv.setPadding(pad, pad, pad, pad);
+            iv.setImageResource(GoalIcons.drawableFor(key));
+            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            iv.setTag(key);
+            iv.setOnClickListener(v -> {
+                selectedHolder[0] = (String) v.getTag();
+                refreshIconPicker(chips, selectedHolder[0]);
+                if (onChange != null) onChange.onSelected(selectedHolder[0]);
+            });
+            container.addView(iv);
+            chips.add(iv);
+        }
+        refreshIconPicker(chips, selectedHolder[0]);
+    }
+
+    /** Tô lại trạng thái chọn: icon đang chọn nền xanh + icon trắng. */
+    private void refreshIconPicker(List<ImageView> chips, String selectedKey) {
+        for (ImageView iv : chips) {
+            boolean selected = iv.getTag() != null && iv.getTag().equals(selectedKey);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setShape(GradientDrawable.OVAL);
+            if (selected) {
+                bg.setColor(getColor(R.color.saving_blue));
+                iv.setColorFilter(Color.WHITE);
+            } else {
+                bg.setColor(0x22000000);
+                iv.setColorFilter(getColor(R.color.text_secondary));
+            }
+            iv.setBackground(bg);
+        }
     }
 
     @Override

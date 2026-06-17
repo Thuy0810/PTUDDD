@@ -1,6 +1,7 @@
 package com.expensemanager.app.ui.category;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -75,7 +76,47 @@ public class CategoryListActivity extends AppCompatActivity {
                     .show();
         });
 
+        adapter.setOnItemClick(c -> showEditDialog(uid, c));
+
         findViewById(R.id.fabAdd).setOnClickListener(v -> showAddDialog(uid));
+    }
+
+    /** Sửa danh mục: đổi tên + icon (giữ nguyên loại, nhóm, danh mục cha). */
+    private void showEditDialog(String uid, Category c) {
+        EditText editName = new EditText(this);
+        editName.setHint(getString(R.string.category_name));
+        editName.setText(c.getName());
+
+        TextView labelIcon = new TextView(this);
+        labelIcon.setText(getString(R.string.category_icon));
+        labelIcon.setPadding(0, 24, 0, 0);
+        final String[] iconHolder = { c.getIconKey() != null ? c.getIconKey() : "other" };
+        View iconPicker = com.expensemanager.app.util.CategoryIconPicker.createScroller(this, iconHolder);
+
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(48, 16, 48, 0);
+        layout.addView(editName);
+        layout.addView(labelIcon);
+        layout.addView(iconPicker);
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.edit_category))
+                .setView(layout)
+                .setPositiveButton(getString(R.string.save), (d, w) -> {
+                    String name = editName.getText().toString().trim();
+                    if (name.isEmpty()) {
+                        Toast.makeText(this, getString(R.string.j2_enter_category_name),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    c.setName(name);
+                    c.setIconKey(iconHolder[0]);
+                    catRepo.update(uid, c);
+                    Toast.makeText(this, getString(R.string.j3_updated), Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show();
     }
 
     private void showAddDialog(String uid) {
@@ -119,11 +160,19 @@ public class CategoryListActivity extends AppCompatActivity {
         refreshParents.run();
         radioType.setOnCheckedChangeListener((g, id) -> refreshParents.run());
 
+        TextView labelIcon = new TextView(this);
+        labelIcon.setText(getString(R.string.category_icon));
+        labelIcon.setPadding(0, 24, 0, 0);
+        final String[] iconHolder = {"other"};
+        View iconPicker = com.expensemanager.app.util.CategoryIconPicker.createScroller(this, iconHolder);
+
         android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
         layout.setOrientation(android.widget.LinearLayout.VERTICAL);
         layout.setPadding(48, 16, 48, 0);
         layout.addView(editName);
         layout.addView(radioType);
+        layout.addView(labelIcon);
+        layout.addView(iconPicker);
         layout.addView(labelParent);
         layout.addView(spinnerParent);
 
@@ -137,7 +186,7 @@ public class CategoryListActivity extends AppCompatActivity {
                         return;
                     }
                     String type = rbIncome.isChecked() ? Category.TYPE_INCOME : Category.TYPE_EXPENSE;
-                    Category c = new Category(null, name, type, "other", "#6B7280", false);
+                    Category c = new Category(null, name, type, iconHolder[0], "#6B7280", false);
                     int pos = spinnerParent.getSelectedItemPosition();
                     if (pos > 0 && pos < parentCandidates.size()) {
                         Category parent = parentCandidates.get(pos);

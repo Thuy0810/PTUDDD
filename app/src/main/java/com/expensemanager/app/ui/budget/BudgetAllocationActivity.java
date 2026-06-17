@@ -886,10 +886,19 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         rb2.setOnClickListener(v -> selectedGroup[0] = 2);
         rb3.setOnClickListener(v -> selectedGroup[0] = 3);
 
+        // Bộ chọn icon
+        final String[] iconHolder = {"other"};
+        android.widget.TextView iconLabel = new android.widget.TextView(this);
+        iconLabel.setText(getString(R.string.category_icon));
+        iconLabel.setPadding(0, 16, 0, 0);
+        View iconPicker = com.expensemanager.app.util.CategoryIconPicker.createScroller(this, iconHolder);
+
         android.widget.LinearLayout container = new android.widget.LinearLayout(this);
         container.setOrientation(android.widget.LinearLayout.VERTICAL);
         container.setPadding(48, 16, 48, 16);
         container.addView(input);
+        container.addView(iconLabel);
+        container.addView(iconPicker);
         container.addView(radioView);
 
         new AlertDialog.Builder(this)
@@ -906,6 +915,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                     c.setName(name);
                     c.setType(Category.TYPE_EXPENSE);
                     c.setGroup(groupValues[selectedGroup[0]]);
+                    c.setIconKey(iconHolder[0]);
                     categoryRepo.add(uid, c);
                     Toast.makeText(this, getString(R.string.j1_category_created, name),
                             Toast.LENGTH_SHORT).show();

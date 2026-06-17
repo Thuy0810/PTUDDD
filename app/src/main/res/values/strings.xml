@@ -153,6 +153,7 @@
     <string name="goals">Mục tiêu tiết kiệm</string>
     <string name="add_goal">Thêm mục tiêu</string>
     <string name="goal_name">Tên mục tiêu</string>
+    <string name="goal_icon">Biểu tượng</string>
     <string name="goal_target">Số tiền cần đạt</string>
     <string name="goal_current">Đã có</string>
     <string name="goal_deadline">Hạn hoàn thành</string>

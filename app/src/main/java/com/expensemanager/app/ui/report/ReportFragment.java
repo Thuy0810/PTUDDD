@@ -23,13 +23,11 @@ import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentReportBinding;
 import com.expensemanager.app.data.model.Budget;
 import com.expensemanager.app.data.model.Category;
-import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
-import com.expensemanager.app.data.repository.GoalRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.data.model.FinancialInsights;
@@ -39,7 +37,6 @@ import com.expensemanager.app.ui.transaction.AddTransactionActivity;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.InsightsEngine;
 import com.expensemanager.app.util.MoneyFormat;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -88,7 +85,6 @@ public class ReportFragment extends Fragment {
     private Map<String, Long> ovRolloverMap = new HashMap<>();
     private List<Category> ovCategories = new ArrayList<>();
     private List<Wallet> ovWallets = new ArrayList<>();
-    private List<SavingsGoal> ovGoals = new ArrayList<>();
 
     private final Calendar selectedDate = Calendar.getInstance();
     private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
@@ -137,7 +133,6 @@ public class ReportFragment extends Fragment {
         String prevMonthKey = DateUtils.previousMonthKey(overviewMonthKey);
 
         BudgetRepository budgetRepo = new BudgetRepository();
-        GoalRepository goalRepo = new GoalRepository();
 
         txRepo.observeMonth(currentUid, overviewMonthKey).observe(getViewLifecycleOwner(), txs -> {
             ovMonthIncome = 0L;
@@ -204,16 +199,6 @@ public class ReportFragment extends Fragment {
             }
             renderOverview();
         });
-
-        goalRepo.observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
-            ovGoals = new ArrayList<>();
-            if (list != null) {
-                for (SavingsGoal g : list) {
-                    if (g != null && !g.isArchived()) ovGoals.add(g);
-                }
-            }
-            renderOverview();
-        });
     }
 
     private void recomputeOverviewRollover() {
@@ -233,7 +218,6 @@ public class ReportFragment extends Fragment {
         if (binding == null) return;
         renderBudgetStatus();
         renderOverviewWallets();
-        renderGoals();
     }
 
     private void renderBudgetStatus() {
@@ -308,71 +292,6 @@ public class ReportFragment extends Fragment {
             binding.layoutWallets.addView(row);
         }
         binding.textWalletsTotal.setText(MoneyFormat.formatLong(total));
-    }
-
-    private void renderGoals() {
-        binding.layoutGoals.removeAllViews();
-        if (ovGoals.isEmpty()) {
-            binding.textNoGoals.setVisibility(View.VISIBLE);
-            return;
-        }
-        binding.textNoGoals.setVisibility(View.GONE);
-
-        for (SavingsGoal g : ovGoals) {
-            View row = getLayoutInflater()
-                    .inflate(R.layout.item_dashboard_goal, binding.layoutGoals, false);
-
-            ((TextView) row.findViewById(R.id.textGoalTitle)).setText(g.getTitle());
-
-            int pct = Math.round(g.getProgress() * 100f);
-            TextView percent = row.findViewById(R.id.textGoalPercent);
-            percent.setText(pct + "%");
-
-            LinearProgressIndicator bar = row.findViewById(R.id.progressGoal);
-            bar.setProgress(Math.max(0, Math.min(100, pct)));
-            int barColor = g.isCompleted() || pct >= 100
-                    ? R.color.income_green
-                    : (g.isOverdue() ? R.color.expense_red : R.color.primary);
-            bar.setIndicatorColor(ContextCompat.getColor(requireContext(), barColor));
-            percent.setTextColor(ContextCompat.getColor(requireContext(), barColor));
-
-            ((TextView) row.findViewById(R.id.textGoalAmounts)).setText(
-                    getString(R.string.dash_goal_progress_value,
-                            MoneyFormat.formatLong(g.getSavedAmount()),
-                            MoneyFormat.formatLong(g.getTargetAmount())));
-
-            TextView remaining = row.findViewById(R.id.textGoalRemaining);
-            long left = g.getTargetAmount() - g.getSavedAmount();
-            if (g.isCompleted() || left <= 0L) {
-                remaining.setText(getString(R.string.dash_goal_done));
-                remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.income_green));
-            } else {
-                remaining.setText(getString(R.string.dash_goal_remaining,
-                        MoneyFormat.formatLong(left)));
-                remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
-            }
-
-            TextView deadline = row.findViewById(R.id.textGoalDeadline);
-            if (g.isCompleted() || left <= 0L || g.getDeadline() == null) {
-                deadline.setVisibility(View.GONE);
-            } else if (g.isOverdue()) {
-                deadline.setText(getString(R.string.dash_goal_overdue));
-                deadline.setTextColor(ContextCompat.getColor(requireContext(), R.color.expense_red));
-                deadline.setVisibility(View.VISIBLE);
-            } else {
-                long monthly = g.getMonthlyRequired();
-                String text = getString(R.string.dash_goal_days_left, g.getRemainingDays());
-                if (monthly > 0L) {
-                    text = getString(R.string.dash_goal_monthly, MoneyFormat.formatLong(monthly))
-                            + " · " + text;
-                }
-                deadline.setText(text);
-                deadline.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
-                deadline.setVisibility(View.VISIBLE);
-            }
-
-            binding.layoutGoals.addView(row);
-        }
     }
 
     /**
