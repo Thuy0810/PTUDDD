@@ -162,11 +162,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Ngân sách (no Java handler) -->
+                    <!-- Ngân sách -> btnBudgetShortcut -->
                     <LinearLayout
+                        android:id="@+id/btnBudgetShortcut"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
@@ -392,11 +395,14 @@
                         android:layout_marginStart="64dp"
                         android:background="@color/line_1" />
 
-                    <!-- Thử thách tiết kiệm (no Java handler) -->
+                    <!-- Thử thách tiết kiệm -> btnChallenge -->
                     <LinearLayout
+                        android:id="@+id/btnChallenge"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"

@@ -52,6 +52,7 @@ public class SecurityActivity extends AppCompatActivity {
             if (!PrefsHelper.isPinEnabled(this)) {
                 // Không cho bật biometric khi PIN chưa bật
                 buttonView.setChecked(false);
+                Toast.makeText(this, R.string.enable_pin_first, Toast.LENGTH_SHORT).show();
                 return;
             }
             PrefsHelper.setBiometricEnabled(this, isChecked);

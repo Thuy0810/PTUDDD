@@ -276,7 +276,7 @@ public final class PrefsHelper {
     }
 
     public static boolean isCurrencySymbolBefore(Context ctx) {
-        return false;
+        return prefs(ctx).getBoolean(KEY_CURRENCY_POSITION, false);
     }
 
     public static void setCurrencyPosition(Context ctx, boolean before) {

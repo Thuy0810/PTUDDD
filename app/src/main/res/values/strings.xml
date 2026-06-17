@@ -168,6 +168,7 @@
     <string name="account">Tài khoản</string>
     <string name="user">Người dùng</string>
     <string name="security">Bảo mật</string>
+    <string name="enable_pin_first">Vui lòng bật mã PIN trước khi dùng vân tay</string>
     <string name="language">Ngôn ngữ</string>
     <string name="support">Hỗ trợ</string>
     <string name="help_center">Trung tâm hỗ trợ</string>
@@ -635,4 +636,29 @@
 
     <string name="choose">Chọn</string>
     <string name="ok">OK</string>
+
+    <!-- Thử thách tiết kiệm -->
+    <string name="c1_title">Thử thách tiết kiệm</string>
+    <string name="c1_subtitle">Đặt mục tiêu và đánh dấu từng ngày hoàn thành</string>
+    <string name="c1_empty">Chưa có thử thách nào. Nhấn + để tạo.</string>
+    <string name="c1_add">Thêm thử thách</string>
+    <string name="c1_name_hint">Tên thử thách</string>
+    <string name="c1_desc_hint">Mô tả (tuỳ chọn)</string>
+    <string name="c1_target_hint">Mục tiêu tiết kiệm</string>
+    <string name="c1_days_hint">Số ngày</string>
+    <string name="c1_no_description">Không có mô tả</string>
+    <string name="c1_days_progress">%1$d/%2$d ngày</string>
+    <string name="c1_mark_day_done">Đánh dấu hoàn thành hôm nay</string>
+    <string name="c1_completed">Đã hoàn thành 🎉</string>
+    <string name="c1_enter_name">Nhập tên thử thách</string>
+    <string name="c1_enter_days">Nhập số ngày hợp lệ</string>
+    <string name="c1_created">Đã tạo thử thách!</string>
+    <string name="c1_day_marked">Đã ghi nhận một ngày!</string>
+    <string name="c1_finished_toast">Hoàn thành thử thách! 🎉</string>
+
+    <!-- Cài đặt tiền tệ -->
+    <string name="s5_pos_before">Trước số (₫ 500.000)</string>
+    <string name="s5_pos_after">Sau số (500.000 ₫)</string>
+    <string name="s5_fmt_dot">Dấu chấm (500.000)</string>
+    <string name="s5_fmt_comma">Dấu phẩy (500,000)</string>
 </resources>

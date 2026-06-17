@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Budget;
@@ -59,7 +58,7 @@ public class BudgetEditActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        binding.recyclerCategories.setLayoutManager(new LinearLayoutManager(this));
+        // recyclerCategories là LinearLayout (vertical); item được inflate + addView trực tiếp.
     }
 
     private void setupClickListeners() {

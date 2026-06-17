@@ -126,6 +126,7 @@
     <string name="account">Account</string>
     <string name="user">User</string>
     <string name="security">Security</string>
+    <string name="enable_pin_first">Please enable PIN before using biometrics</string>
     <string name="language">Language</string>
     <string name="support">Support</string>
     <string name="help_center">Help center</string>
@@ -592,4 +593,29 @@
 
     <string name="choose">Choose</string>
     <string name="ok">OK</string>
+
+    <!-- Savings challenge -->
+    <string name="c1_title">Savings Challenge</string>
+    <string name="c1_subtitle">Set a goal and mark each completed day</string>
+    <string name="c1_empty">No challenges yet. Tap + to create one.</string>
+    <string name="c1_add">Add challenge</string>
+    <string name="c1_name_hint">Challenge name</string>
+    <string name="c1_desc_hint">Description (optional)</string>
+    <string name="c1_target_hint">Savings target</string>
+    <string name="c1_days_hint">Number of days</string>
+    <string name="c1_no_description">No description</string>
+    <string name="c1_days_progress">%1$d/%2$d days</string>
+    <string name="c1_mark_day_done">Mark today as done</string>
+    <string name="c1_completed">Completed 🎉</string>
+    <string name="c1_enter_name">Enter a challenge name</string>
+    <string name="c1_enter_days">Enter a valid number of days</string>
+    <string name="c1_created">Challenge created!</string>
+    <string name="c1_day_marked">A day recorded!</string>
+    <string name="c1_finished_toast">Challenge complete! 🎉</string>
+
+    <!-- Currency settings -->
+    <string name="s5_pos_before">Before amount (₫ 500,000)</string>
+    <string name="s5_pos_after">After amount (500,000 ₫)</string>
+    <string name="s5_fmt_dot">Dot (500.000)</string>
+    <string name="s5_fmt_comma">Comma (500,000)</string>
 </resources>

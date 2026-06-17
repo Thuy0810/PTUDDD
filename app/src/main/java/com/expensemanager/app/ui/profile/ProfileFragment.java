@@ -13,7 +13,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.expensemanager.app.R;
-import com.expensemanager.app.util.LocaleHelper;
 import com.expensemanager.app.databinding.FragmentProfileBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.auth.LoginActivity;
@@ -67,8 +66,20 @@ public class ProfileFragment extends Fragment {
             binding.btnSecurity.setOnClickListener(v ->
                     startActivity(new Intent(requireContext(), SecurityActivity.class)));
         }
+        // Hàng "Cài đặt" -> mở màn Cài đặt (đổi ngôn ngữ nằm trong đó)
         if (binding.btnLanguage != null) {
-            binding.btnLanguage.setOnClickListener(v -> showLanguagePicker());
+            binding.btnLanguage.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), SettingsActivity.class)));
+        }
+
+        // Quản lý: Ngân sách & Thử thách tiết kiệm
+        if (binding.btnBudgetShortcut != null) {
+            binding.btnBudgetShortcut.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), com.expensemanager.app.ui.budget.BudgetListActivity.class)));
+        }
+        if (binding.btnChallenge != null) {
+            binding.btnChallenge.setOnClickListener(v ->
+                    startActivity(new Intent(requireContext(), com.expensemanager.app.ui.challenge.ChallengeListActivity.class)));
         }
 
         // Quản lý
@@ -99,42 +110,29 @@ public class ProfileFragment extends Fragment {
                     Toast.makeText(requireContext(), getString(R.string.j3_contact_support), Toast.LENGTH_SHORT).show());
         }
 
-        // Đăng xuất
+        // Đăng xuất (có xác nhận)
         if (binding.btnLogout != null) {
-            binding.btnLogout.setOnClickListener(v -> {
-                try {
-                    HomeViewModelHolder.clear();
-                    PrefsHelper.clearPendingLogout(requireContext());
-                    authRepo.logout();
-                    Intent i = new Intent(requireContext(), LoginActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(i);
-                } catch (Exception e) {
-                    Toast.makeText(requireContext(), getString(R.string.j3_logout_error), Toast.LENGTH_SHORT).show();
-                }
-            });
+            binding.btnLogout.setOnClickListener(v ->
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.logout)
+                            .setMessage(R.string.success_logout_confirm)
+                            .setNegativeButton(R.string.cancel, null)
+                            .setPositiveButton(R.string.logout, (d, w) -> doLogout())
+                            .show());
         }
     }
 
-    private void showLanguagePicker() {
-        final String[] tags = { LocaleHelper.VIETNAMESE, LocaleHelper.ENGLISH };
-        String[] labels = {
-                getString(R.string.language_vietnamese),
-                getString(R.string.language_english)
-        };
-        String current = LocaleHelper.getLanguage();
-        int checked = LocaleHelper.ENGLISH.equals(current) ? 1 : 0;
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.choose_language)
-                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
-                    dialog.dismiss();
-                    if (!tags[which].equals(LocaleHelper.getLanguage())) {
-                        LocaleHelper.setLanguage(tags[which]);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
+    private void doLogout() {
+        try {
+            HomeViewModelHolder.clear();
+            PrefsHelper.clearPendingLogout(requireContext());
+            authRepo.logout();
+            Intent i = new Intent(requireContext(), LoginActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), getString(R.string.j3_logout_error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

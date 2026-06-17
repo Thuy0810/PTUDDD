@@ -271,12 +271,12 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <LinearLayout
                 android:id="@+id/recyclerCategories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false" />
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </ScrollView>
 

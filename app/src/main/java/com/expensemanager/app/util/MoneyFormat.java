@@ -1,7 +1,6 @@
 package com.expensemanager.app.util;
 
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,12 +39,9 @@ public final class MoneyFormat {
     private static DecimalFormat getFormat() {
         DecimalFormat df = formatCache.get(locale);
         if (df == null) {
+            // Dùng dấu phân cách mặc định của locale (vi-VN: chấm/phẩy, en-US: phẩy/chấm)
+            // để cài đặt "định dạng số" thực sự có tác dụng.
             df = (DecimalFormat) NumberFormat.getInstance(locale);
-            DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-            // Định dạng vi-VN: ngăn cách hàng nghìn bằng dấu chấm, thập phân bằng dấu phẩy
-            symbols.setDecimalSeparator(',');
-            symbols.setGroupingSeparator('.');
-            df.setDecimalFormatSymbols(symbols);
             df.setMaximumFractionDigits(decimals);
             df.setMinimumFractionDigits(0);
             df.setGroupingUsed(true);

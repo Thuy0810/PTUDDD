@@ -38,7 +38,8 @@ public class ExpenseApplication extends Application {
                 loc = new Locale("vi", "VN");
             }
 
-            MoneyFormat.applySettings(symbol, false, decimals, loc);
+            boolean before = PrefsHelper.isCurrencySymbolBefore(this);
+            MoneyFormat.applySettings(symbol, before, decimals, loc);
         } catch (Exception e) {
             MoneyFormat.reset();
         }

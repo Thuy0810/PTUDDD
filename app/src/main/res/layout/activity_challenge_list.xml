@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/recurring"
+            android:text="@string/c1_title"
             android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="@string/s3_recurring_subtitle"
+            android:text="@string/c1_subtitle"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
     </LinearLayout>
@@ -35,13 +35,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:gravity="center"
-        android:text="@string/recurring_empty"
+        android:text="@string/c1_empty"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerRecurring"
+        android:id="@+id/recyclerChallenges"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_margin="16dp"
-        android:text="@string/s3_add_item"
+        android:text="@string/c1_add"
         android:textColor="@color/white"
         app:icon="@drawable/ic_add"
         app:iconTint="@color/white" />
