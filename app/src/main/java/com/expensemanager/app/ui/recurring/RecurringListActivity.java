@@ -68,10 +68,7 @@ public class RecurringListActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.recurring);
-        }
+
         binding.btnBack.setOnClickListener(v -> finish());
     }
 

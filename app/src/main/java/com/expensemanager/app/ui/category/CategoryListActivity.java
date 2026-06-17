@@ -38,10 +38,8 @@ public class CategoryListActivity extends AppCompatActivity {
         binding = ActivityCategoryListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.categories);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.categories);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         RecyclerView rv = findViewById(R.id.recyclerCategories);
         adapter = new CategoryAdapter();

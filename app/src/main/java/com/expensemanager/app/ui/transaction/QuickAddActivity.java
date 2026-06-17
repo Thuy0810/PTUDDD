@@ -52,10 +52,8 @@ public class QuickAddActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityQuickAddBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getString(R.string.quick_add_title));
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.quick_add_title);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         MoneyInputFormatter.attach(binding.editAmount);
         binding.textDate.setText(QuickParseUtil.formatDate(new Date()));

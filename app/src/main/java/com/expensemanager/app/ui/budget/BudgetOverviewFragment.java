@@ -60,6 +60,7 @@ public class BudgetOverviewFragment extends Fragment {
     // ZBB rollover: dữ liệu tháng trước để tính cuốn chiếu
     private Map<String, Long> prevAllocatedMap = new HashMap<>();
     private Map<String, Long> prevSpentMap = new HashMap<>();
+    private Map<String, Long> rolloverMap = new HashMap<>();
 
     private int selectedYear = Calendar.getInstance().get(Calendar.YEAR);
     private int selectedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -105,11 +106,14 @@ public class BudgetOverviewFragment extends Fragment {
 
         binding.layoutMonth.setOnClickListener(v -> showMonthPicker());
 
-        binding.btnAllocate.setOnClickListener(v -> {
-            Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
-            i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, String.format("%04d-%02d", selectedYear, selectedMonth));
-            startActivity(i);
-        });
+        binding.btnAllocate.setOnClickListener(v -> openAllocation());
+    }
+
+    private void openAllocation() {
+        Intent i = new Intent(requireContext(), BudgetAllocationActivity.class);
+        i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY,
+                String.format("%04d-%02d", selectedYear, selectedMonth));
+        startActivity(i);
     }
 
     private void showMonthPicker() {
@@ -236,7 +240,7 @@ public class BudgetOverviewFragment extends Fragment {
 
     /** Tính bản đồ cuốn chiếu từ tháng trước rồi đẩy vào adapter. */
     private void updateRollover() {
-        Map<String, Long> rolloverMap = new HashMap<>();
+        Map<String, Long> map = new HashMap<>();
         java.util.Set<String> catIds = new java.util.HashSet<>();
         catIds.addAll(prevAllocatedMap.keySet());
         catIds.addAll(prevSpentMap.keySet());
@@ -244,9 +248,11 @@ public class BudgetOverviewFragment extends Fragment {
             long a = prevAllocatedMap.containsKey(catId) ? prevAllocatedMap.get(catId) : 0L;
             long s = prevSpentMap.containsKey(catId) ? prevSpentMap.get(catId) : 0L;
             long roll = com.expensemanager.app.domain.usecase.BudgetService.categoryRollover(a, s);
-            if (roll != 0L) rolloverMap.put(catId, roll);
+            if (roll != 0L) map.put(catId, roll);
         }
-        adapter.setRolloverMap(rolloverMap);
+        rolloverMap = map;
+        adapter.setRolloverMap(map);
+        updateHeaderSummary();
     }
 
     private void calculateAndUpdateSummary() {
@@ -373,17 +379,27 @@ public class BudgetOverviewFragment extends Fragment {
         binding.textUnassigned.setTextColor(
                 requireContext().getColor(unassigned < 0 ? R.color.budget_danger : android.R.color.white));
 
-        // (3) Dem so danh muc vuot muc (da chi > han muc, han muc > 0)
+        // (3) Dem so danh muc vuot muc: da chi > (phan bo + cuon chieu).
+        // Duyet ca danh muc co CHI TIEU nhung KHONG dat phan bo (available = 0),
+        // de khop voi highlight tren tung the.
         int overCount = 0;
-        for (Map.Entry<String, Long> e : allocatedMap.entrySet()) {
-            long limit = e.getValue() != null ? e.getValue() : 0L;
-            if (limit <= 0) continue;
-            long spent = spentMap.containsKey(e.getKey()) ? spentMap.get(e.getKey()) : 0L;
-            if (spent > limit) overCount++;
+        java.util.Set<String> catIds = new java.util.HashSet<>();
+        catIds.addAll(allocatedMap.keySet());
+        catIds.addAll(spentMap.keySet());
+        for (String catId : catIds) {
+            long alloc = allocatedMap.containsKey(catId) ? allocatedMap.get(catId) : 0L;
+            long roll = rolloverMap.containsKey(catId) ? rolloverMap.get(catId) : 0L;
+            long spent = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
+            if (spent > alloc + roll) overCount++;
         }
         if (overCount > 0) {
             binding.cardOverBudget.setVisibility(View.VISIBLE);
             binding.textOverBudget.setText(getString(R.string.dash_over_categories, overCount));
+        } else if (totalAllocated > totalMoney) {
+            // Đã phân bổ vượt thu nhập (giao việc quá tiền có).
+            binding.cardOverBudget.setVisibility(View.VISIBLE);
+            binding.textOverBudget.setText(getString(R.string.budget_over_allocated_banner,
+                    MoneyFormat.formatLong(totalAllocated - totalMoney)));
         } else {
             binding.cardOverBudget.setVisibility(View.GONE);
         }

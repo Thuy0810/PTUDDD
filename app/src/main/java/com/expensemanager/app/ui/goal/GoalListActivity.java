@@ -2,11 +2,15 @@ package com.expensemanager.app.ui.goal;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -51,10 +55,8 @@ public class GoalListActivity extends AppCompatActivity {
         binding = ActivityGoalListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.goals);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.goals);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         RecyclerView rv = findViewById(R.id.recyclerGoals);
         adapter = new GoalAdapter();
@@ -207,7 +209,26 @@ public class GoalListActivity extends AppCompatActivity {
         MoneyInputFormatter.attach(editContribute);
         container.addView(editContribute);
 
-        new AlertDialog.Builder(this)
+        // Nút: sửa thẳng số đã tiết kiệm + chuyển sang mục tiêu khác.
+        final android.app.AlertDialog[] parentRef = new android.app.AlertDialog[1];
+
+        android.widget.Button btnEditSaved = new android.widget.Button(this);
+        btnEditSaved.setText(getString(R.string.edit_saved_amount));
+        btnEditSaved.setOnClickListener(v -> {
+            if (parentRef[0] != null) parentRef[0].dismiss();
+            showEditSavedDialog(uid, g);
+        });
+        container.addView(btnEditSaved);
+
+        android.widget.Button btnTransfer = new android.widget.Button(this);
+        btnTransfer.setText(getString(R.string.transfer_to_goal));
+        btnTransfer.setOnClickListener(v -> {
+            if (parentRef[0] != null) parentRef[0].dismiss();
+            showGoalTransferDialog(uid, g);
+        });
+        container.addView(btnTransfer);
+
+        parentRef[0] = new AlertDialog.Builder(this)
                 .setTitle(g.getTitle())
                 .setView(container)
                 .setPositiveButton(getString(R.string.save), (d, which) -> {
@@ -232,6 +253,120 @@ public class GoalListActivity extends AppCompatActivity {
                     goalRepo.delete(uid, g.getId());
                     Toast.makeText(this, getString(R.string.success_delete), Toast.LENGTH_SHORT).show();
                 })
+                .show();
+    }
+
+    /** Sửa thẳng số tiền đã tiết kiệm của mục tiêu (không đụng tới ví). */
+    private void showEditSavedDialog(String uid, SavingsGoal g) {
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(48, 16, 48, 0);
+
+        EditText editSaved = new EditText(this);
+        editSaved.setHint(getString(R.string.edit_saved_amount_hint));
+        editSaved.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(editSaved);
+        editSaved.setText(MoneyInputFormatter.format(g.getSavedAmount()));
+        container.addView(editSaved);
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.edit_saved_amount))
+                .setView(container)
+                .setPositiveButton(getString(R.string.save), (d, which) -> {
+                    long newSaved = MoneyInputFormatter.getRawValue(editSaved);
+                    if (newSaved < 0) {
+                        Toast.makeText(this, getString(R.string.j3_invalid_number), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    goalRepo.updateSavedAmount(uid, g.getId(), newSaved)
+                            .addOnSuccessListener(unused -> Toast.makeText(this,
+                                    getString(R.string.saved_amount_updated), Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(this,
+                                    getString(R.string.j3_error_prefix, e.getMessage()),
+                                    Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show();
+    }
+
+    /** Chuyển số đã tiết kiệm sang mục tiêu khác (atomic, không ảnh hưởng ví). */
+    private void showGoalTransferDialog(String uid, SavingsGoal fromGoal) {
+        // Mục tiêu đích: tất cả mục tiêu khác chưa lưu trữ.
+        List<SavingsGoal> others = new ArrayList<>();
+        for (SavingsGoal g : goals) {
+            if (g.getId() != null && !g.getId().equals(fromGoal.getId()) && !g.isArchived()) {
+                others.add(g);
+            }
+        }
+        if (others.isEmpty()) {
+            Toast.makeText(this, getString(R.string.need_two_goals), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(48, 16, 48, 0);
+
+        android.widget.TextView info = new android.widget.TextView(this);
+        info.setText(getString(R.string.dash_goal_progress_value,
+                MoneyFormat.formatLong(fromGoal.getSavedAmount()),
+                MoneyFormat.formatLong(fromGoal.getTargetAmount())));
+        info.setTextColor(getResources().getColor(R.color.text_primary, null));
+        info.setPadding(0, 0, 0, 8);
+        container.addView(info);
+
+        android.widget.TextView lblTo = new android.widget.TextView(this);
+        lblTo.setText(getString(R.string.transfer_to_goal_label));
+        lblTo.setTextSize(13);
+        lblTo.setTextColor(getResources().getColor(R.color.text_secondary, null));
+        lblTo.setPadding(0, 8, 0, 4);
+        container.addView(lblTo);
+
+        Spinner spTo = new Spinner(this);
+        List<String> names = new ArrayList<>();
+        for (SavingsGoal g : others) names.add(g.getTitle());
+        ArrayAdapter<String> aTo = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, names);
+        aTo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spTo.setAdapter(aTo);
+        container.addView(spTo);
+
+        android.widget.TextView lblAmt = new android.widget.TextView(this);
+        lblAmt.setText(getString(R.string.transfer_amount));
+        lblAmt.setTextSize(13);
+        lblAmt.setTextColor(getResources().getColor(R.color.text_secondary, null));
+        lblAmt.setPadding(0, 16, 0, 4);
+        container.addView(lblAmt);
+
+        EditText editAmount = new EditText(this);
+        editAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(editAmount);
+        container.addView(editAmount);
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.transfer_between_goals))
+                .setView(container)
+                .setPositiveButton(getString(R.string.transfer_money), (d, which) -> {
+                    long amount = MoneyInputFormatter.getRawValue(editAmount);
+                    if (amount <= 0) {
+                        Toast.makeText(this, getString(R.string.j3_invalid_number), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (fromGoal.getSavedAmount() < amount) {
+                        Toast.makeText(this, getString(R.string.reallocation_exceed_source),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    SavingsGoal to = others.get(spTo.getSelectedItemPosition());
+                    goalRepo.transferBetweenGoals(uid, fromGoal.getId(), to.getId(), amount)
+                            .addOnSuccessListener(unused -> Toast.makeText(this,
+                                    getString(R.string.transfer_success, MoneyFormat.formatLong(amount)),
+                                    Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(this,
+                                    getString(R.string.j3_error_prefix, e.getMessage()),
+                                    Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

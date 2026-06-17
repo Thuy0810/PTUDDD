@@ -44,6 +44,7 @@ public class GoalRepository {
         g.setId(docId);
         if (data == null) return g;
         g.setTitle((String) data.get("title"));
+        g.setIconKey((String) data.get("iconKey"));
         Long target = MoneyValueParser.toLong(data.get("targetAmount"));
         Long saved = MoneyValueParser.toLong(data.get("savedAmount"));
         g.setTargetAmount(target != null ? target : 0L);
@@ -167,6 +168,106 @@ public class GoalRepository {
         db.collection("users").document(uid).collection("savings_history").add(entry);
     }
 
+    /**
+     * Sửa thẳng số tiền đã tiết kiệm (savedAmount) của mục tiêu — không đụng tới ví.
+     *
+     * <p>Tự đánh dấu completed nếu đạt/ vượt target, bỏ completed nếu xuống dưới.
+     */
+    public Task<Void> updateSavedAmount(String uid, String goalId, long newSaved) {
+        if (newSaved < 0) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("savedAmount < 0"));
+        }
+        DocumentReference goalRef = db.collection("users").document(uid)
+                .collection("savings_goals").document(goalId);
+        return db.runTransaction(transaction -> {
+            DocumentSnapshot snap = transaction.get(goalRef);
+            if (!snap.exists()) {
+                throw new FirebaseFirestoreException("Mục tiêu không tồn tại",
+                        FirebaseFirestoreException.Code.NOT_FOUND);
+            }
+            Long target = MoneyValueParser.toLong(snap.get("targetAmount"));
+            if (target == null) target = 0L;
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("savedAmount", newSaved);
+            updates.put("completed", target > 0L && newSaved >= target);
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+            transaction.update(goalRef, updates);
+            return null;
+        });
+    }
+
+    /**
+     * Chuyển số tiền đã tiết kiệm giữa hai mục tiêu (atomic).
+     *
+     * <p>Chỉ di chuyển savedAmount — KHÔNG ảnh hưởng tới ví (tiền đã rút khỏi ví
+     * khi đóng góp trước đó). Trong 1 transaction: kiểm tra cả hai mục tiêu tồn tại,
+     * không archived, mục tiêu nguồn đủ savedAmount; trừ nguồn, cộng đích; cập nhật
+     * cờ completed cho cả hai theo target.
+     */
+    public Task<Void> transferBetweenGoals(String uid, String fromGoalId, String toGoalId, long amount) {
+        if (fromGoalId == null || toGoalId == null) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("goalId is null"));
+        }
+        if (fromGoalId.equals(toGoalId)) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("same goal"));
+        }
+        if (amount <= 0) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("amount <= 0"));
+        }
+        DocumentReference fromRef = db.collection("users").document(uid)
+                .collection("savings_goals").document(fromGoalId);
+        DocumentReference toRef = db.collection("users").document(uid)
+                .collection("savings_goals").document(toGoalId);
+        return db.runTransaction(transaction -> {
+            DocumentSnapshot fromSnap = transaction.get(fromRef);
+            DocumentSnapshot toSnap = transaction.get(toRef);
+            if (!fromSnap.exists() || !toSnap.exists()) {
+                throw new FirebaseFirestoreException("Mục tiêu không tồn tại",
+                        FirebaseFirestoreException.Code.NOT_FOUND);
+            }
+            Boolean fromArchived = fromSnap.getBoolean("isArchived");
+            Boolean toArchived = toSnap.getBoolean("isArchived");
+            if ((fromArchived != null && fromArchived) || (toArchived != null && toArchived)) {
+                throw new FirebaseFirestoreException("Mục tiêu đã lưu trữ",
+                        FirebaseFirestoreException.Code.FAILED_PRECONDITION);
+            }
+
+            Long fromSaved = MoneyValueParser.toLong(fromSnap.get("savedAmount"));
+            Long toSaved = MoneyValueParser.toLong(toSnap.get("savedAmount"));
+            Long fromTarget = MoneyValueParser.toLong(fromSnap.get("targetAmount"));
+            Long toTarget = MoneyValueParser.toLong(toSnap.get("targetAmount"));
+            if (fromSaved == null) fromSaved = 0L;
+            if (toSaved == null) toSaved = 0L;
+            if (fromTarget == null) fromTarget = 0L;
+            if (toTarget == null) toTarget = 0L;
+            if (fromSaved < amount) {
+                throw new FirebaseFirestoreException("Số tiền vượt quá nguồn có thể chuyển",
+                        FirebaseFirestoreException.Code.ABORTED);
+            }
+
+            long newFromSaved = fromSaved - amount;
+            long newToSaved = toSaved + amount;
+
+            Map<String, Object> fromUpdates = new HashMap<>();
+            fromUpdates.put("savedAmount", newFromSaved);
+            fromUpdates.put("completed", fromTarget > 0L && newFromSaved >= fromTarget);
+            fromUpdates.put("updatedAt", FieldValue.serverTimestamp());
+            transaction.update(fromRef, fromUpdates);
+
+            Map<String, Object> toUpdates = new HashMap<>();
+            toUpdates.put("savedAmount", newToSaved);
+            toUpdates.put("completed", toTarget > 0L && newToSaved >= toTarget);
+            toUpdates.put("updatedAt", FieldValue.serverTimestamp());
+            transaction.update(toRef, toUpdates);
+            return null;
+        });
+    }
+
     public void add(String uid, SavingsGoal g) {
         DocumentReference ref = db.collection("users").document(uid)
                 .collection("savings_goals").document();
@@ -180,6 +281,15 @@ public class GoalRepository {
         g.setUpdatedAt(Timestamp.now());
         db.collection("users").document(uid).collection("savings_goals")
                 .document(g.getId()).set(g.toMap());
+    }
+
+    /** Cập nhật riêng icon của mục tiêu. */
+    public Task<Void> updateIcon(String uid, String goalId, String iconKey) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("iconKey", iconKey);
+        updates.put("updatedAt", FieldValue.serverTimestamp());
+        return db.collection("users").document(uid).collection("savings_goals")
+                .document(goalId).update(updates);
     }
 
     public void delete(String uid, String id) {

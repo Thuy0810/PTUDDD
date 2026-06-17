@@ -48,10 +48,8 @@ public class WalletListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallet_list);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.wallets);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.wallets);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         textTotalBalance = findViewById(R.id.textTotalBalance);
         RecyclerView rv = findViewById(R.id.recyclerWallets);
@@ -187,10 +185,14 @@ public class WalletListActivity extends AppCompatActivity {
         MoneyInputFormatter.attach(editBalance);
 
         editName.setText(wallet.getName());
-        if (wallet.getCurrentBalance() > 0) {
-            editBalance.setText(MoneyInputFormatter.format(wallet.getCurrentBalance()));
-        }
-        editBalance.setVisibility(View.GONE);
+        // Cho phép sửa thẳng số dư hiện tại (không ghi log điều chỉnh).
+        editBalance.setText(MoneyInputFormatter.format(wallet.getCurrentBalance()));
+        editBalance.setVisibility(View.VISIBLE);
+        try {
+            ((com.google.android.material.textfield.TextInputLayout)
+                    editBalance.getParent().getParent())
+                    .setHint(getString(R.string.current_balance));
+        } catch (Exception ignored) { }
         view.<com.google.android.material.button.MaterialButton>findViewById(R.id.btnCreate).setText(getString(R.string.save));
 
         String[] types = getResources().getStringArray(R.array.wallet_type_labels);
@@ -225,6 +227,7 @@ public class WalletListActivity extends AppCompatActivity {
                             })
                             .addOnFailureListener(e -> showDeleteConfirm(uid, wallet));
                 })
+                .setNeutralButton(R.string.transfer_money, (d, w) -> showTransferDialog(uid, wallet))
                 .setNegativeButton(R.string.cancel, null)
                 .create();
         dialogRef[0] = dialog;
@@ -239,6 +242,7 @@ public class WalletListActivity extends AppCompatActivity {
             wallet.setName(name);
             wallet.setType(TYPE_KEYS[pos]);
             wallet.setIcon(selectedIcon[0]);
+            wallet.setCurrentBalance(MoneyInputFormatter.getRawValue(editBalance));
             view.findViewById(R.id.btnCreate).setEnabled(false);
             walletRepo.update(uid, wallet)
                     .addOnSuccessListener(unused -> {
@@ -252,6 +256,114 @@ public class WalletListActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    /** Chuyển tiền giữa hai ví (atomic qua WalletRepository.transfer). */
+    private void showTransferDialog(String uid, Wallet fromWallet) {
+        // Chỉ chuyển giữa các ví chưa lưu trữ.
+        List<Wallet> active = new ArrayList<>();
+        for (Wallet w : wallets) {
+            if (!w.isArchived()) active.add(w);
+        }
+        if (active.size() < 2) {
+            Toast.makeText(this, getString(R.string.need_two_wallets), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        float d = getResources().getDisplayMetrics().density;
+        int pad = (int) (20 * d);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(pad, pad / 2, pad, 0);
+
+        List<String> names = new ArrayList<>();
+        for (Wallet w : active) {
+            names.add(w.getName() + " (" + MoneyFormat.formatLong(w.getCurrentBalance()) + ")");
+        }
+
+        TextView lblFrom = new TextView(this);
+        lblFrom.setText(getString(R.string.transfer_from));
+        lblFrom.setTextColor(getColor(R.color.text_secondary));
+        lblFrom.setTextSize(13);
+        container.addView(lblFrom);
+        Spinner spFrom = new Spinner(this);
+        ArrayAdapter<String> aFrom = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, names);
+        aFrom.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spFrom.setAdapter(aFrom);
+        container.addView(spFrom);
+
+        TextView lblTo = new TextView(this);
+        lblTo.setText(getString(R.string.transfer_to));
+        lblTo.setTextColor(getColor(R.color.text_secondary));
+        lblTo.setTextSize(13);
+        lblTo.setPadding(0, (int) (12 * d), 0, 0);
+        container.addView(lblTo);
+        Spinner spTo = new Spinner(this);
+        ArrayAdapter<String> aTo = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, new ArrayList<>(names));
+        aTo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spTo.setAdapter(aTo);
+        container.addView(spTo);
+
+        TextView lblAmt = new TextView(this);
+        lblAmt.setText(getString(R.string.transfer_amount));
+        lblAmt.setTextColor(getColor(R.color.text_secondary));
+        lblAmt.setTextSize(13);
+        lblAmt.setPadding(0, (int) (12 * d), 0, 0);
+        container.addView(lblAmt);
+        EditText editAmount = new EditText(this);
+        editAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(editAmount);
+        container.addView(editAmount);
+
+        // Mặc định: ví nguồn = ví đang sửa, ví đích = ví khác đầu tiên.
+        int fromIdx = 0;
+        for (int i = 0; i < active.size(); i++) {
+            if (active.get(i).getId() != null && active.get(i).getId().equals(fromWallet.getId())) {
+                fromIdx = i;
+                break;
+            }
+        }
+        spFrom.setSelection(fromIdx);
+        spTo.setSelection(fromIdx == 0 ? 1 : 0);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.transfer_between_wallets)
+                .setView(container)
+                .setPositiveButton(R.string.transfer_money, (dl, wl) -> {
+                    int fp = spFrom.getSelectedItemPosition();
+                    int tp = spTo.getSelectedItemPosition();
+                    Wallet from = active.get(fp);
+                    Wallet to = active.get(tp);
+                    if (from.getId() != null && from.getId().equals(to.getId())) {
+                        Toast.makeText(this, getString(R.string.j2_select_two_diff_wallets),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    long amount = MoneyInputFormatter.getRawValue(editAmount);
+                    if (amount <= 0) {
+                        Toast.makeText(this, getString(R.string.j2_enter_amount_gt_zero),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (from.getCurrentBalance() < amount) {
+                        Toast.makeText(this,
+                                getString(R.string.j2_warn_insufficient_balance,
+                                        MoneyFormat.formatLong(from.getCurrentBalance())),
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    walletRepo.transfer(uid, from.getId(), to.getId(), amount)
+                            .addOnSuccessListener(unused -> Toast.makeText(this,
+                                    getString(R.string.transfer_success, MoneyFormat.formatLong(amount)),
+                                    Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e -> Toast.makeText(this,
+                                    getString(R.string.transfer_failed, e.getMessage()),
+                                    Toast.LENGTH_LONG).show());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void showArchiveConfirm(String uid, Wallet wallet, AlertDialog parent) {

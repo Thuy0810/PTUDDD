@@ -31,10 +31,8 @@ public class SecurityActivity extends AppCompatActivity {
         binding = ActivitySecurityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.security);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.security);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         refreshUiState();
 

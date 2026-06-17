@@ -864,22 +864,54 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         }
     }
 
+    /** Tạo MỚI một danh mục chi (nhập tên + chọn nhóm), không phải chọn danh mục có sẵn. */
     private void showAddCategoryDialog() {
-        if (expenseCategories.isEmpty()) {
-            Toast.makeText(this, getString(R.string.j1_no_category), Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (uid == null) return;
 
-        String[] names = new String[expenseCategories.size()];
-        for (int i = 0; i < expenseCategories.size(); i++) {
-            names[i] = expenseCategories.get(i).getName();
-        }
+        final EditText input = new EditText(this);
+        input.setHint(getString(R.string.category_name));
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+
+        final String[] groupValues = {"essential", "need", "want", "other"};
+        final int[] selectedGroup = {3};
+
+        View radioView = getLayoutInflater().inflate(R.layout.dialog_group_picker, null);
+        RadioButton rb0 = radioView.findViewById(R.id.rbEssential);
+        RadioButton rb1 = radioView.findViewById(R.id.rbNeed);
+        RadioButton rb2 = radioView.findViewById(R.id.rbWant);
+        RadioButton rb3 = radioView.findViewById(R.id.rbOther);
+        rb3.setChecked(true);
+        rb0.setOnClickListener(v -> selectedGroup[0] = 0);
+        rb1.setOnClickListener(v -> selectedGroup[0] = 1);
+        rb2.setOnClickListener(v -> selectedGroup[0] = 2);
+        rb3.setOnClickListener(v -> selectedGroup[0] = 3);
+
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(48, 16, 48, 16);
+        container.addView(input);
+        container.addView(radioView);
 
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.select_category))
-                .setItems(names, (d, which) -> {
-                    showEditDialog(expenseCategories.get(which), 0);
+                .setTitle(getString(R.string.add_category))
+                .setView(container)
+                .setPositiveButton(getString(R.string.create), (d, w) -> {
+                    String name = input.getText().toString().trim();
+                    if (name.isEmpty()) {
+                        Toast.makeText(this, getString(R.string.j2_enter_category_name),
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Category c = new Category();
+                    c.setName(name);
+                    c.setType(Category.TYPE_EXPENSE);
+                    c.setGroup(groupValues[selectedGroup[0]]);
+                    categoryRepo.add(uid, c);
+                    Toast.makeText(this, getString(R.string.j1_category_created, name),
+                            Toast.LENGTH_SHORT).show();
+                    loadData();
                 })
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 

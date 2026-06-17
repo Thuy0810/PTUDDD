@@ -10,28 +10,36 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentReportBinding;
+import com.expensemanager.app.data.model.Budget;
 import com.expensemanager.app.data.model.Category;
+import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
+import com.expensemanager.app.data.repository.BudgetRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
+import com.expensemanager.app.data.repository.GoalRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.data.model.FinancialInsights;
+import com.expensemanager.app.domain.usecase.BudgetService;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.InsightsEngine;
 import com.expensemanager.app.util.MoneyFormat;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -49,8 +57,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ReportFragment extends Fragment {
     private FragmentReportBinding binding;
@@ -67,6 +77,18 @@ public class ReportFragment extends Fragment {
     private long forecastBalance = 0L;
     private boolean forecastTxLoaded = false;
     private boolean forecastWalletsLoaded = false;
+
+    // Bức tranh tài chính tháng này (cố định theo THÁNG HIỆN TẠI, độc lập bộ lọc kỳ)
+    private String overviewMonthKey;
+    private long ovMonthIncome = 0L;
+    private final Map<String, Long> ovSpentByCat = new HashMap<>();
+    private final Map<String, Long> ovAllocatedMap = new HashMap<>();
+    private final Map<String, Long> ovPrevAllocatedMap = new HashMap<>();
+    private final Map<String, Long> ovPrevSpentMap = new HashMap<>();
+    private Map<String, Long> ovRolloverMap = new HashMap<>();
+    private List<Category> ovCategories = new ArrayList<>();
+    private List<Wallet> ovWallets = new ArrayList<>();
+    private List<SavingsGoal> ovGoals = new ArrayList<>();
 
     private final Calendar selectedDate = Calendar.getInstance();
     private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
@@ -101,6 +123,256 @@ public class ReportFragment extends Fragment {
 
         loadData();
         setupForecast();
+        setupOverview();
+    }
+
+    /**
+     * Bức tranh tài chính tháng này: tình trạng ngân sách ZBB, số dư ví, tiến độ mục tiêu.
+     * Luôn theo THÁNG HIỆN TẠI, độc lập với bộ lọc kỳ báo cáo bên trên.
+     */
+    private void setupOverview() {
+        overviewMonthKey = DateUtils.currentMonthKey();
+        binding.textOverviewMonth.setText(DateUtils.formatMonthYear(overviewMonthKey));
+
+        String prevMonthKey = DateUtils.previousMonthKey(overviewMonthKey);
+
+        BudgetRepository budgetRepo = new BudgetRepository();
+        GoalRepository goalRepo = new GoalRepository();
+
+        txRepo.observeMonth(currentUid, overviewMonthKey).observe(getViewLifecycleOwner(), txs -> {
+            ovMonthIncome = 0L;
+            ovSpentByCat.clear();
+            if (txs != null) {
+                for (Transaction t : txs) {
+                    if (Transaction.TYPE_INCOME.equals(t.getType())) {
+                        ovMonthIncome += t.getAmount();
+                    } else if (Transaction.TYPE_EXPENSE.equals(t.getType()) && t.getCategoryId() != null) {
+                        Long cur = ovSpentByCat.get(t.getCategoryId());
+                        ovSpentByCat.put(t.getCategoryId(), (cur != null ? cur : 0L) + t.getAmount());
+                    }
+                }
+            }
+            renderOverview();
+        });
+
+        budgetRepo.observeMonth(currentUid, overviewMonthKey).observe(getViewLifecycleOwner(), list -> {
+            ovAllocatedMap.clear();
+            if (list != null) {
+                for (Budget b : list) {
+                    if (b.getCategoryId() != null) ovAllocatedMap.put(b.getCategoryId(), b.getAllocatedAmount());
+                }
+            }
+            renderOverview();
+        });
+
+        budgetRepo.observeMonth(currentUid, prevMonthKey).observe(getViewLifecycleOwner(), list -> {
+            ovPrevAllocatedMap.clear();
+            if (list != null) {
+                for (Budget b : list) {
+                    if (b.getCategoryId() != null) ovPrevAllocatedMap.put(b.getCategoryId(), b.getAllocatedAmount());
+                }
+            }
+            recomputeOverviewRollover();
+            renderOverview();
+        });
+
+        txRepo.observeMonth(currentUid, prevMonthKey).observe(getViewLifecycleOwner(), txs -> {
+            ovPrevSpentMap.clear();
+            if (txs != null) {
+                for (Transaction t : txs) {
+                    if (Transaction.TYPE_EXPENSE.equals(t.getType()) && t.getCategoryId() != null) {
+                        Long cur = ovPrevSpentMap.get(t.getCategoryId());
+                        ovPrevSpentMap.put(t.getCategoryId(), (cur != null ? cur : 0L) + t.getAmount());
+                    }
+                }
+            }
+            recomputeOverviewRollover();
+            renderOverview();
+        });
+
+        new CategoryRepository().observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
+            ovCategories = list != null ? list : new ArrayList<>();
+            renderOverview();
+        });
+
+        new WalletRepository().observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
+            ovWallets = new ArrayList<>();
+            if (list != null) {
+                for (Wallet w : list) {
+                    if (w != null && !w.isArchived()) ovWallets.add(w);
+                }
+            }
+            renderOverview();
+        });
+
+        goalRepo.observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
+            ovGoals = new ArrayList<>();
+            if (list != null) {
+                for (SavingsGoal g : list) {
+                    if (g != null && !g.isArchived()) ovGoals.add(g);
+                }
+            }
+            renderOverview();
+        });
+    }
+
+    private void recomputeOverviewRollover() {
+        ovRolloverMap = new HashMap<>();
+        Set<String> catIds = new HashSet<>();
+        catIds.addAll(ovPrevAllocatedMap.keySet());
+        catIds.addAll(ovPrevSpentMap.keySet());
+        for (String catId : catIds) {
+            long a = ovPrevAllocatedMap.containsKey(catId) ? ovPrevAllocatedMap.get(catId) : 0L;
+            long s = ovPrevSpentMap.containsKey(catId) ? ovPrevSpentMap.get(catId) : 0L;
+            long roll = BudgetService.categoryRollover(a, s);
+            if (roll != 0L) ovRolloverMap.put(catId, roll);
+        }
+    }
+
+    private void renderOverview() {
+        if (binding == null) return;
+        renderBudgetStatus();
+        renderOverviewWallets();
+        renderGoals();
+    }
+
+    private void renderBudgetStatus() {
+        long totalAllocated = 0L;
+        for (Long v : ovAllocatedMap.values()) totalAllocated += v;
+
+        BudgetService.BudgetPool pool = BudgetService.pool(ovMonthIncome, totalAllocated);
+        binding.textAllocated.setText(MoneyFormat.formatLong(totalAllocated));
+        binding.textToBeBudgeted.setText(MoneyFormat.formatLong(pool.toBeBudgeted));
+
+        int tbbColor;
+        String statusText;
+        int statusColor;
+        if (pool.isOverBudgeted()) {
+            tbbColor = R.color.expense_red;
+            statusText = getString(R.string.s1_over_budgeted);
+            statusColor = R.color.expense_red;
+        } else if (pool.isBalanced()) {
+            tbbColor = R.color.income_green;
+            statusText = getString(R.string.s1_all_assigned);
+            statusColor = R.color.income_green;
+        } else {
+            tbbColor = R.color.saving_blue;
+            statusText = getString(R.string.s1_unallocated_money) + ": "
+                    + MoneyFormat.formatLong(pool.toBeBudgeted);
+            statusColor = R.color.saving_blue;
+        }
+        binding.textToBeBudgeted.setTextColor(ContextCompat.getColor(requireContext(), tbbColor));
+
+        int overCount = 0;
+        for (Category c : ovCategories) {
+            if (!Category.TYPE_EXPENSE.equals(c.getType())) continue;
+            long alloc = ovAllocatedMap.containsKey(c.getId()) ? ovAllocatedMap.get(c.getId()) : 0L;
+            long roll = ovRolloverMap.containsKey(c.getId()) ? ovRolloverMap.get(c.getId()) : 0L;
+            long spent = ovSpentByCat.containsKey(c.getId()) ? ovSpentByCat.get(c.getId()) : 0L;
+            if (BudgetService.envelope(alloc, roll, spent).isOverspent()) overCount++;
+        }
+        if (overCount > 0) {
+            binding.textBudgetStatusLine.setText(getString(R.string.dash_over_categories, overCount));
+            binding.textBudgetStatusLine.setTextColor(ContextCompat.getColor(requireContext(), R.color.expense_red));
+        } else {
+            binding.textBudgetStatusLine.setText(statusText);
+            binding.textBudgetStatusLine.setTextColor(ContextCompat.getColor(requireContext(), statusColor));
+        }
+
+        long totalRollover = 0L;
+        for (Long r : ovRolloverMap.values()) totalRollover += r;
+        if (totalRollover != 0L) {
+            String sign = totalRollover > 0 ? "+" : "";
+            binding.textRolloverLine.setText(getString(R.string.dash_rollover_total,
+                    sign + MoneyFormat.formatLong(totalRollover)));
+            binding.textRolloverLine.setTextColor(ContextCompat.getColor(requireContext(),
+                    totalRollover >= 0 ? R.color.income_green : R.color.expense_red));
+            binding.textRolloverLine.setVisibility(View.VISIBLE);
+        } else {
+            binding.textRolloverLine.setVisibility(View.GONE);
+        }
+    }
+
+    private void renderOverviewWallets() {
+        binding.layoutWallets.removeAllViews();
+        long total = 0L;
+        for (Wallet w : ovWallets) {
+            total += w.getCurrentBalance();
+            View row = getLayoutInflater()
+                    .inflate(R.layout.item_dashboard_wallet, binding.layoutWallets, false);
+            ((TextView) row.findViewById(R.id.textWalletName)).setText(w.getName());
+            TextView bal = row.findViewById(R.id.textWalletBalance);
+            bal.setText(MoneyFormat.formatLong(w.getCurrentBalance()));
+            bal.setTextColor(ContextCompat.getColor(requireContext(),
+                    w.getCurrentBalance() >= 0 ? R.color.text_primary : R.color.expense_red));
+            binding.layoutWallets.addView(row);
+        }
+        binding.textWalletsTotal.setText(MoneyFormat.formatLong(total));
+    }
+
+    private void renderGoals() {
+        binding.layoutGoals.removeAllViews();
+        if (ovGoals.isEmpty()) {
+            binding.textNoGoals.setVisibility(View.VISIBLE);
+            return;
+        }
+        binding.textNoGoals.setVisibility(View.GONE);
+
+        for (SavingsGoal g : ovGoals) {
+            View row = getLayoutInflater()
+                    .inflate(R.layout.item_dashboard_goal, binding.layoutGoals, false);
+
+            ((TextView) row.findViewById(R.id.textGoalTitle)).setText(g.getTitle());
+
+            int pct = Math.round(g.getProgress() * 100f);
+            TextView percent = row.findViewById(R.id.textGoalPercent);
+            percent.setText(pct + "%");
+
+            LinearProgressIndicator bar = row.findViewById(R.id.progressGoal);
+            bar.setProgress(Math.max(0, Math.min(100, pct)));
+            int barColor = g.isCompleted() || pct >= 100
+                    ? R.color.income_green
+                    : (g.isOverdue() ? R.color.expense_red : R.color.primary);
+            bar.setIndicatorColor(ContextCompat.getColor(requireContext(), barColor));
+            percent.setTextColor(ContextCompat.getColor(requireContext(), barColor));
+
+            ((TextView) row.findViewById(R.id.textGoalAmounts)).setText(
+                    getString(R.string.dash_goal_progress_value,
+                            MoneyFormat.formatLong(g.getSavedAmount()),
+                            MoneyFormat.formatLong(g.getTargetAmount())));
+
+            TextView remaining = row.findViewById(R.id.textGoalRemaining);
+            long left = g.getTargetAmount() - g.getSavedAmount();
+            if (g.isCompleted() || left <= 0L) {
+                remaining.setText(getString(R.string.dash_goal_done));
+                remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.income_green));
+            } else {
+                remaining.setText(getString(R.string.dash_goal_remaining,
+                        MoneyFormat.formatLong(left)));
+                remaining.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
+            }
+
+            TextView deadline = row.findViewById(R.id.textGoalDeadline);
+            if (g.isCompleted() || left <= 0L || g.getDeadline() == null) {
+                deadline.setVisibility(View.GONE);
+            } else if (g.isOverdue()) {
+                deadline.setText(getString(R.string.dash_goal_overdue));
+                deadline.setTextColor(ContextCompat.getColor(requireContext(), R.color.expense_red));
+                deadline.setVisibility(View.VISIBLE);
+            } else {
+                long monthly = g.getMonthlyRequired();
+                String text = getString(R.string.dash_goal_days_left, g.getRemainingDays());
+                if (monthly > 0L) {
+                    text = getString(R.string.dash_goal_monthly, MoneyFormat.formatLong(monthly))
+                            + " · " + text;
+                }
+                deadline.setText(text);
+                deadline.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
+                deadline.setVisibility(View.VISIBLE);
+            }
+
+            binding.layoutGoals.addView(row);
+        }
     }
 
     /**
@@ -530,11 +802,16 @@ public class ReportFragment extends Fragment {
 
         if (lastMonthExpense > 0) {
             double diff = expense - lastMonthExpense;
+            String arrow = diff > 0 ? "▲ " : (diff < 0 ? "▼ " : "");
             String sign = diff > 0 ? "+" : "";
             String pctValue = String.format(java.util.Locale.getDefault(), "%.0f",
                     Math.abs(diff / lastMonthExpense * 100));
             String pct = getString(R.string.j3_vs_previous_period, sign, pctValue);
-            binding.textComparison.setText(pct);
+            binding.textComparison.setText(arrow + pct);
+            int cmpColor = diff > 0 ? R.color.expense_red
+                    : (diff < 0 ? R.color.income_green : R.color.text_secondary);
+            binding.textComparison.setTextColor(
+                    ContextCompat.getColor(requireContext(), cmpColor));
             binding.textComparison.setVisibility(View.VISIBLE);
         } else {
             binding.textComparison.setVisibility(View.GONE);
@@ -598,10 +875,14 @@ public class ReportFragment extends Fragment {
             return;
         }
 
+        double total = 0;
+        for (Double v : byCat.values()) total += v;
+
         PieDataSet set = new PieDataSet(entries, "");
         set.setColors(colors);
         set.setValueTextSize(11f);
         set.setValueTextColor(Color.WHITE);
+        set.setSliceSpace(2f);
 
         PieData data = new PieData(set);
         binding.pieChart.setData(data);
@@ -609,14 +890,30 @@ public class ReportFragment extends Fragment {
         binding.pieChart.setUsePercentValues(true);
         binding.pieChart.setDrawHoleEnabled(true);
         binding.pieChart.setHoleColor(Color.TRANSPARENT);
-        binding.pieChart.setHoleRadius(45f);
-        binding.pieChart.setTransparentCircleRadius(50f);
+        binding.pieChart.setHoleRadius(62f);
+        binding.pieChart.setTransparentCircleRadius(66f);
         binding.pieChart.setDrawEntryLabels(false);
-        binding.pieChart.getLegend().setEnabled(true);
-        binding.pieChart.getLegend().setTextColor(
+
+        // Tổng chi ở giữa donut để không bị trống
+        binding.pieChart.setDrawCenterText(true);
+        binding.pieChart.setCenterText(MoneyFormat.format(total));
+        binding.pieChart.setCenterTextSize(13f);
+        binding.pieChart.setCenterTextColor(
                 getResources().getColor(R.color.text_primary, null));
-        binding.pieChart.getLegend().setWordWrapEnabled(true);
-        binding.pieChart.setExtraOffsets(8, 8, 8, 8);
+
+        Legend legend = binding.pieChart.getLegend();
+        legend.setEnabled(true);
+        legend.setTextColor(getResources().getColor(R.color.text_primary, null));
+        legend.setOrientation(Legend.LegendOrientation.VERTICAL);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        legend.setDrawInside(false);
+        legend.setWordWrapEnabled(false);
+        legend.setTextSize(11f);
+        legend.setXEntrySpace(8f);
+        legend.setYEntrySpace(6f);
+
+        binding.pieChart.setExtraOffsets(6, 4, 6, 4);
         binding.pieChart.animateY(800);
         binding.pieChart.invalidate();
     }

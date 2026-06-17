@@ -22,10 +22,8 @@ public class RegisterActivity extends AppCompatActivity {
         binding = ActivityRegisterBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getString(R.string.register));
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.register);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         binding.btnRegister.setOnClickListener(v -> register());
         binding.textLogin.setOnClickListener(v -> finish());

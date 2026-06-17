@@ -339,6 +339,8 @@
     <string name="reallocation_other_category">From another category</string>
     <string name="reallocation_success">Covered %1$s for the category</string>
     <string name="reallocation_change">%1$s: %2$s → %3$s</string>
+    <string name="budget_tap_to_fix">Tap to fix budget</string>
+    <string name="budget_over_allocated_banner">Allocated over income by %1$s</string>
     <!-- Bottom Nav -->
     <string name="add">Add</string>
     <!-- Alerts -->
@@ -478,6 +480,7 @@
     <string name="j1_create_group">Create group</string>
     <string name="j1_enter_group_name">Enter group name</string>
     <string name="j1_group_created">Group created: %1$s</string>
+    <string name="j1_category_created">Category added: %1$s</string>
     <string name="j1_month_year_label">%1$d/%2$d</string>
     <string name="j1_updated">Updated</string>
     <string name="j1_create_category_group">Create category group</string>
@@ -659,6 +662,7 @@
 
     <!-- ===== Dashboard: Financial overview ===== -->
     <string name="dash_title">Financial overview</string>
+    <string name="report_overview_section">This month\'s financial picture</string>
     <string name="home_financial_overview">Your whole financial picture</string>
     <string name="home_financial_overview_sub">Income, budget &amp; goals on one page</string>
     <string name="dash_month_summary">This month</string>
@@ -680,4 +684,24 @@
     <string name="dash_goal_done">Completed</string>
     <string name="dash_no_goals">No savings goals yet</string>
     <string name="dash_no_data">No spending data this month</string>
+    <string name="back">Back</string>
+
+    <!-- Transfer / edit balance for wallets & goals -->
+    <string name="current_balance">Current balance</string>
+    <string name="transfer_money">Transfer</string>
+    <string name="transfer_between_wallets">Transfer between wallets</string>
+    <string name="transfer_from">From wallet</string>
+    <string name="transfer_to">To wallet</string>
+    <string name="transfer_amount">Amount to transfer</string>
+    <string name="transfer_success">Transferred %1$s</string>
+    <string name="transfer_failed">Transfer failed: %1$s</string>
+    <string name="need_two_wallets">Need at least 2 wallets to transfer</string>
+    <string name="edit_saved_amount">Edit saved amount</string>
+    <string name="edit_saved_amount_hint">Saved amount</string>
+    <string name="saved_amount_updated">Saved amount updated</string>
+    <string name="transfer_to_goal">Transfer to another goal</string>
+    <string name="transfer_between_goals">Transfer between goals</string>
+    <string name="transfer_from_goal">From goal</string>
+    <string name="transfer_to_goal_label">To goal</string>
+    <string name="need_two_goals">Need at least 2 goals to transfer</string>
 </resources>

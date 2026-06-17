@@ -1,5 +1,6 @@
 package com.expensemanager.app.ui.transaction;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -19,11 +20,13 @@ import com.expensemanager.app.data.repository.CategoryRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.util.CategorySuggester;
+import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.util.MoneyInputFormatter;
 import com.expensemanager.app.util.QuickParseUtil;
 import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,23 +46,20 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Map<String, Wallet> walletMap = new HashMap<>();
     private boolean categoriesLoaded = false;
     private boolean walletsLoaded = false;
-    private Timestamp parsedDate = null;
+    // Ngày của giao dịch (mặc định = hôm nay). Người dùng chọn qua chip ngày.
+    private final Calendar selectedCal = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityAddTransactionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getString(R.string.j2_transaction_title));
-        }
         MoneyInputFormatter.attach(binding.editAmount);
 
         editTxId = getIntent().getStringExtra(EXTRA_TX_ID);
         if (editTxId != null) {
             binding.btnDelete.setVisibility(android.view.View.VISIBLE);
-            getSupportActionBar().setTitle(getString(R.string.edit_transaction));
+            binding.textTopBarTitle.setText(R.string.edit_transaction);
         }
 
         String uid = authRepo.getUid();
@@ -106,6 +106,32 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirm());
         binding.btnCancel.setOnClickListener(v -> finish());
+
+        // Chọn ngày giao dịch
+        updateDateLabel();
+        binding.chipDate.setOnClickListener(v -> showDatePicker());
+    }
+
+    private void showDatePicker() {
+        DatePickerDialog dialog = new DatePickerDialog(this,
+                (view, year, month, day) -> {
+                    selectedCal.set(Calendar.YEAR, year);
+                    selectedCal.set(Calendar.MONTH, month);
+                    selectedCal.set(Calendar.DAY_OF_MONTH, day);
+                    updateDateLabel();
+                },
+                selectedCal.get(Calendar.YEAR),
+                selectedCal.get(Calendar.MONTH),
+                selectedCal.get(Calendar.DAY_OF_MONTH));
+        // Không cho chọn ngày trong tương lai (đồng bộ với quick-parse).
+        dialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        dialog.show();
+    }
+
+    private void updateDateLabel() {
+        if (binding != null) {
+            binding.textDate.setText(DateUtils.formatDisplay(selectedCal.getTime()));
+        }
     }
 
     private void tryLoadTransaction() {
@@ -129,7 +155,8 @@ public class AddTransactionActivity extends AppCompatActivity {
         if (r.date != null) {
             java.util.Date now = new java.util.Date();
             if (!r.date.after(now)) {
-                parsedDate = new Timestamp(r.date);
+                selectedCal.setTime(r.date);
+                updateDateLabel();
             }
         }
         String catId = CategorySuggester.suggestCategoryId(
@@ -258,6 +285,11 @@ public class AddTransactionActivity extends AppCompatActivity {
                     setupCategorySpinner(t.getType());
                     selectCategoryById(t.getCategoryId());
                     selectWalletById(t.getWalletId());
+
+                    if (t.getDate() != null) {
+                        selectedCal.setTime(t.getDate().toDate());
+                        updateDateLabel();
+                    }
                 });
     }
 
@@ -292,12 +324,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         t.setWalletId(wallet.getId());
         t.setNote(binding.editNote.getText() != null ? binding.editNote.getText().toString() : "");
 
+        Timestamp txDate = new Timestamp(selectedCal.getTime());
         if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);
-            t.setDate(originalTransaction.getDate());
+            t.setDate(txDate);
             performUpdate(uid, originalTransaction, t, wallet);
         } else {
-            Timestamp txDate = parsedDate != null ? parsedDate : Timestamp.now();
             t.setDate(txDate);
             performAdd(uid, t, wallet);
         }

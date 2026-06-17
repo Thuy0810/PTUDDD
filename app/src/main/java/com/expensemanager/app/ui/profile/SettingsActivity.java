@@ -27,10 +27,8 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getString(R.string.settings));
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.settings);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         binding.switchDark.setChecked(PrefsHelper.isDarkMode(this));
         binding.switchReminder.setChecked(PrefsHelper.isReminderEnabled(this));

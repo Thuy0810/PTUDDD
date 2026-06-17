@@ -175,9 +175,25 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
             int progress = item.getProgressPercent();
             cardBinding.progressBar.setProgress(progress);
 
-            if (item.getRemaining() < 0) {
-                cardBinding.textRemaining.setTextColor(
-                        itemView.getContext().getColor(R.color.expense_red));
+            // Highlight + nhắc phân bổ khi danh mục vượt ngân sách.
+            android.content.Context ctx = itemView.getContext();
+            com.google.android.material.card.MaterialCardView card =
+                    (com.google.android.material.card.MaterialCardView) cardBinding.getRoot();
+            boolean over = item.getRemaining() < 0;
+            if (over) {
+                long deficit = -item.getRemaining();
+                cardBinding.textRemaining.setTextColor(ctx.getColor(R.color.expense_red));
+                cardBinding.textOverBadge.setText(ctx.getString(
+                        R.string.budget_exceeded_amount, MoneyFormat.formatLong(deficit)));
+                cardBinding.textOverBadge.setBackgroundColor(ctx.getColor(R.color.budget_danger));
+                cardBinding.textOverBadge.setVisibility(View.VISIBLE);
+                card.setStrokeColor(ctx.getColor(R.color.budget_danger));
+                card.setStrokeWidth((int) (1.5f * ctx.getResources().getDisplayMetrics().density));
+            } else {
+                // Reset trạng thái (do RecyclerView tái dùng view).
+                cardBinding.textRemaining.setTextColor(ctx.getColor(R.color.income_green));
+                cardBinding.textOverBadge.setVisibility(View.GONE);
+                card.setStrokeWidth(0);
             }
 
             // Icon danh muc: icon vector (kieu net) theo thiet ke
@@ -207,12 +223,6 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
                 expanded[0] = !expanded[0];
                 cardBinding.layoutExpanded.setVisibility(expanded[0] ? View.VISIBLE : View.GONE);
                 cardBinding.iconExpand.setRotation(expanded[0] ? 180f : 0f);
-            });
-
-            cardBinding.btnEdit.setOnClickListener(v -> {
-                if (editListener != null) {
-                    editListener.onEdit(cat, item.allocated);
-                }
             });
 
             container.addView(cardBinding.getRoot());

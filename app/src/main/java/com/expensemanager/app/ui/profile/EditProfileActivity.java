@@ -23,10 +23,8 @@ public class EditProfileActivity extends AppCompatActivity {
         binding = ActivityEditProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.edit_profile);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.edit_profile);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         // Load current email from Firebase Auth (read-only)
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();

@@ -12,6 +12,7 @@ public class SavingsGoal {
     @DocumentId
     private String id;
     private String title;
+    private String iconKey;
     private long targetAmount;
     private long savedAmount;
     private String walletId;
@@ -28,6 +29,9 @@ public class SavingsGoal {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getIconKey() { return iconKey; }
+    public void setIconKey(String iconKey) { this.iconKey = iconKey; }
 
     public long getTargetAmount() { return targetAmount; }
     public void setTargetAmount(long targetAmount) { this.targetAmount = targetAmount; }
@@ -86,6 +90,7 @@ public class SavingsGoal {
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("title", title);
+        map.put("iconKey", iconKey);
         map.put("targetAmount", targetAmount);
         map.put("savedAmount", savedAmount);
         map.put("walletId", walletId);

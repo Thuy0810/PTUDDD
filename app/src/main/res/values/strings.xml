@@ -381,6 +381,8 @@
     <string name="reallocation_other_category">Từ danh mục khác</string>
     <string name="reallocation_success">Đã bù %1$s cho danh mục</string>
     <string name="reallocation_change">%1$s: %2$s → %3$s</string>
+    <string name="budget_tap_to_fix">Chạm để bù ngân sách</string>
+    <string name="budget_over_allocated_banner">Đã phân bổ vượt thu nhập %1$s</string>
     <!-- Bottom Nav -->
     <string name="add">Thêm</string>
     <!-- Alerts -->
@@ -525,6 +527,7 @@
     <string name="j1_create_group">Tạo nhóm</string>
     <string name="j1_enter_group_name">Nhập tên nhóm</string>
     <string name="j1_group_created">Đã tạo nhóm: %1$s</string>
+    <string name="j1_category_created">Đã thêm danh mục: %1$s</string>
     <string name="j1_month_year_label">Tháng %1$d/%2$d</string>
     <string name="j1_updated">Đã cập nhật</string>
     <string name="j1_create_category_group">Tạo nhóm danh mục</string>
@@ -707,6 +710,7 @@
 
     <!-- ===== Dashboard: Tổng quan tài chính ===== -->
     <string name="dash_title">Tổng quan tài chính</string>
+    <string name="report_overview_section">Bức tranh tài chính tháng này</string>
     <string name="home_financial_overview">Bức tranh tài chính tổng thể</string>
     <string name="home_financial_overview_sub">Thu chi, ngân sách &amp; mục tiêu trong 1 trang</string>
     <string name="dash_month_summary">Thu chi tháng này</string>
@@ -728,4 +732,24 @@
     <string name="dash_goal_done">Đã hoàn thành</string>
     <string name="dash_no_goals">Chưa có mục tiêu tiết kiệm</string>
     <string name="dash_no_data">Chưa có dữ liệu chi tiêu tháng này</string>
+    <string name="back">Quay lại</string>
+
+    <!-- Chuyển tiền / chỉnh sửa số dư ví & mục tiêu -->
+    <string name="current_balance">Số dư hiện tại</string>
+    <string name="transfer_money">Chuyển tiền</string>
+    <string name="transfer_between_wallets">Chuyển tiền giữa ví</string>
+    <string name="transfer_from">Từ ví</string>
+    <string name="transfer_to">Đến ví</string>
+    <string name="transfer_amount">Số tiền chuyển</string>
+    <string name="transfer_success">Đã chuyển %1$s</string>
+    <string name="transfer_failed">Chuyển tiền thất bại: %1$s</string>
+    <string name="need_two_wallets">Cần ít nhất 2 ví để chuyển tiền</string>
+    <string name="edit_saved_amount">Sửa số đã tiết kiệm</string>
+    <string name="edit_saved_amount_hint">Số tiền đã tiết kiệm</string>
+    <string name="saved_amount_updated">Đã cập nhật số đã tiết kiệm</string>
+    <string name="transfer_to_goal">Chuyển sang mục tiêu khác</string>
+    <string name="transfer_between_goals">Chuyển giữa mục tiêu</string>
+    <string name="transfer_from_goal">Từ mục tiêu</string>
+    <string name="transfer_to_goal_label">Đến mục tiêu</string>
+    <string name="need_two_goals">Cần ít nhất 2 mục tiêu để chuyển</string>
 </resources>

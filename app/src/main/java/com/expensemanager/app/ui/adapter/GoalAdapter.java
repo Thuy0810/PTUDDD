@@ -13,6 +13,7 @@ import com.expensemanager.app.data.model.SavingsGoal;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.databinding.ItemGoalBinding;
 import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.GoalIcons;
 import com.expensemanager.app.util.MoneyFormat;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         SavingsGoal g = items.get(position);
+        GoalIcons.apply(holder.binding.imgIcon, g.getIconKey());
         holder.binding.textTitle.setText(g.getTitle());
         holder.binding.textSaved.setText(MoneyFormat.format(g.getSavedAmount()));
         holder.binding.textTarget.setText(MoneyFormat.format(g.getTargetAmount()));

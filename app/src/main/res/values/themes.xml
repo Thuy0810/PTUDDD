@@ -21,8 +21,8 @@
         <item name="textInputStyle">@style/Widget.ExpenseManager.TextInputLayout</item>
     </style>
 
-    <!-- Theme co ActionBar -->
-    <style name="Theme.ExpenseManager.WithActionBar" parent="Theme.Material3.Light">
+    <!-- Theme cho cac man hinh phu - dung header custom trong layout, khong ActionBar he thong -->
+    <style name="Theme.ExpenseManager.WithActionBar" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>

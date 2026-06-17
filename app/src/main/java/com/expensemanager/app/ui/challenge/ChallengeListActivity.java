@@ -32,10 +32,8 @@ public class ChallengeListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChallengeListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.c1_title);
-        }
+        ((android.widget.TextView) findViewById(R.id.textHeaderTitle)).setText(R.string.c1_title);
+        findViewById(R.id.btnHeaderBack).setOnClickListener(v -> finish());
 
         uid = authRepo.getUid();
         if (uid == null) { finish(); return; }

@@ -6,29 +6,16 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <!-- Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <include layout="@layout/include_app_header" />
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wallets"
-            android:textColor="@color/text_primary"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/s3_long_press_edit_delete"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-    </LinearLayout>
+        android:layout_marginBottom="4dp"
+        android:paddingHorizontal="16dp"
+        android:text="@string/s3_long_press_edit_delete"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
 
     <!-- Tong so du -->
     <com.google.android.material.card.MaterialCardView

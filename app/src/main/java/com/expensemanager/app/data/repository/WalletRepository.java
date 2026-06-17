@@ -72,6 +72,71 @@ public class WalletRepository {
                 .collection("wallets").document(id).delete();
     }
 
+    /**
+     * Chuyển tiền giữa hai ví (atomic).
+     *
+     * <p>Trong 1 Firestore transaction: đọc cả hai ví, kiểm tra tồn tại +
+     * không archived + ví nguồn đủ số dư, sau đó trừ ví nguồn và cộng ví đích.
+     *
+     * @param uid    user id
+     * @param fromId ví nguồn
+     * @param toId   ví đích
+     * @param amount số tiền chuyển (> 0)
+     */
+    @NonNull
+    public Task<Void> transfer(String uid, String fromId, String toId, long amount) {
+        if (fromId == null || toId == null) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("walletId is null"));
+        }
+        if (fromId.equals(toId)) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("same wallet"));
+        }
+        if (amount <= 0) {
+            return com.google.android.gms.tasks.Tasks.forException(
+                    new IllegalArgumentException("amount <= 0"));
+        }
+        return db.runTransaction(transaction -> {
+            com.google.firebase.firestore.DocumentReference fromRef =
+                    db.collection("users").document(uid).collection("wallets").document(fromId);
+            com.google.firebase.firestore.DocumentReference toRef =
+                    db.collection("users").document(uid).collection("wallets").document(toId);
+
+            com.google.firebase.firestore.DocumentSnapshot fromSnap = transaction.get(fromRef);
+            com.google.firebase.firestore.DocumentSnapshot toSnap = transaction.get(toRef);
+
+            if (!fromSnap.exists() || !toSnap.exists()) {
+                throw new com.google.firebase.firestore.FirebaseFirestoreException(
+                        "Ví không tồn tại",
+                        com.google.firebase.firestore.FirebaseFirestoreException.Code.NOT_FOUND);
+            }
+            Boolean fromArchived = fromSnap.getBoolean("isArchived");
+            Boolean toArchived = toSnap.getBoolean("isArchived");
+            if ((fromArchived != null && fromArchived) || (toArchived != null && toArchived)) {
+                throw new com.google.firebase.firestore.FirebaseFirestoreException(
+                        "Ví đã lưu trữ",
+                        com.google.firebase.firestore.FirebaseFirestoreException.Code.FAILED_PRECONDITION);
+            }
+
+            Long fromBalance = MoneyValueParser.toLong(fromSnap.get("currentBalance"));
+            Long toBalance = MoneyValueParser.toLong(toSnap.get("currentBalance"));
+            if (fromBalance == null) fromBalance = 0L;
+            if (toBalance == null) toBalance = 0L;
+            if (fromBalance < amount) {
+                throw new com.google.firebase.firestore.FirebaseFirestoreException(
+                        "Số dư không đủ",
+                        com.google.firebase.firestore.FirebaseFirestoreException.Code.ABORTED);
+            }
+
+            transaction.update(fromRef, "currentBalance", fromBalance - amount,
+                    "updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            transaction.update(toRef, "currentBalance", toBalance + amount,
+                    "updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+            return null;
+        });
+    }
+
     @NonNull
     public Task<Void> archive(String uid, String id) {
         if (id == null) {
