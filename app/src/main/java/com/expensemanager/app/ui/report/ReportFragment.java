@@ -20,12 +20,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentReportBinding;
 import com.expensemanager.app.data.model.Category;
-import com.expensemanager.app.data.model.Tag;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
-import com.expensemanager.app.data.repository.TagRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.data.model.FinancialInsights;
@@ -74,8 +72,6 @@ public class ReportFragment extends Fragment {
     private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
     private String selectedWalletId = null;
     private String selectedType = "all"; // all/income/expense
-    private List<Tag> tags = new ArrayList<>();
-    private String selectedTagId = null;
 
     private TransactionRepository txRepo;
     private String currentUid;
@@ -262,13 +258,6 @@ public class ReportFragment extends Fragment {
             applyFiltersAndBind();
         });
 
-        new TagRepository().observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
-            tags = list != null ? list : new ArrayList<>();
-            txAdapter.setTagMap(TagRepository.toMap(tags));
-            setupTagSpinner();
-            applyFiltersAndBind();
-        });
-
         binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioAll) selectedType = "all";
             else if (checkedId == R.id.radioIncome) selectedType = "income";
@@ -294,31 +283,6 @@ public class ReportFragment extends Fragment {
                     selectedWalletId = null;
                 } else if (pos - 1 < wallets.size()) {
                     selectedWalletId = wallets.get(pos - 1).getId();
-                }
-                applyFiltersAndBind();
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-    }
-
-    private void setupTagSpinner() {
-        if (binding == null) return;
-        List<String> names = new ArrayList<>();
-        names.add(getString(R.string.all_tags));
-        for (Tag t : tags) names.add(t.getName());
-
-        ArrayAdapter<String> ad = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, names);
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerTag.setAdapter(ad);
-
-        binding.spinnerTag.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                if (pos == 0) {
-                    selectedTagId = null;
-                } else if (pos - 1 < tags.size()) {
-                    selectedTagId = tags.get(pos - 1).getId();
                 }
                 applyFiltersAndBind();
             }
@@ -354,8 +318,7 @@ public class ReportFragment extends Fragment {
             if (catId.equals(t.getCategoryId())
                     && Transaction.TYPE_EXPENSE.equals(t.getType())
                     && passesWalletFilter(t)
-                    && passesTypeFilter(t)
-                    && passesTagFilter(t)) {
+                    && passesTypeFilter(t)) {
                 filtered.add(t);
             }
         }
@@ -430,7 +393,6 @@ public class ReportFragment extends Fragment {
         for (Transaction t : currentTxs) {
             if (!passesWalletFilter(t)) continue;
             if (!passesTypeFilter(t)) continue;
-            if (!passesTagFilter(t)) continue;
             filtered.add(t);
         }
 
@@ -463,10 +425,6 @@ public class ReportFragment extends Fragment {
         }
     }
 
-    private boolean passesTagFilter(Transaction t) {
-        if (selectedTagId == null) return true;
-        return t.getTagIds() != null && t.getTagIds().contains(selectedTagId);
-    }
 
     private Calendar[] getDateRange() {
         Calendar start = (Calendar) selectedDate.clone();

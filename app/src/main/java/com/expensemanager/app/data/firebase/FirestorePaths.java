@@ -34,8 +34,4 @@ public final class FirestorePaths {
     public static String challenges(String uid) {
         return user(uid) + "/challenges";
     }
-
-    public static String tags(String uid) {
-        return user(uid) + "/tags";
-    }
 }

@@ -1,5 +1,7 @@
 # KẾ HOẠCH KIỂM THỬ
 
+> **Cập nhật 17/06/2026:** Các test liên quan tới **chuyển tiền (transfer)** và **Nhãn (tag)** đã **không còn áp dụng** vì hai tính năng này đã bị gỡ khỏi codebase. Bỏ qua các case `transfer`/`TransferService`/`tag` bên dưới; phần còn lại (`MoneyValueParser`, `DateUtils`, `BudgetService`, `GoalService`, `TransactionRepository` income/expense, `BalanceCalculator`) vẫn hợp lệ.
+
 Tài liệu mô tả test cần viết cho từng module. Mục tiêu: đảm bảo rà soát và migration không phá vỡ dữ liệu, không làm sai số dư, không crash app.
 
 ## 1. Test `MoneyValueParser`

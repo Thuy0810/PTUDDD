@@ -30,15 +30,15 @@ Tài liệu hướng dẫn cho người dùng cuối sử dụng ứng dụng Qu
 - **Lưu trữ (archive):** nếu ví có giao dịch, bạn chỉ có thể lưu trữ thay vì xoá. Ví lưu trữ không hiển thị khi tạo giao dịch mới.
 - **Xoá:** chỉ xoá được khi ví **chưa có giao dịch nào**.
 
-### 2.3. Chuyển tiền giữa 2 ví
-1. Tab **Cá nhân** → **Ví của tôi** → nút **"Chuyển tiền"** (hoặc vào thẳng 1 ví → "Chuyển").
-2. Chọn **ví nguồn**, **ví nhận**, nhập **số tiền**, **ghi chú**.
-3. Bấm **Xác nhận**. Hệ thống kiểm tra số dư, cập nhật đồng thời 2 ví và ghi log giao dịch chuyển tiền.
+### 2.3. Điều chỉnh số dư ví
+- Mở ví → **điều chỉnh/nạp số dư**: nhập số dư mới và lý do. Hệ thống cập nhật ví và ghi log audit.
+
+> Phiên bản hiện tại **không có** chức năng chuyển tiền giữa 2 ví.
 
 ## 3. Ghi giao dịch
 
 ### 3.1. Thêm khoản thu / chi
-1. Màn hình chính → nút **"+"** (FAB).
+1. Màn hình chính → nút **Thêm** trên thanh điều hướng dưới.
 2. Chọn **Thu** hoặc **Chi**.
 3. Nhập **số tiền**, chọn **ví**, **danh mục**, **ngày**, **ghi chú** (tuỳ chọn).
 4. Bấm **Lưu**. Số dư ví tự động cập nhật.
@@ -116,9 +116,6 @@ Tài liệu hướng dẫn cho người dùng cuối sử dụng ứng dụng Qu
 
 **Hỏi:** Tôi có thể xoá ví đang có giao dịch không?
 **Đáp:** Không. Bạn chỉ có thể **lưu trữ** ví. Ví lưu trữ sẽ ẩn khỏi danh sách chọn khi tạo giao dịch mới nhưng vẫn giữ trong lịch sử.
-
-**Hỏi:** Chuyển tiền có ảnh hưởng đến thu/chi không?
-**Đáp:** Không. Chuyển tiền chỉ thay đổi số dư giữa 2 ví, không tính vào thu nhập/chi tiêu và không ảnh hưởng ngân sách.
 
 **Hỏi:** Số dư ví bị lệch với lịch sử giao dịch?
 **Đáp:** Vào **Ví của tôi** → chọn ví → **Đối soát** (tính năng sẽ được thêm trong giai đoạn sau). Hiện tại hãy liên hệ hỗ trợ.

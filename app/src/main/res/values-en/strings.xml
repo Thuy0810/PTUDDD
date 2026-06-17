@@ -590,22 +590,6 @@
     <string name="parent_category">Parent category (optional)</string>
     <string name="no_parent_category">None (top-level)</string>
 
-    <!-- ===== Tags ===== -->
-    <string name="tags">Tags</string>
-    <string name="tag_label">Tag:</string>
-    <string name="manage_tags">Manage tags</string>
-    <string name="tags_hint">Create tags to label and filter transactions</string>
-    <string name="no_tags">No tags yet</string>
-    <string name="add_tag">Add tag</string>
-    <string name="edit_tag">Edit tag</string>
-    <string name="tag_name">Tag name</string>
-    <string name="tag_color">Color</string>
-    <string name="tag_enter_name">Please enter a tag name</string>
-    <string name="delete_tag_title">Delete tag</string>
-    <string name="no_tags_selected">No tags selected</string>
-    <string name="no_tags_create_first">No tags yet. Create one in Manage tags.</string>
     <string name="choose">Choose</string>
-    <string name="choose_tags">Choose tags</string>
-    <string name="all_tags">All tags</string>
     <string name="ok">OK</string>
 </resources>

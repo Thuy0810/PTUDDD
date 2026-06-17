@@ -20,7 +20,6 @@ import com.expensemanager.app.ui.auth.LoginActivity;
 import com.expensemanager.app.ui.recurring.RecurringListActivity;
 import com.expensemanager.app.ui.wallet.WalletListActivity;
 import com.expensemanager.app.ui.category.CategoryListActivity;
-import com.expensemanager.app.ui.tag.TagListActivity;
 import com.expensemanager.app.ui.goal.GoalListActivity;
 import com.expensemanager.app.util.PrefsHelper;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
@@ -80,10 +79,6 @@ public class ProfileFragment extends Fragment {
         if (binding.btnManageCategories != null) {
             binding.btnManageCategories.setOnClickListener(v ->
                     startActivity(new Intent(requireContext(), CategoryListActivity.class)));
-        }
-        if (binding.btnManageTags != null) {
-            binding.btnManageTags.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), TagListActivity.class)));
         }
         if (binding.btnManageGoals != null) {
             binding.btnManageGoals.setOnClickListener(v ->

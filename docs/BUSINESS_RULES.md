@@ -1,6 +1,14 @@
 # QUY TẮC NGHIỆP VỤ
 
-Tài liệu này mô tả chi tiết 21 module nghiệp vụ hiện có, dựa trên rà soát thực tế code trong repo. Mỗi module gồm: mục đích, màn hình, model, repository, collection Firestore, luồng xử lý, ràng buộc, lỗi hiện tại, đề xuất, ưu tiên.
+> **Cập nhật 17/06/2026 — đọc trước.** Một số mục bên dưới mô tả trạng thái cũ; những thay đổi đã áp dụng vào codebase:
+> - **Bỏ tính năng Nhãn (Tag):** danh mục (`Category`) đảm nhận việc phân loại. Toàn bộ model/repository/UI/string của Tag đã được gỡ.
+> - **Bỏ Chuyển tiền (Transfer):** `TransferActivity` và loại `TYPE_TRANSFER` không còn; giao dịch chỉ gồm `income`/`expense`. Mục 7 bên dưới chỉ còn giá trị lịch sử.
+> - **Đã thêm lớp `domain/usecase/`:** `BudgetService`, `GoalService`, `RecurringService`, `WalletAdjustmentService`. UI **không còn** gọi `FirebaseFirestore.getInstance()` trực tiếp (các vi phạm TD-01…TD-09 đã xử lý).
+> - **Migration tiền tệ `double → long` hoàn tất** cho mọi model; `Wallet` đã có `isArchived`/`updatedAt`.
+> - **Danh mục cha/con:** `Category.parentId` hỗ trợ danh mục con.
+> - Giao dịch định kỳ nằm ở `ui/recurring/RecurringListActivity` (tách khỏi `ChallengeListActivity`).
+
+Tài liệu này mô tả chi tiết các module nghiệp vụ, dựa trên rà soát thực tế code trong repo. Mỗi module gồm: mục đích, màn hình, model, repository, collection Firestore, luồng xử lý, ràng buộc, lỗi, đề xuất, ưu tiên.
 
 ---
 
@@ -104,9 +112,11 @@ Tài liệu này mô tả chi tiết 21 module nghiệp vụ hiện có, dựa t
 
 ---
 
-## 7. Chuyển tiền (`TransferActivity`)
+## 7. Chuyển tiền (`TransferActivity`) — ĐÃ GỠ KHỎI PHIÊN BẢN HIỆN TẠI
 
-- **Mục đích:** Chuyển tiền giữa 2 ví.
+> Mục này chỉ còn giá trị lịch sử. `TransferActivity` và loại `TYPE_TRANSFER` đã bị bỏ. Nếu cần lại tính năng này trong tương lai, hãy hiện thực qua `domain/usecase/TransferService` (atomic, đọc/ghi 2 ví trong cùng Firestore Transaction) thay vì đặt logic trong Activity. Để điều chỉnh/nạp số dư ví hiện dùng `WalletAdjustmentService` + `WalletPaymentDialog`.
+
+- **Mục đích (cũ):** Chuyển tiền giữa 2 ví.
 - **Màn hình:** `ui/wallet/TransferActivity.java` (ViewBinding: `ActivityTransferBinding`).
 - **Model:** `Transaction` (type=`TYPE_TRANSFER`).
 - **Repository:** **Hiện KHÔNG có** — toàn bộ logic nằm trong Activity.

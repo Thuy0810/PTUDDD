@@ -11,12 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.ActivityAddTransactionBinding;
 import com.expensemanager.app.data.model.Category;
-import com.expensemanager.app.data.model.Tag;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
-import com.expensemanager.app.data.repository.TagRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.util.CategorySuggester;
@@ -45,10 +43,6 @@ public class AddTransactionActivity extends AppCompatActivity {
     private boolean categoriesLoaded = false;
     private boolean walletsLoaded = false;
     private Timestamp parsedDate = null;
-
-    private final TagRepository tagRepo = new TagRepository();
-    private List<Tag> allTags = new ArrayList<>();
-    private final List<String> selectedTagIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,61 +99,12 @@ public class AddTransactionActivity extends AppCompatActivity {
             }
         });
 
-        tagRepo.observeAll(uid).observe(this, list -> {
-            allTags = list != null ? list : new ArrayList<>();
-            updateSelectedTagsLabel();
-        });
-
-        binding.btnSelectTags.setOnClickListener(v -> showTagPicker());
-
         binding.btnSave.setOnClickListener(v -> {
             applyQuickParse();
             save();
         });
         binding.btnDelete.setOnClickListener(v -> showDeleteConfirm());
         binding.btnCancel.setOnClickListener(v -> finish());
-    }
-
-    private void showTagPicker() {
-        if (allTags.isEmpty()) {
-            Toast.makeText(this, getString(R.string.no_tags_create_first), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        final String[] names = new String[allTags.size()];
-        final boolean[] checked = new boolean[allTags.size()];
-        for (int i = 0; i < allTags.size(); i++) {
-            names[i] = allTags.get(i).getName();
-            checked[i] = selectedTagIds.contains(allTags.get(i).getId());
-        }
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.choose_tags))
-                .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
-                .setPositiveButton(getString(R.string.ok), (d, w) -> {
-                    selectedTagIds.clear();
-                    for (int i = 0; i < allTags.size(); i++) {
-                        if (checked[i]) selectedTagIds.add(allTags.get(i).getId());
-                    }
-                    updateSelectedTagsLabel();
-                })
-                .setNegativeButton(getString(R.string.cancel), null)
-                .show();
-    }
-
-    private void updateSelectedTagsLabel() {
-        if (binding == null) return;
-        if (selectedTagIds.isEmpty()) {
-            binding.textSelectedTags.setText(getString(R.string.no_tags_selected));
-            return;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (Tag t : allTags) {
-            if (selectedTagIds.contains(t.getId())) {
-                if (sb.length() > 0) sb.append(", ");
-                sb.append(t.getName());
-            }
-        }
-        binding.textSelectedTags.setText(sb.length() > 0
-                ? sb.toString() : getString(R.string.no_tags_selected));
     }
 
     private void tryLoadTransaction() {
@@ -312,10 +257,6 @@ public class AddTransactionActivity extends AppCompatActivity {
                     setupCategorySpinner(t.getType());
                     selectCategoryById(t.getCategoryId());
                     selectWalletById(t.getWalletId());
-
-                    selectedTagIds.clear();
-                    if (t.getTagIds() != null) selectedTagIds.addAll(t.getTagIds());
-                    updateSelectedTagsLabel();
                 });
     }
 
@@ -349,7 +290,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         t.setCategoryId(cat.getId());
         t.setWalletId(wallet.getId());
         t.setNote(binding.editNote.getText() != null ? binding.editNote.getText().toString() : "");
-        t.setTagIds(new ArrayList<>(selectedTagIds));
 
         if (editTxId != null && originalTransaction != null) {
             t.setId(editTxId);

@@ -26,12 +26,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.expensemanager.app.databinding.FragmentTransactionListBinding;
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Category;
-import com.expensemanager.app.data.model.Tag;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
-import com.expensemanager.app.data.repository.TagRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
@@ -55,8 +53,6 @@ public class TransactionListFragment extends Fragment {
     private Map<String, Category> catMap;
     private List<Wallet> wallets = new ArrayList<>();
     private Map<String, Wallet> walletMap;
-    private final TagRepository tagRepo = new TagRepository();
-    private List<Tag> tags = new ArrayList<>();
 
     private SharedPreferences prefs;
     private String uid;
@@ -108,12 +104,6 @@ public class TransactionListFragment extends Fragment {
             }
             adapter.setWalletMap(walletMap);
             setupWalletSpinner();
-        });
-
-        tagRepo.observeAll(uid).observe(getViewLifecycleOwner(), list -> {
-            tags = list != null ? list : new ArrayList<>();
-            adapter.setTagMap(TagRepository.toMap(tags));
-            setupTagSpinner();
         });
 
         setupDateRangeButton();
@@ -239,26 +229,6 @@ public class TransactionListFragment extends Fragment {
         });
     }
 
-    private void setupTagSpinner() {
-        if (binding == null) return;
-        List<String> names = new ArrayList<>();
-        names.add(getString(R.string.all_tags));
-        for (Tag t : tags) names.add(t.getName());
-
-        ArrayAdapter<String> ad = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, names);
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerTag.setAdapter(ad);
-
-        binding.spinnerTag.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                applyFilter();
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-    }
-
     private void setupTypeFilter() {
         binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> applyFilter());
     }
@@ -328,21 +298,6 @@ public class TransactionListFragment extends Fragment {
                 if (amt >= min && amt <= max) amountFiltered.add(t);
             }
             filtered = amountFiltered;
-        }
-
-        // Tag filter
-        if (binding.spinnerTag != null) {
-            int tagPos = binding.spinnerTag.getSelectedItemPosition();
-            if (tagPos > 0 && tagPos - 1 < tags.size()) {
-                String tagId = tags.get(tagPos - 1).getId();
-                List<Transaction> tagFiltered = new ArrayList<>();
-                for (Transaction t : filtered) {
-                    if (t.getTagIds() != null && t.getTagIds().contains(tagId)) {
-                        tagFiltered.add(t);
-                    }
-                }
-                filtered = tagFiltered;
-            }
         }
 
         // Sort

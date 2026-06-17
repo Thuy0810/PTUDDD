@@ -2,6 +2,19 @@
 
 Danh sách các vi phạm ràng buộc, lỗi kỹ thuật, và điểm chưa hợp lý đã phát hiện khi rà soát codebase. Sắp xếp theo mức độ ưu tiên.
 
+> **Cập nhật 17/06/2026 — các mục mức CAO phần lớn đã được xử lý:**
+> - **TD-01, TD-02, TD-03, TD-47:** `TransferActivity` đã bị gỡ cùng tính năng chuyển tiền → các vi phạm này không còn.
+> - **TD-04:** `AddTransactionActivity` dùng `txRepo.getTransactionById(...)` thay cho gọi Firestore trực tiếp.
+> - **TD-05, TD-06, TD-25:** Mục tiêu tiết kiệm dùng `GoalService` (đóng góp atomic, trừ ví trong transaction).
+> - **TD-07, TD-08, TD-09:** Không còn `FirebaseFirestore.getInstance()` trong bất kỳ Activity/Fragment nào (đã quét toàn bộ `ui/`).
+> - **TD-13:** `Wallet` đã có `isArchived` + `updatedAt`.
+> - **TD-14, TD-15, TD-16:** `Budget`/`SavingsGoal`/`Challenge` đã chuyển sang `long` và bổ sung `isArchived`/`updatedAt`.
+> - **TD-17:** Đã có lớp `domain/usecase/` (`BudgetService`, `GoalService`, `RecurringService`, `WalletAdjustmentService`).
+> - **TD-26:** `RecurringService`/`RecurringRepository` chạy idempotent qua `occurrenceId`.
+> - **TD-33:** `MoneyFormat` đã có API theo `long` (`format(long)`, `formatSigned(long, type)`).
+>
+> Vẫn nên rà lại (TD-10, TD-11, TD-12 nay đơn giản hơn vì bỏ transfer; các mục timezone TD-18→TD-24; ViewBinding/tách logic mức THẤP). Phần bảng chi tiết bên dưới giữ nguyên để tham chiếu lịch sử — số dòng (`file:line`) có thể đã lệch sau khi gỡ Tag/Transfer.
+
 ## CAO — Ưu tiên sửa ngay
 
 | # | File:Line | Mô tả | Ảnh hưởng |

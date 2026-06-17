@@ -590,22 +590,6 @@
     <string name="parent_category">Danh mục cha (tuỳ chọn)</string>
     <string name="no_parent_category">Không có (danh mục gốc)</string>
 
-    <!-- ===== Nhãn (Tags) ===== -->
-    <string name="tags">Nhãn</string>
-    <string name="tag_label">Nhãn:</string>
-    <string name="manage_tags">Quản lý nhãn</string>
-    <string name="tags_hint">Tạo nhãn để gắn và lọc giao dịch</string>
-    <string name="no_tags">Chưa có nhãn nào</string>
-    <string name="add_tag">Thêm nhãn</string>
-    <string name="edit_tag">Sửa nhãn</string>
-    <string name="tag_name">Tên nhãn</string>
-    <string name="tag_color">Màu</string>
-    <string name="tag_enter_name">Vui lòng nhập tên nhãn</string>
-    <string name="delete_tag_title">Xoá nhãn</string>
-    <string name="no_tags_selected">Chưa chọn nhãn</string>
-    <string name="no_tags_create_first">Chưa có nhãn. Hãy tạo nhãn trong mục Quản lý nhãn.</string>
     <string name="choose">Chọn</string>
-    <string name="choose_tags">Chọn nhãn</string>
-    <string name="all_tags">Tất cả nhãn</string>
     <string name="ok">OK</string>
 </resources>

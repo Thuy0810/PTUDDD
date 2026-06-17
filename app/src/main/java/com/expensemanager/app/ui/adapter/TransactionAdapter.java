@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.expensemanager.app.R;
 import com.expensemanager.app.data.model.Category;
-import com.expensemanager.app.data.model.Tag;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.databinding.ItemTransactionBinding;
@@ -32,7 +31,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private List<Transaction> items = new ArrayList<>();
     private Map<String, Category> categoryMap = new HashMap<>();
     private Map<String, Wallet> walletMap = new HashMap<>();
-    private Map<String, Tag> tagMap = new HashMap<>();
     private OnItemClick listener;
 
     public void setItems(List<Transaction> items) {
@@ -47,11 +45,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     public void setWalletMap(Map<String, Wallet> map) {
         this.walletMap = map != null ? map : new HashMap<>();
-        notifyDataSetChanged();
-    }
-
-    public void setTagMap(Map<String, Tag> map) {
-        this.tagMap = map != null ? map : new HashMap<>();
         notifyDataSetChanged();
     }
 
@@ -71,7 +64,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Transaction t = items.get(position);
         String type = t.getType();
-        holder.bind(t, type, categoryMap, walletMap, tagMap, listener);
+        holder.bind(t, type, categoryMap, walletMap, listener);
     }
 
     @Override
@@ -90,7 +83,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         void bind(Transaction t, String type,
                    Map<String, Category> categoryMap,
                    Map<String, Wallet> walletMap,
-                   Map<String, Tag> tagMap,
                    OnItemClick listener) {
 
             String categoryName = "";
@@ -151,24 +143,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 binding.textNote.setVisibility(View.VISIBLE);
             } else {
                 binding.textNote.setVisibility(View.GONE);
-            }
-
-            // --- Tags ---
-            StringBuilder tagSb = new StringBuilder();
-            if (t.getTagIds() != null && tagMap != null) {
-                for (String tagId : t.getTagIds()) {
-                    Tag tag = tagMap.get(tagId);
-                    if (tag != null) {
-                        if (tagSb.length() > 0) tagSb.append("  ");
-                        tagSb.append("#").append(tag.getName());
-                    }
-                }
-            }
-            if (tagSb.length() > 0) {
-                binding.textTags.setText(tagSb.toString());
-                binding.textTags.setVisibility(View.VISIBLE);
-            } else {
-                binding.textTags.setVisibility(View.GONE);
             }
 
             // --- Amount ---
