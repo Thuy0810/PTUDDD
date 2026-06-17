@@ -48,8 +48,9 @@ public final class MoneyInputFormatter {
     public static String format(long value) {
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
         DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-            symbols.setDecimalSeparator('.');
-            symbols.setGroupingSeparator(',');
+            // vi-VN: ngăn cách hàng nghìn bằng dấu chấm
+            symbols.setDecimalSeparator(',');
+            symbols.setGroupingSeparator('.');
         df.setDecimalFormatSymbols(symbols);
         df.setGroupingUsed(true);
         df.setMaximumFractionDigits(0);

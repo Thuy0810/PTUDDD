@@ -108,7 +108,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="0 vnd"
+                        android:text="0 VND"
                         android:textColor="@color/white"
                         android:textSize="28sp"
                         android:textStyle="bold" />
@@ -136,7 +136,7 @@
                                 android:id="@+id/textTotalSpent"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0 vnd"
+                                android:text="0 VND"
                                 android:textColor="@color/white"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -159,7 +159,7 @@
                                 android:id="@+id/textTotalRemaining"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0 vnd"
+                                android:text="0 VND"
                                 android:textColor="@color/white"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />

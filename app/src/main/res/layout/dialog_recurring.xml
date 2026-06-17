@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="@string/amount"
-            app:suffixText="vnd">
+            app:suffixText="VND">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editRecurringAmount"

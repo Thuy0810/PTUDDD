@@ -30,7 +30,7 @@
             android:id="@+id/textBalance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 vnd"
+            android:text="0 VND"
             android:textColor="@color/income_green"
             android:textSize="16sp"
             android:textStyle="bold" />

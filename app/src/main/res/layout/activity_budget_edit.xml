@@ -83,7 +83,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="0 vnd"
+                        android:text="0 VND"
                         android:textColor="@color/white"
                         android:textSize="28sp"
                         android:textStyle="bold" />
@@ -175,7 +175,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3,500,000 vnd"
+                            android:text="3,500,000 VND"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -210,7 +210,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="350,000 vnd"
+                            android:text="350,000 VND"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -245,7 +245,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="200,000 vnd"
+                            android:text="200,000 VND"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />

@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class MoneyFormat {
     /** Mã tiền tệ hiển thị sau số tiền. */
-    private static volatile String currencyCode = "vnd";
+    private static volatile String currencyCode = "VND";
     /** Vị trí ký hiệu tiền: true = trước số, false = sau số. Mặc định false (sau). */
     private static volatile boolean symbolBefore = false;
     private static volatile int decimals = 0;
@@ -34,7 +34,7 @@ public final class MoneyFormat {
     }
 
     public static void reset() {
-        applySettings("vnd", false, 0, new Locale("vi", "VN"));
+        applySettings("VND", false, 0, new Locale("vi", "VN"));
     }
 
     private static DecimalFormat getFormat() {
@@ -42,8 +42,9 @@ public final class MoneyFormat {
         if (df == null) {
             df = (DecimalFormat) NumberFormat.getInstance(locale);
             DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-            symbols.setDecimalSeparator('.');
-            symbols.setGroupingSeparator(',');
+            // Định dạng vi-VN: ngăn cách hàng nghìn bằng dấu chấm, thập phân bằng dấu phẩy
+            symbols.setDecimalSeparator(',');
+            symbols.setGroupingSeparator('.');
             df.setDecimalFormatSymbols(symbols);
             df.setMaximumFractionDigits(decimals);
             df.setMinimumFractionDigits(0);
@@ -120,9 +121,9 @@ public final class MoneyFormat {
     }
 
     private static String normalizeCurrencyCode(String code) {
-        if (code == null || code.trim().isEmpty()) return "vnd";
+        if (code == null || code.trim().isEmpty()) return "VND";
         String normalized = code.trim();
-        if ("đ".equals(normalized) || "₫".equals(normalized)) return "vnd";
-        return normalized.toLowerCase(Locale.ROOT);
+        if ("đ".equals(normalized) || "₫".equals(normalized)) return "VND";
+        return normalized.toUpperCase(Locale.ROOT);
     }
 }
