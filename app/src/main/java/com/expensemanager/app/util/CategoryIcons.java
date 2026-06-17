@@ -22,22 +22,25 @@ public final class CategoryIcons {
 
     private static final Map<String, Integer> MAP = new HashMap<>();
     static {
-        MAP.put("food", R.drawable.ic_cat_coffee);
-        MAP.put("transport", R.drawable.ic_cat_car);
-        MAP.put("shopping", R.drawable.ic_cat_bag);
-        MAP.put("bills", R.drawable.ic_cat_bolt);
-        MAP.put("education", R.drawable.ic_cat_laptop);
-        MAP.put("entertainment", R.drawable.ic_cat_film);
-        MAP.put("fun", R.drawable.ic_cat_film);
-        MAP.put("health", R.drawable.ic_cat_heart);
-        MAP.put("family", R.drawable.ic_user_stroke);
-        MAP.put("saving", R.drawable.ic_target_ring);
-        MAP.put("other", R.drawable.ic_note);
-        MAP.put("salary", R.drawable.ic_cat_briefcase);
-        MAP.put("income", R.drawable.ic_cat_briefcase);
-        MAP.put("bonus", R.drawable.ic_trophy);
-        MAP.put("gift", R.drawable.ic_cat_gift);
-        MAP.put("sales", R.drawable.ic_creditcard);
+        // Icon từ thư viện Iconics (Google Material) — dùng dưới dạng drawable XML.
+        MAP.put("food", R.drawable.ico_food);
+        MAP.put("transport", R.drawable.ico_transport);
+        MAP.put("shopping", R.drawable.ico_shopping);
+        MAP.put("bills", R.drawable.ico_bills);
+        MAP.put("education", R.drawable.ico_education);
+        MAP.put("entertainment", R.drawable.ico_entertainment);
+        MAP.put("fun", R.drawable.ico_entertainment);
+        MAP.put("health", R.drawable.ico_health);
+        MAP.put("family", R.drawable.ico_family);
+        MAP.put("saving", R.drawable.ico_saving);
+        MAP.put("other", R.drawable.ico_other);
+        MAP.put("salary", R.drawable.ico_salary);
+        MAP.put("income", R.drawable.ico_salary);
+        MAP.put("bonus", R.drawable.ico_bonus);
+        MAP.put("gift", R.drawable.ico_gift);
+        MAP.put("sales", R.drawable.ico_sales);
+        MAP.put("home", R.drawable.ico_home);
+        MAP.put("rent", R.drawable.ico_home);
     }
 
     /** @return res-id icon vector cho iconKey, hoặc 0 nếu không có (vd: iconKey là emoji). */
@@ -50,7 +53,7 @@ public final class CategoryIcons {
     /** Icon mặc định theo loại giao dịch khi danh mục không xác định. */
     public static int defaultFor(String type) {
         return Transaction.TYPE_INCOME.equals(type)
-                ? R.drawable.ic_cat_briefcase : R.drawable.ic_note;
+                ? R.drawable.ico_salary : R.drawable.ico_other;
     }
 
     /** iconKey có phải emoji không (không phải khóa chữ thường ascii đã biết). */

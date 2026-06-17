@@ -90,6 +90,14 @@ public class BudgetFragment extends Fragment {
             i.putExtra(BudgetAllocationActivity.EXTRA_MONTH_KEY, DateUtils.currentMonthKey());
             startActivity(i);
         });
+
+        // Ke hoach khac: Muc tieu + Thu thach
+        binding.btnPlanGoals.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(),
+                        com.expensemanager.app.ui.goal.GoalListActivity.class)));
+        binding.btnPlanChallenge.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(),
+                        com.expensemanager.app.ui.challenge.ChallengeListActivity.class)));
     }
 
     private void updateTabUI(boolean showOverview) {

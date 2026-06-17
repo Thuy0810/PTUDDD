@@ -26,13 +26,12 @@
                 android:layout_height="44dp"
                 android:background="@drawable/bg_circle_primary" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/textCategoryIcon"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:gravity="center"
-                android:text="📦"
-                android:textSize="20sp" />
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no" />
         </FrameLayout>
 
         <!-- Info -->

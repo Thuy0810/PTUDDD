@@ -80,17 +80,16 @@ public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocati
         holder.binding.textPercent.setText(progress + "%");
         holder.binding.progressBar.setProgress(progress);
 
-        if (cat.getIconKey() != null) {
-            holder.binding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
-        }
-
+        int color;
         try {
-            int color = Color.parseColor(cat.getColorHex());
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.OVAL);
-            bg.setColor(color);
-            holder.binding.viewCategoryBg.setBackground(bg);
-        } catch (Exception ignored) {}
+            color = Color.parseColor(cat.getColorHex());
+        } catch (Exception e) {
+            color = holder.itemView.getContext().getColor(
+                    com.expensemanager.app.R.color.primary);
+        }
+        com.expensemanager.app.util.CategoryIcons.apply(
+                holder.binding.textCategoryIcon, holder.binding.viewCategoryBg,
+                cat.getIconKey(), color, cat.getType());
 
         holder.binding.btnEdit.setOnClickListener(v -> {
             if (listener != null) {
@@ -105,21 +104,6 @@ public class BudgetAllocationAdapter extends RecyclerView.Adapter<BudgetAllocati
         });
     }
 
-    private String getCategoryEmoji(String iconKey) {
-        if (iconKey == null) return "📦";
-        switch (iconKey) {
-            case "food": return "🍔";
-            case "transport": return "🚌";
-            case "shopping": return "🛍️";
-            case "bills": return "📄";
-            case "education": return "📚";
-            case "entertainment": return "🎮";
-            case "health": return "💊";
-            case "family": return "👨‍👩‍👧";
-            case "saving": return "💰";
-            default: return "📦";
-        }
-    }
 
     @Override
     public int getItemCount() {

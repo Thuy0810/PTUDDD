@@ -80,7 +80,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/nav_budget"
+                android:text="@string/nav_plan"
                 android:textColor="@color/brand_faint"
                 android:textSize="10sp"
                 android:textStyle="normal" />

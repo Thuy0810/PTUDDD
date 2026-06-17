@@ -22,7 +22,11 @@ import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.databinding.FragmentHomeBinding;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
+import com.expensemanager.app.ui.category.CategoryListActivity;
+import com.expensemanager.app.ui.goal.GoalListActivity;
+import com.expensemanager.app.ui.recurring.RecurringListActivity;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
+import com.expensemanager.app.ui.wallet.WalletListActivity;
 import com.expensemanager.app.util.MoneyFormat;
 import com.expensemanager.app.viewmodel.HomeViewModel;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
@@ -67,6 +71,20 @@ public class HomeFragment extends Fragment {
 
         binding.cardBudgetShortcut.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.budgetFragment));
+
+        // Thao tac nhanh
+        binding.qaWallets.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), WalletListActivity.class)));
+        binding.qaGoals.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), GoalListActivity.class)));
+        binding.qaRecurring.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), RecurringListActivity.class)));
+        binding.qaCategories.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), CategoryListActivity.class)));
+
+        // Tap so du -> Quan ly vi
+        binding.layoutBalance.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), WalletListActivity.class)));
 
         binding.textGreeting.setText(greetingByTime());
 

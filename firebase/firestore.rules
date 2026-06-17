@@ -38,7 +38,7 @@ service cloud.firestore {
         // Amount validation: must be positive integer
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
-        && request.resource.data.amount == request.resource.data.amount.round()
+        && request.resource.data.amount is int
         // Date must be timestamp
         && request.resource.data.date is timestamp
         // For transfer: fromWalletId != toWalletId
@@ -56,7 +56,7 @@ service cloud.firestore {
       allow update: if isOwner(userId)
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
-        && request.resource.data.amount == request.resource.data.amount.round()
+        && request.resource.data.amount is int
         && request.resource.data.type in ['income', 'expense', 'transfer']
         && request.resource.data.date is timestamp
         && (
@@ -91,7 +91,7 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 100
         && 'currentBalance' in request.resource.data
         && request.resource.data.currentBalance is number
-        && request.resource.data.currentBalance == request.resource.data.currentBalance.round()
+        && request.resource.data.currentBalance is int
         && request.resource.data.currentBalance >= 0;
 
       allow update: if isOwner(userId)
@@ -108,7 +108,7 @@ service cloud.firestore {
           || (
             'currentBalance' in request.resource.data
             && request.resource.data.currentBalance is number
-            && request.resource.data.currentBalance == request.resource.data.currentBalance.round()
+            && request.resource.data.currentBalance is int
           )
         );
 
@@ -125,7 +125,7 @@ service cloud.firestore {
         && 'limitAmount' in request.resource.data
         && request.resource.data.limitAmount is number
         && request.resource.data.limitAmount > 0
-        && request.resource.data.limitAmount == request.resource.data.limitAmount.round()
+        && request.resource.data.limitAmount is int
         && 'scope' in request.resource.data
         // App dùng "monthlyTotal" cho ngân sách tổng (Budget.SCOPE_MONTHLY).
         && request.resource.data.scope in ['monthlyTotal', 'category']
@@ -163,7 +163,7 @@ service cloud.firestore {
         && 'amount' in request.resource.data
         && request.resource.data.amount is number
         && request.resource.data.amount > 0
-        && request.resource.data.amount == request.resource.data.amount.round()
+        && request.resource.data.amount is int
         // cycleType
         && 'cycleType' in request.resource.data
         && request.resource.data.cycleType in ['daily', 'weekly', 'monthly', 'yearly']
@@ -249,11 +249,11 @@ service cloud.firestore {
         && 'targetAmount' in request.resource.data
         && request.resource.data.targetAmount is number
         && request.resource.data.targetAmount > 0
-        && request.resource.data.targetAmount == request.resource.data.targetAmount.round()
+        && request.resource.data.targetAmount is int
         && 'savedAmount' in request.resource.data
         && request.resource.data.savedAmount is number
         && request.resource.data.savedAmount >= 0
-        && request.resource.data.savedAmount == request.resource.data.savedAmount.round()
+        && request.resource.data.savedAmount is int
         // Cho phép đóng góp vượt mục tiêu (app cho phép; getProgress() đã chặn ở 100%).
         // Không ràng buộc savedAmount <= targetAmount để tránh PERMISSION_DENIED khi
         // đóng góp nhiều hơn phần còn thiếu.
@@ -286,7 +286,7 @@ service cloud.firestore {
         && 'targetSavings' in request.resource.data
         && request.resource.data.targetSavings is number
         && request.resource.data.targetSavings > 0
-        && request.resource.data.targetSavings == request.resource.data.targetSavings.round()
+        && request.resource.data.targetSavings is int
         && (
           'totalDays' in request.resource.data
             ? request.resource.data.totalDays is int && request.resource.data.totalDays > 0

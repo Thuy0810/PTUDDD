@@ -32,13 +32,12 @@
                     android:layout_height="40dp"
                     android:background="@drawable/bg_circle_primary" />
 
-                <TextView
+                <ImageView
                     android:id="@+id/textCategoryIcon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="🍔"
-                    android:textSize="18sp" />
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no" />
             </FrameLayout>
 
             <LinearLayout

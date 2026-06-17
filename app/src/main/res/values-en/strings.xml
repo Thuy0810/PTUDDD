@@ -21,6 +21,19 @@
     <string name="nav_transactions">Transactions</string>
     <string name="nav_report">Reports</string>
     <string name="nav_profile">Profile</string>
+    <string name="nav_plan">Plan</string>
+    <string name="save_transaction">Save transaction</string>
+    <!-- Home quick actions -->
+    <string name="quick_actions">Quick actions</string>
+    <string name="qa_wallets">Wallets</string>
+    <string name="qa_goals">Goals</string>
+    <string name="qa_recurring">Recurring</string>
+    <string name="qa_categories">Categories</string>
+    <!-- Plan tab sections -->
+    <string name="plan_goals_title">Savings goals</string>
+    <string name="plan_goals_desc">Set and track your goals</string>
+    <string name="plan_challenge_title">Savings challenge</string>
+    <string name="plan_challenge_desc">Create challenges, stay motivated</string>
     <!-- Transaction -->
     <string name="search_hint">Search transactions.</string>
     <string name="empty_transactions">No transactions yet</string>
@@ -59,6 +72,7 @@
     <string name="wallet_name">Wallet name</string>
     <string name="wallet_balance">Balance</string>
     <string name="wallet_type">Wallet type</string>
+    <string name="wallet_icon">Wallet icon</string>
     <string name="wallet_cash">Cash</string>
     <string name="wallet_bank">Bank</string>
     <string name="wallet_saving">Savings wallet</string>
@@ -273,10 +287,8 @@
     <string name="saturday">Saturday</string>
     <string name="all_wallets">All wallets</string>
     <string-array name="wallet_type_labels">
-        <item>Cash</item>
-        <item>Bank</item>
-        <item>E-wallet</item>
-        <item>Savings</item>
+        <item>Payment wallet</item>
+        <item>Debit card</item>
     </string-array>
     <string-array name="sort_labels">
         <item>Newest</item>

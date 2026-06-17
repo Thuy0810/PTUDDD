@@ -16,10 +16,6 @@ import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentProfileBinding;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.ui.auth.LoginActivity;
-import com.expensemanager.app.ui.recurring.RecurringListActivity;
-import com.expensemanager.app.ui.wallet.WalletListActivity;
-import com.expensemanager.app.ui.category.CategoryListActivity;
-import com.expensemanager.app.ui.goal.GoalListActivity;
 import com.expensemanager.app.util.PrefsHelper;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
 
@@ -72,33 +68,8 @@ public class ProfileFragment extends Fragment {
                     startActivity(new Intent(requireContext(), SettingsActivity.class)));
         }
 
-        // Quản lý: Ngân sách & Thử thách tiết kiệm
-        if (binding.btnBudgetShortcut != null) {
-            binding.btnBudgetShortcut.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), com.expensemanager.app.ui.budget.BudgetListActivity.class)));
-        }
-        if (binding.btnChallenge != null) {
-            binding.btnChallenge.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), com.expensemanager.app.ui.challenge.ChallengeListActivity.class)));
-        }
-
-        // Quản lý
-        if (binding.btnManageWallets != null) {
-            binding.btnManageWallets.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), WalletListActivity.class)));
-        }
-        if (binding.btnManageCategories != null) {
-            binding.btnManageCategories.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), CategoryListActivity.class)));
-        }
-        if (binding.btnManageGoals != null) {
-            binding.btnManageGoals.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), GoalListActivity.class)));
-        }
-        if (binding.btnManageRecurring != null) {
-            binding.btnManageRecurring.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), RecurringListActivity.class)));
-        }
+        // (Quản lý ví/danh mục/mục tiêu/định kỳ/thử thách/ngân sách
+        //  đã chuyển sang tab Trang chủ và tab Kế hoạch.)
 
         // Hỗ trợ
         if (binding.btnHelp != null) {

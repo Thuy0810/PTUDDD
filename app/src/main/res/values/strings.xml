@@ -63,6 +63,19 @@
     <string name="nav_transactions">Giao dịch</string>
     <string name="nav_report">Báo cáo</string>
     <string name="nav_profile">Cá nhân</string>
+    <string name="nav_plan">Kế hoạch</string>
+    <string name="save_transaction">Lưu giao dịch</string>
+    <!-- Home quick actions -->
+    <string name="quick_actions">Thao tác nhanh</string>
+    <string name="qa_wallets">Ví</string>
+    <string name="qa_goals">Mục tiêu</string>
+    <string name="qa_recurring">Định kỳ</string>
+    <string name="qa_categories">Danh mục</string>
+    <!-- Plan tab sections -->
+    <string name="plan_goals_title">Mục tiêu tiết kiệm</string>
+    <string name="plan_goals_desc">Đặt và theo dõi mục tiêu</string>
+    <string name="plan_challenge_title">Thử thách tiết kiệm</string>
+    <string name="plan_challenge_desc">Tạo thử thách, giữ động lực</string>
     <!-- Transaction -->
     <string name="search_hint">Tìm kiếm giao dịch.</string>
     <string name="empty_transactions">Chưa có giao dịch nào</string>
@@ -101,6 +114,7 @@
     <string name="wallet_name">Tên ví</string>
     <string name="wallet_balance">Số dư</string>
     <string name="wallet_type">Loại ví</string>
+    <string name="wallet_icon">Biểu tượng ví</string>
     <string name="wallet_cash">Tiền mặt</string>
     <string name="wallet_bank">Ngân hàng</string>
     <string name="wallet_saving">Ví tiết kiệm</string>
@@ -315,10 +329,8 @@
     <string name="saturday">Thứ 7</string>
     <string name="all_wallets">Tất cả ví</string>
     <string-array name="wallet_type_labels">
-        <item>Tiền mặt</item>
-        <item>Ngân hàng</item>
-        <item>Ví điện tử</item>
-        <item>Tiết kiệm</item>
+        <item>Ví thanh toán</item>
+        <item>Thẻ ghi nợ</item>
     </string-array>
     <string-array name="sort_labels">
         <item>Mới nhất</item>

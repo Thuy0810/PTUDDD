@@ -88,14 +88,15 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
         }
 
         if (cat != null) {
+            int color;
             try {
-                int color = Color.parseColor(cat.getColorHex());
-                GradientDrawable bg = new GradientDrawable();
-                bg.setShape(GradientDrawable.OVAL);
-                bg.setColor(color);
-                holder.binding.viewCategoryBg.setBackground(bg);
-            } catch (Exception ignored) {}
-            holder.binding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
+                color = Color.parseColor(cat.getColorHex());
+            } catch (Exception e) {
+                color = holder.itemView.getContext().getColor(R.color.primary);
+            }
+            com.expensemanager.app.util.CategoryIcons.apply(
+                    holder.binding.textCategoryIcon, holder.binding.viewCategoryBg,
+                    cat.getIconKey(), color, cat.getType());
         }
 
         if (percent >= 90) {
@@ -115,28 +116,6 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.VH> {
         });
     }
 
-    private String getCategoryEmoji(String iconKey) {
-        if (iconKey == null) return "📦";
-        switch (iconKey) {
-            case "food": return "🍔";
-            case "transport": return "🚌";
-            case "shopping": return "🛍️";
-            case "bills": return "📄";
-            case "education": return "📚";
-            case "entertainment": return "🎮";
-            case "health": return "💊";
-            case "family": return "👨‍👩‍👧";
-            case "saving": return "💰";
-            case "salary": return "💵";
-            case "bonus": return "🎁";
-            case "gift": return "🎁";
-            case "sales": return "🛒";
-            case "bank": return "🏦";
-            case "cash": return "💵";
-            case "ewallet": return "📱";
-            default: return "📦";
-        }
-    }
 
     @Override
     public int getItemCount() { return items.size(); }

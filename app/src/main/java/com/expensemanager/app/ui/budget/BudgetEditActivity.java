@@ -123,17 +123,15 @@ public class BudgetEditActivity extends AppCompatActivity {
             itemBinding.textPercent.setText(progress + "%");
             itemBinding.progressBar.setProgress(progress);
 
-            if (cat.getIconKey() != null) {
-                itemBinding.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
-            }
-
+            int iconColor;
             try {
-                int color = Color.parseColor(cat.getColorHex());
-                GradientDrawable bg = new GradientDrawable();
-                bg.setShape(GradientDrawable.OVAL);
-                bg.setColor(color);
-                itemBinding.viewCategoryBg.setBackground(bg);
-            } catch (Exception ignored) {}
+                iconColor = Color.parseColor(cat.getColorHex());
+            } catch (Exception e) {
+                iconColor = getColor(R.color.primary);
+            }
+            com.expensemanager.app.util.CategoryIcons.apply(
+                    itemBinding.textCategoryIcon, itemBinding.viewCategoryBg,
+                    cat.getIconKey(), iconColor, cat.getType());
 
             itemBinding.btnEdit.setOnClickListener(v -> showEditDialog(cat, amount));
             itemBinding.getRoot().setOnClickListener(v -> showEditDialog(cat, amount));
@@ -231,22 +229,6 @@ public class BudgetEditActivity extends AppCompatActivity {
     private void saveAll() {
         Toast.makeText(this, getString(R.string.j1_budget_saved), Toast.LENGTH_SHORT).show();
         finish();
-    }
-
-    private String getCategoryEmoji(String iconKey) {
-        if (iconKey == null) return "📦";
-        switch (iconKey) {
-            case "food": return "🍔";
-            case "transport": return "🚌";
-            case "shopping": return "🛍️";
-            case "bills": return "📄";
-            case "education": return "📚";
-            case "entertainment": return "🎮";
-            case "health": return "💊";
-            case "family": return "👨‍👩‍👧";
-            case "saving": return "💰";
-            default: return "📦";
-        }
     }
 
     @Override

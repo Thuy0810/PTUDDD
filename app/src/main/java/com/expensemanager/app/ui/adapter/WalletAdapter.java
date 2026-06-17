@@ -51,34 +51,14 @@ public class WalletAdapter extends RecyclerView.Adapter<WalletAdapter.VH> {
         double bal = w.getCurrentBalance();
         holder.binding.textBalance.setText(MoneyFormat.format(bal));
 
-        // Set icon
-        holder.binding.textWalletIcon.setText(getWalletEmoji(w.getType()));
-
-        // Set color background
-        String colorHex = w.getColor();
-        if (colorHex == null) colorHex = "#FFB84D";
-        try {
-            int color = Color.parseColor(colorHex);
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.OVAL);
-            bg.setColor(color);
-            holder.binding.viewWalletBg.setBackground(bg);
-        } catch (Exception ignored) {}
+        // Icon ví: dùng thư viện icon (vector) + nền tròn màu ví
+        com.expensemanager.app.util.WalletIcons.apply(
+                holder.binding.textWalletIcon, holder.binding.viewWalletBg,
+                w.getIcon(), w.getType(), w.getColor());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onClick(w);
         });
-    }
-
-    private String getWalletEmoji(String type) {
-        if (type == null) return "💰";
-        switch (type) {
-            case "cash": return "💵";
-            case "bank": return "🏦";
-            case "ewallet": return "📱";
-            case "savings": return "🐷";
-            default: return "💰";
-        }
     }
 
     @Override

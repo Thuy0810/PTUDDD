@@ -327,7 +327,7 @@ public class BudgetAllocationActivity extends AppCompatActivity {
         ItemBudgetAllocSimpleBinding card = ItemBudgetAllocSimpleBinding.inflate(
                 LayoutInflater.from(this), binding.layoutEssentialItems, false);
         card.textCategoryName.setText(name);
-        card.textCategoryIcon.setText("📦");
+        card.textCategoryIcon.setImageResource(R.drawable.ico_other);
         card.progressBudget.setProgress(0);
         card.textStatus.setVisibility(View.GONE);
         card.textSpent.setText(getString(R.string.budget_spent) + ": 0 / --");
@@ -347,7 +347,6 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 LayoutInflater.from(this), binding.layoutEssentialItems, false);
 
         card.textCategoryName.setText(cat.getName());
-        card.textCategoryIcon.setText(getCategoryEmoji(cat.getIconKey()));
 
         // Progress
         card.progressBudget.setProgress(pct);
@@ -388,15 +387,15 @@ public class BudgetAllocationActivity extends AppCompatActivity {
             card.btnReallocate.setVisibility(View.GONE);
         }
 
-        if (cat.getColorHex() != null) {
-            try {
-                int color = Color.parseColor(cat.getColorHex());
-                GradientDrawable bg = new GradientDrawable();
-                bg.setShape(GradientDrawable.OVAL);
-                bg.setColor(color);
-                card.viewCategoryBg.setBackground(bg);
-            } catch (Exception ignored) {}
+        int catIconColor;
+        try {
+            catIconColor = Color.parseColor(cat.getColorHex());
+        } catch (Exception e) {
+            catIconColor = ContextCompat.getColor(this, R.color.primary);
         }
+        com.expensemanager.app.util.CategoryIcons.apply(
+                card.textCategoryIcon, card.viewCategoryBg,
+                cat.getIconKey(), catIconColor, cat.getType());
 
         card.getRoot().setOnClickListener(v -> showEditDialog(cat, allocated));
         card.btnMenu.setOnClickListener(v -> showItemMenu(v, cat, allocated));
@@ -601,24 +600,6 @@ public class BudgetAllocationActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show();
-    }
-
-    private String getCategoryEmoji(String iconKey) {
-        if (iconKey == null) return "📦";
-        switch (iconKey) {
-            case "food": return "🍔";
-            case "transport": return "🚌";
-            case "shopping": return "🛍️";
-            case "bills": return "📄";
-            case "education": return "📚";
-            case "entertainment": return "🎮";
-            case "health": return "💊";
-            case "family": return "👨‍👩‍👧";
-            case "saving": return "💰";
-            case "home": return "🏠";
-            case "rent": return "🏠";
-            default: return "📦";
-        }
     }
 
     @Override

@@ -78,6 +78,9 @@ public class Wallet {
     public String getTypeLabel() {
         if (type == null) return "";
         switch (type) {
+            case "payment": return "Ví thanh toán";
+            case "debit": return "Thẻ ghi nợ";
+            // legacy (dữ liệu cũ)
             case "cash": return "Tiền mặt";
             case "bank": return "Ngân hàng";
             case "ewallet": return "Ví điện tử";

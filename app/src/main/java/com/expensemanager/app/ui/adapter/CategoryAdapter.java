@@ -64,40 +64,20 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
                 isIncome ? com.expensemanager.app.R.color.income_green
                         : com.expensemanager.app.R.color.expense_red));
 
-        holder.binding.textCategoryIcon.setText(getCategoryEmoji(c.getIconKey()));
-
+        int color;
         try {
-            int color = Color.parseColor(c.getColorHex());
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.OVAL);
-            bg.setColor(color);
-            holder.binding.viewCategoryBg.setBackground(bg);
-        } catch (Exception ignored) {}
+            color = Color.parseColor(c.getColorHex());
+        } catch (Exception e) {
+            color = holder.itemView.getContext().getColor(com.expensemanager.app.R.color.primary);
+        }
+        com.expensemanager.app.util.CategoryIcons.apply(
+                holder.binding.textCategoryIcon, holder.binding.viewCategoryBg,
+                c.getIconKey(), color, c.getType());
 
         holder.itemView.setOnLongClickListener(v -> {
             if (listener != null) listener.onLongClick(c);
             return true;
         });
-    }
-
-    private String getCategoryEmoji(String iconKey) {
-        if (iconKey == null) return "📦";
-        switch (iconKey) {
-            case "food": return "🍔";
-            case "transport": return "🚌";
-            case "shopping": return "🛍️";
-            case "bills": return "📄";
-            case "education": return "📚";
-            case "entertainment": return "🎮";
-            case "health": return "💊";
-            case "family": return "👨‍👩‍👧";
-            case "saving": return "💰";
-            case "salary": return "💵";
-            case "bonus": return "🎁";
-            case "gift": return "🎁";
-            case "sales": return "🛒";
-            default: return "📦";
-        }
     }
 
     @Override

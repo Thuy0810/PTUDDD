@@ -32,6 +32,15 @@ android {
     }
 }
 
+// Ghim androidx.core về 1.13.1 (bản cuối tương thích compileSdk 34).
+// Iconics/các lib mới có thể kéo core 1.15+/1.17 vốn yêu cầu compileSdk 35/36 + AGP 8.9.1.
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.core:core:1.13.1'
+        force 'androidx.core:core-ktx:1.13.1'
+    }
+}
+
 dependencies {
     def lifecycleVersion = '2.7.0'
     def navVersion = '2.7.7'
@@ -64,6 +73,12 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.9.0'
     implementation 'com.google.guava:guava:33.3.1-android'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+
+    // Icon library (vector, dùng dưới dạng drawable XML — hỗ trợ API 24+)
+    // Dùng 5.4.0 để tương thích compileSdk 34 / AGP 8.7 (bản mới kéo androidx.core 1.17 đòi SDK 36).
+    implementation 'com.mikepenz:iconics-core:5.4.0'
+    implementation 'com.mikepenz:iconics-views:5.4.0'
+    implementation 'com.mikepenz:google-material-typeface:4.0.0.2-kotlin@aar'
 
     testImplementation 'junit:junit:4.13.2'
 }
