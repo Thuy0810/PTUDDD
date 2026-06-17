@@ -20,14 +20,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.expensemanager.app.R;
 import com.expensemanager.app.databinding.FragmentReportBinding;
 import com.expensemanager.app.data.model.Category;
+import com.expensemanager.app.data.model.Tag;
 import com.expensemanager.app.data.model.Transaction;
 import com.expensemanager.app.data.model.Wallet;
 import com.expensemanager.app.data.repository.AuthRepository;
 import com.expensemanager.app.data.repository.CategoryRepository;
+import com.expensemanager.app.data.repository.TagRepository;
 import com.expensemanager.app.data.repository.TransactionRepository;
 import com.expensemanager.app.data.repository.WalletRepository;
+import com.expensemanager.app.data.model.FinancialInsights;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
+import com.expensemanager.app.util.DateUtils;
+import com.expensemanager.app.util.InsightsEngine;
 import com.expensemanager.app.util.MoneyFormat;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -59,10 +64,18 @@ public class ReportFragment extends Fragment {
     private List<Transaction> currentTxs = new ArrayList<>();
     private boolean lastMonthLoaded = false;
 
+    // Dự báo dòng tiền (luôn theo tháng hiện tại + tổng số dư)
+    private List<Transaction> forecastMonthTx = new ArrayList<>();
+    private long forecastBalance = 0L;
+    private boolean forecastTxLoaded = false;
+    private boolean forecastWalletsLoaded = false;
+
     private final Calendar selectedDate = Calendar.getInstance();
     private int selectedPeriod = 0; // 0=Ngày, 1=Tuần, 2=Tháng, 3=Quý, 4=Năm
     private String selectedWalletId = null;
     private String selectedType = "all"; // all/income/expense
+    private List<Tag> tags = new ArrayList<>();
+    private String selectedTagId = null;
 
     private TransactionRepository txRepo;
     private String currentUid;
@@ -91,6 +104,60 @@ public class ReportFragment extends Fragment {
         setupChartListeners();
 
         loadData();
+        setupForecast();
+    }
+
+    /**
+     * Dự báo dòng tiền dựa trên tốc độ chi của THÁNG HIỆN TẠI và tổng số dư ví,
+     * độc lập với bộ lọc kỳ báo cáo bên trên.
+     */
+    private void setupForecast() {
+        txRepo.observeMonth(currentUid, DateUtils.currentMonthKey())
+                .observe(getViewLifecycleOwner(), list -> {
+                    forecastMonthTx = list != null ? list : new ArrayList<>();
+                    forecastTxLoaded = true;
+                    recomputeForecast();
+                });
+
+        new WalletRepository().observeAll(currentUid)
+                .observe(getViewLifecycleOwner(), list -> {
+                    long total = 0L;
+                    if (list != null) {
+                        for (Wallet w : list) {
+                            if (w != null && !w.isArchived()) total += w.getCurrentBalance();
+                        }
+                    }
+                    forecastBalance = total;
+                    forecastWalletsLoaded = true;
+                    recomputeForecast();
+                });
+    }
+
+    private void recomputeForecast() {
+        if (binding == null || !forecastTxLoaded || !forecastWalletsLoaded) return;
+
+        FinancialInsights fi = InsightsEngine.compute(
+                forecastMonthTx, new ArrayList<>(), new ArrayList<>(),
+                new ArrayList<>(), new ArrayList<>(), forecastBalance, 0L);
+
+        binding.textForecastAvgDaily.setText(MoneyFormat.format(fi.avgDailyExpense));
+        binding.textForecastPredicted.setText(
+                fi.predictedMonthExpense > 0 ? MoneyFormat.format(fi.predictedMonthExpense) : "--");
+
+        if (fi.daysBalanceLasts < 0) {
+            binding.textForecastDaysLeft.setText("--");
+        } else {
+            binding.textForecastDaysLeft.setText(
+                    getString(R.string.forecast_days_value, fi.daysBalanceLasts));
+        }
+
+        if (fi.willRunOutThisMonth && fi.projectedRunOutDay > 0) {
+            binding.textForecastWarning.setVisibility(View.VISIBLE);
+            binding.textForecastWarning.setText(
+                    getString(R.string.forecast_runout_warning, fi.projectedRunOutDay));
+        } else {
+            binding.textForecastWarning.setVisibility(View.GONE);
+        }
     }
 
     private void setupRecyclerView() {
@@ -195,6 +262,13 @@ public class ReportFragment extends Fragment {
             applyFiltersAndBind();
         });
 
+        new TagRepository().observeAll(currentUid).observe(getViewLifecycleOwner(), list -> {
+            tags = list != null ? list : new ArrayList<>();
+            txAdapter.setTagMap(TagRepository.toMap(tags));
+            setupTagSpinner();
+            applyFiltersAndBind();
+        });
+
         binding.radioGroupType.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioAll) selectedType = "all";
             else if (checkedId == R.id.radioIncome) selectedType = "income";
@@ -220,6 +294,31 @@ public class ReportFragment extends Fragment {
                     selectedWalletId = null;
                 } else if (pos - 1 < wallets.size()) {
                     selectedWalletId = wallets.get(pos - 1).getId();
+                }
+                applyFiltersAndBind();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void setupTagSpinner() {
+        if (binding == null) return;
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.all_tags));
+        for (Tag t : tags) names.add(t.getName());
+
+        ArrayAdapter<String> ad = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, names);
+        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerTag.setAdapter(ad);
+
+        binding.spinnerTag.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                if (pos == 0) {
+                    selectedTagId = null;
+                } else if (pos - 1 < tags.size()) {
+                    selectedTagId = tags.get(pos - 1).getId();
                 }
                 applyFiltersAndBind();
             }
@@ -255,7 +354,8 @@ public class ReportFragment extends Fragment {
             if (catId.equals(t.getCategoryId())
                     && Transaction.TYPE_EXPENSE.equals(t.getType())
                     && passesWalletFilter(t)
-                    && passesTypeFilter(t)) {
+                    && passesTypeFilter(t)
+                    && passesTagFilter(t)) {
                 filtered.add(t);
             }
         }
@@ -330,6 +430,7 @@ public class ReportFragment extends Fragment {
         for (Transaction t : currentTxs) {
             if (!passesWalletFilter(t)) continue;
             if (!passesTypeFilter(t)) continue;
+            if (!passesTagFilter(t)) continue;
             filtered.add(t);
         }
 
@@ -360,6 +461,11 @@ public class ReportFragment extends Fragment {
             case "expense": return Transaction.TYPE_EXPENSE.equals(t.getType());
             default: return true;
         }
+    }
+
+    private boolean passesTagFilter(Transaction t) {
+        if (selectedTagId == null) return true;
+        return t.getTagIds() != null && t.getTagIds().contains(selectedTagId);
     }
 
     private Calendar[] getDateRange() {

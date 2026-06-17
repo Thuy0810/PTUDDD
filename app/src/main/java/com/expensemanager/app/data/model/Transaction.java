@@ -3,8 +3,10 @@ package com.expensemanager.app.data.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Transaction {
@@ -22,6 +24,7 @@ public class Transaction {
     private String mood;
     private String regretFlag;
     private String recurringRuleId;
+    private List<String> tagIds;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -61,6 +64,9 @@ public class Transaction {
     public String getRecurringRuleId() { return recurringRuleId; }
     public void setRecurringRuleId(String recurringRuleId) { this.recurringRuleId = recurringRuleId; }
 
+    public List<String> getTagIds() { return tagIds != null ? tagIds : new ArrayList<>(); }
+    public void setTagIds(List<String> tagIds) { this.tagIds = tagIds; }
+
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
@@ -81,6 +87,7 @@ public class Transaction {
         if (mood != null) map.put("mood", mood);
         if (regretFlag != null)         map.put("regretFlag", regretFlag);
         if (recurringRuleId != null) map.put("recurringRuleId", recurringRuleId);
+        map.put("tagIds", tagIds != null ? tagIds : new ArrayList<>());
         map.put("createdAt", createdAt != null ? createdAt : Timestamp.now());
         map.put("updatedAt", Timestamp.now());
         return map;

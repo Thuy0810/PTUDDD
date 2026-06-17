@@ -113,6 +113,29 @@ public final class InsightsEngine {
             fi.predictedMonthExpense = expense * daysInMonth / day;
         }
 
+        // --- Dự báo dòng tiền theo tốc độ chi (run-rate forecast) ---
+        fi.balanceSnapshot = totalBalance;
+        long avgDaily = day > 0 ? expense / day : 0L;
+        fi.avgDailyExpense = avgDaily;
+        if (avgDaily > 0L) {
+            long lasts = totalBalance > 0L ? totalBalance / avgDaily : 0L;
+            fi.daysBalanceLasts = lasts > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) lasts;
+            // Nếu số ngày trụ được < số ngày còn lại trong tháng → cảnh báo hết tiền.
+            if (fi.daysBalanceLasts < daysLeft) {
+                fi.willRunOutThisMonth = true;
+                int runOutDay = day + fi.daysBalanceLasts;
+                if (runOutDay > daysInMonth) runOutDay = daysInMonth;
+                if (runOutDay < day) runOutDay = day;
+                fi.projectedRunOutDay = runOutDay;
+                score -= 10;
+                // Cảnh báo quan trọng nhất → đặt đầu danh sách.
+                alertTypes.add(0, FinancialAlertType.CASH_RUNOUT_RISK);
+            }
+        }
+        score = Math.max(0, Math.min(100, score));
+        fi.healthScore = score;
+        fi.status = FinancialHealthStatus.fromScore(score);
+
         // Top expense category
         fi.topExpenseCategoryId = topExpenseCategoryId(thisMonth);
 

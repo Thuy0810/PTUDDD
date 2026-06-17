@@ -183,7 +183,13 @@ public class HomeFragment extends Fragment {
         // Alerts: chỉ hiển thị 1 cảnh báo quan trọng nhất
         if (fi.alerts != null && !fi.alerts.isEmpty()) {
             binding.cardAlerts.setVisibility(View.VISIBLE);
-            String alertLabel = getAlertLabel(fi.alerts.get(0));
+            FinancialAlertType top = fi.alerts.get(0);
+            String alertLabel;
+            if (top == FinancialAlertType.CASH_RUNOUT_RISK && fi.projectedRunOutDay > 0) {
+                alertLabel = getString(R.string.alert_cash_runout, fi.projectedRunOutDay);
+            } else {
+                alertLabel = getAlertLabel(top);
+            }
             binding.textAlerts.setText(alertLabel);
         } else {
             binding.cardAlerts.setVisibility(View.GONE);
@@ -203,6 +209,8 @@ public class HomeFragment extends Fragment {
                 return getString(R.string.alert_missing_records);
             case ABNORMAL_SPENDING:
                 return getString(R.string.alert_abnormal_spending);
+            case CASH_RUNOUT_RISK:
+                return getString(R.string.alert_cash_runout_generic);
             default:
                 return "";
         }

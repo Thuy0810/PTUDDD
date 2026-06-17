@@ -37,6 +37,21 @@ public class FinancialInsights {
     /** ID danh mục chi nhiều nhất tháng này */
     public String topExpenseCategoryId;
 
+    // --- Dự báo dòng tiền (run-rate forecast) ---
+    /** Chi tiêu trung bình mỗi ngày tính từ đầu tháng đến hôm nay. */
+    public long avgDailyExpense;
+    /** Tổng tài sản hiện tại (số dư tất cả ví) dùng cho dự báo. */
+    public long balanceSnapshot;
+    /**
+     * Số ngày số dư hiện tại còn trụ được nếu giữ nguyên tốc độ chi.
+     * {@code -1} nếu chưa đủ dữ liệu (chưa chi đồng nào).
+     */
+    public int daysBalanceLasts = -1;
+    /** {@code true} nếu dự báo hết tiền trước khi hết tháng. */
+    public boolean willRunOutThisMonth;
+    /** Ngày trong tháng (1-31) dự kiến hết tiền. {@code 0} nếu không áp dụng. */
+    public int projectedRunOutDay;
+
     // --- Cảnh báo ---
     public List<FinancialAlertType> alerts = new ArrayList<>();
 

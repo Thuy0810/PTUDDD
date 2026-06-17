@@ -9,4 +9,6 @@ public enum FinancialAlertType {
     EXPENSE_INCREASED,
     MISSING_RECORDS,
     ABNORMAL_SPENDING,
+    /** Theo tốc độ chi hiện tại, số dư sẽ hết trước cuối tháng. */
+    CASH_RUNOUT_RISK,
 }

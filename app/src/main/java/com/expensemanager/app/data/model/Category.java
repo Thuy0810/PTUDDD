@@ -17,6 +17,8 @@ public class Category {
     private String colorHex;
     private boolean isSystem;
     private String group; // "essential", "need", "want", "other"
+    /** ID danh mục cha. null/"" nghĩa là danh mục gốc (cấp 1). */
+    private String parentId;
 
     public Category() {}
 
@@ -50,6 +52,14 @@ public class Category {
     public String getGroup() { return group; }
     public void setGroup(String group) { this.group = group; }
 
+    public String getParentId() { return parentId; }
+    public void setParentId(String parentId) { this.parentId = parentId; }
+
+    /** {@code true} nếu là danh mục con (có cha). */
+    public boolean isSubcategory() {
+        return parentId != null && !parentId.isEmpty();
+    }
+
     public String getTypeLabel() {
         return TYPE_INCOME.equals(type) ? "Thu nhập" : "Chi tiêu";
     }
@@ -66,6 +76,8 @@ public class Category {
         map.put("iconKey", iconKey);
         map.put("colorHex", colorHex);
         map.put("isSystem", isSystem);
+        if (group != null) map.put("group", group);
+        if (parentId != null && !parentId.isEmpty()) map.put("parentId", parentId);
         return map;
     }
 }

@@ -304,5 +304,18 @@ service cloud.firestore {
     match /users/{userId}/wallet_adjustments/{document=**} {
       allow read, write: if isOwner(userId);
     }
+
+    // =========================================================
+    // Tags (nhãn giao dịch do người dùng quản lý)
+    // =========================================================
+    match /users/{userId}/tags/{tagId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && 'name' in request.resource.data
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 50;
+      allow delete: if isOwner(userId);
+    }
   }
 }

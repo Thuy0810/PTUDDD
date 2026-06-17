@@ -574,4 +574,38 @@
     <string name="quick_add_detected_value">AI detected: %1$s</string>
     <string name="quick_add_not_detected">Couldn\'t detect a category, please pick one</string>
     <string name="currency_symbol_dong">đ</string>
+
+    <!-- ===== Cash flow forecast ===== -->
+    <string name="forecast_title">Cash flow forecast</string>
+    <string name="forecast_subtitle">Based on this month\'s spending pace</string>
+    <string name="forecast_avg_daily">Avg/day</string>
+    <string name="forecast_predicted_month">Month-end estimate</string>
+    <string name="forecast_days_left_label">Balance lasts</string>
+    <string name="forecast_days_value">%1$d days</string>
+    <string name="forecast_runout_warning">⚠️ At the current spending pace, your balance may run out around day %1$d this month.</string>
+    <string name="alert_cash_runout">At your current pace, you may run out of money around day %1$d</string>
+    <string name="alert_cash_runout_generic">Warning: balance may run out before month end</string>
+
+    <!-- ===== Subcategories ===== -->
+    <string name="parent_category">Parent category (optional)</string>
+    <string name="no_parent_category">None (top-level)</string>
+
+    <!-- ===== Tags ===== -->
+    <string name="tags">Tags</string>
+    <string name="tag_label">Tag:</string>
+    <string name="manage_tags">Manage tags</string>
+    <string name="tags_hint">Create tags to label and filter transactions</string>
+    <string name="no_tags">No tags yet</string>
+    <string name="add_tag">Add tag</string>
+    <string name="edit_tag">Edit tag</string>
+    <string name="tag_name">Tag name</string>
+    <string name="tag_color">Color</string>
+    <string name="tag_enter_name">Please enter a tag name</string>
+    <string name="delete_tag_title">Delete tag</string>
+    <string name="no_tags_selected">No tags selected</string>
+    <string name="no_tags_create_first">No tags yet. Create one in Manage tags.</string>
+    <string name="choose">Choose</string>
+    <string name="choose_tags">Choose tags</string>
+    <string name="all_tags">All tags</string>
+    <string name="ok">OK</string>
 </resources>

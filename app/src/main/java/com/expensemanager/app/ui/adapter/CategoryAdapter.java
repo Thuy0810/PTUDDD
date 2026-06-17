@@ -12,16 +12,25 @@ import com.expensemanager.app.data.model.Category;
 import com.expensemanager.app.databinding.ItemCategoryBinding;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
     public interface OnItemLongClick { void onLongClick(Category c); }
 
     private List<Category> items = new ArrayList<>();
+    private Map<String, String> parentNames = new HashMap<>();
     private OnItemLongClick listener;
 
     public void setItems(List<Category> items) {
         this.items = items != null ? items : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    /** Map id danh mục -> tên, dùng để hiển thị tên danh mục cha. */
+    public void setParentNames(Map<String, String> parentNames) {
+        this.parentNames = parentNames != null ? parentNames : new HashMap<>();
         notifyDataSetChanged();
     }
 
@@ -37,7 +46,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Category c = items.get(position);
         holder.binding.textCategoryName.setText(c.getName());
-        holder.binding.textCategoryType.setText(c.getTypeLabel() != null ? c.getTypeLabel() : "");
+        String subtitle = c.getTypeLabel() != null ? c.getTypeLabel() : "";
+        if (c.isSubcategory()) {
+            String pName = parentNames.get(c.getParentId());
+            if (pName != null && !pName.isEmpty()) {
+                subtitle = "↳ " + pName;
+            }
+        }
+        holder.binding.textCategoryType.setText(subtitle);
 
         boolean isIncome = Category.TYPE_INCOME.equals(c.getType());
         holder.binding.textTypeBadge.setText(isIncome ? "Thu" : "Chi");
