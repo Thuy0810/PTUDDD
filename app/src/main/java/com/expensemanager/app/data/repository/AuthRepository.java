@@ -95,19 +95,38 @@ public class AuthRepository {
     }
 
     public LiveData<UserProfile> observeProfile() {
-        MutableLiveData<UserProfile> live = new MutableLiveData<>();
         String uid = getUid();
-        if (uid == null) return live;
-        db.collection("users").document(uid).addSnapshotListener((snap, e) -> {
-            if (e != null) {
-                live.setValue(null);
-                return;
+        if (uid == null) {
+            MutableLiveData<UserProfile> empty = new MutableLiveData<>();
+            empty.setValue(null);
+            return empty;
+        }
+        // LiveData lifecycle-aware: đăng ký listener khi onActive, gỡ khi onInactive
+        // để tránh rò rỉ listener tài liệu hồ sơ.
+        return new LiveData<UserProfile>() {
+            private com.google.firebase.firestore.ListenerRegistration registration;
+
+            @Override
+            protected void onActive() {
+                registration = db.collection("users").document(uid)
+                        .addSnapshotListener((snap, e) -> {
+                            if (e != null) {
+                                setValue(null);
+                                return;
+                            }
+                            if (snap != null && snap.exists()) {
+                                setValue(snap.toObject(UserProfile.class));
+                            }
+                        });
             }
-            if (snap != null && snap.exists()) {
-                UserProfile p = snap.toObject(UserProfile.class);
-                live.setValue(p);
+
+            @Override
+            protected void onInactive() {
+                if (registration != null) {
+                    registration.remove();
+                    registration = null;
+                }
             }
-        });
-        return live;
+        };
     }
 }

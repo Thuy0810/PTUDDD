@@ -136,7 +136,8 @@ public class HomeViewModel extends ViewModel {
             if (db == null) return -1;
             return db.compareTo(da);
         });
-        recentTransactions.setValue(sorted.size() > 5 ? sorted.subList(0, 5) : sorted);
+        recentTransactions.setValue(sorted.size() > 5
+                ? new ArrayList<>(sorted.subList(0, 5)) : sorted);
 
         // Map danh mục / ví để adapter tra cứu tên & icon (tránh hiển thị "đã xóa").
         categoryMap.setValue(catMap);

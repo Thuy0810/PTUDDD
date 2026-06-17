@@ -30,67 +30,37 @@ public class TransactionRepository {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public LiveData<List<Transaction>> observeMonth(String uid, String monthKey) {
-        MutableLiveData<List<Transaction>> live = new MutableLiveData<>();
-        try {
-            String[] parts = monthKey.split("-");
-            int year = Integer.parseInt(parts[0]);
-            int month = Integer.parseInt(parts[1]) - 1;
-            Calendar cal = Calendar.getInstance();
-            cal.set(year, month, 1, 0, 0, 0);
-            Date start = cal.getTime();
-            Calendar endCal = (Calendar) cal.clone();
-            endCal.add(Calendar.MONTH, 1);
-            Date end = endCal.getTime();
+    /** Parser dùng chung cho các observer giao dịch. */
+    private static Transaction parseTransaction(QueryDocumentSnapshot doc) {
+        Transaction t = doc.toObject(Transaction.class);
+        t.setId(doc.getId());
+        return t;
+    }
 
-            db.collection("users").document(uid).collection("transactions")
+    public LiveData<List<Transaction>> observeMonth(String uid, String monthKey) {
+        try {
+            // Dùng DateUtils (múi giờ ICT, nửa mở [start, end)) để biên tháng
+            // khớp với monthKey vốn được sinh theo ICT — tránh lệch trên máy khác múi giờ.
+            Date start = com.expensemanager.app.util.DateUtils.startOfMonth(monthKey);
+            Date end = com.expensemanager.app.util.DateUtils.startOfNextMonth(monthKey);
+
+            Query q = db.collection("users").document(uid).collection("transactions")
                     .whereGreaterThanOrEqualTo("date", new Timestamp(start))
                     .whereLessThan("date", new Timestamp(end))
-                    .orderBy("date", Query.Direction.DESCENDING)
-                    .addSnapshotListener((snap, e) -> {
-                        if (e != null) {
-                            Log.e(TAG, "observeMonth: listen failed", e);
-                            live.setValue(new ArrayList<>());
-                            return;
-                        }
-                        List<Transaction> list = new ArrayList<>();
-                        if (snap != null) {
-                            for (QueryDocumentSnapshot doc : snap) {
-                                Transaction t = doc.toObject(Transaction.class);
-                                t.setId(doc.getId());
-                                list.add(t);
-                            }
-                        }
-                        live.setValue(list);
-                    });
+                    .orderBy("date", Query.Direction.DESCENDING);
+            return new FirestoreQueryLiveData<>(q, TransactionRepository::parseTransaction);
         } catch (Exception ex) {
             Log.e(TAG, "observeMonth: exception", ex);
+            MutableLiveData<List<Transaction>> live = new MutableLiveData<>();
             live.setValue(new ArrayList<>());
+            return live;
         }
-        return live;
     }
 
     public LiveData<List<Transaction>> observeAll(String uid) {
-        MutableLiveData<List<Transaction>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("transactions")
-                .orderBy("date", Query.Direction.DESCENDING)
-                .addSnapshotListener((snap, e) -> {
-                    if (e != null) {
-                        Log.e(TAG, "observeAll: listen failed", e);
-                        live.setValue(new ArrayList<>());
-                        return;
-                    }
-                    List<Transaction> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Transaction t = doc.toObject(Transaction.class);
-                            t.setId(doc.getId());
-                            list.add(t);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+        Query q = db.collection("users").document(uid).collection("transactions")
+                .orderBy("date", Query.Direction.DESCENDING);
+        return new FirestoreQueryLiveData<>(q, TransactionRepository::parseTransaction);
     }
 
     public Task<Void> add(String uid, Transaction transaction) {
@@ -157,16 +127,20 @@ public class TransactionRepository {
                     ? original.getAmount() : -original.getAmount();
             long newEffect = Transaction.TYPE_INCOME.equals(updated.getType())
                     ? updated.getAmount() : -updated.getAmount();
-            double totalChange = newEffect - originalEffect;
+            long totalChange = newEffect - originalEffect;
+            com.google.firebase.firestore.FieldValue now =
+                    com.google.firebase.firestore.FieldValue.serverTimestamp();
 
             if (originalWalletId != null && originalWalletId.equals(newWalletId)) {
                 DocumentReference walletRef = db.collection("users").document(uid)
                         .collection("wallets").document(originalWalletId);
                 DocumentSnapshot walletSnap = transaction.get(walletRef);
-                Double balance = walletSnap.getDouble("currentBalance");
-                if (balance == null) balance = 0.0;
+                // Số tiền VND luôn là long — đọc qua MoneyValueParser, không dùng getDouble.
+                Long balance = MoneyValueParser.toLong(walletSnap.get("currentBalance"));
+                if (balance == null) balance = 0L;
                 transaction.set(txRef, updated.toMap());
-                transaction.update(walletRef, "currentBalance", balance + totalChange);
+                transaction.update(walletRef, "currentBalance", balance + totalChange,
+                        "updatedAt", now);
             } else {
                 DocumentReference origWalletRef = null;
                 DocumentReference newWalletRef = null;
@@ -188,14 +162,16 @@ public class TransactionRepository {
                 }
                 transaction.set(txRef, updated.toMap());
                 if (origSnap != null) {
-                    Double origBalance = origSnap.getDouble("currentBalance");
-                    if (origBalance == null) origBalance = 0.0;
-                    transaction.update(origWalletRef, "currentBalance", origBalance - originalEffect);
+                    Long origBalance = MoneyValueParser.toLong(origSnap.get("currentBalance"));
+                    if (origBalance == null) origBalance = 0L;
+                    transaction.update(origWalletRef, "currentBalance",
+                            origBalance - originalEffect, "updatedAt", now);
                 }
                 if (newSnap != null) {
-                    Double newBalance = newSnap.getDouble("currentBalance");
-                    if (newBalance == null) newBalance = 0.0;
-                    transaction.update(newWalletRef, "currentBalance", newBalance + newEffect);
+                    Long newBalance = MoneyValueParser.toLong(newSnap.get("currentBalance"));
+                    if (newBalance == null) newBalance = 0L;
+                    transaction.update(newWalletRef, "currentBalance",
+                            newBalance + newEffect, "updatedAt", now);
                 }
             }
             return null;
@@ -304,28 +280,11 @@ public class TransactionRepository {
     }
 
     public LiveData<List<Transaction>> observeRange(String uid, Date start, Date end) {
-        MutableLiveData<List<Transaction>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("transactions")
+        Query q = db.collection("users").document(uid).collection("transactions")
                 .whereGreaterThanOrEqualTo("date", new Timestamp(start))
                 .whereLessThan("date", new Timestamp(end))
-                .orderBy("date", Query.Direction.DESCENDING)
-                .addSnapshotListener((snap, e) -> {
-                    if (e != null) {
-                        Log.e(TAG, "observeRange: listen failed", e);
-                        live.setValue(new ArrayList<>());
-                        return;
-                    }
-                    List<Transaction> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Transaction t = doc.toObject(Transaction.class);
-                            t.setId(doc.getId());
-                            list.add(t);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+                .orderBy("date", Query.Direction.DESCENDING);
+        return new FirestoreQueryLiveData<>(q, TransactionRepository::parseTransaction);
     }
 
     /**

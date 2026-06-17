@@ -3,104 +3,115 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/brand_bg"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
-        <!-- === HEADER: Tong so du === -->
+        <!-- === HEADER: Tong so du (gradient xanh) === -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/layoutHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="24dp"
-            app:cardElevation="4dp">
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary"
-                android:orientation="horizontal"
+                android:background="@drawable/bg_home_header"
+                android:orientation="vertical"
                 android:paddingHorizontal="24dp"
-                android:paddingTop="28dp"
+                android:paddingTop="26dp"
                 android:paddingBottom="24dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/balance"
-                        android:textColor="@color/text_on_dark"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/textBalance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="0 vnd"
-                        android:textColor="@color/white"
-                        android:textSize="30sp"
-                        android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <LinearLayout
-                        android:id="@+id/layoutBudgetRemaining"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:background="@drawable/bg_chip_white"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"
-                        android:visibility="gone">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/budget_remaining_label"
-                            android:textColor="@color/text_on_dark"
-                            android:textSize="12sp" />
+                            android:letterSpacing="0.04"
+                            android:text="@string/balance"
+                            android:textColor="@color/brand_text_on_blue"
+                            android:textSize="13sp" />
 
                         <TextView
-                            android:id="@+id/textBudgetRemaining"
+                            android:id="@+id/textBalance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
+                            android:layout_marginTop="6dp"
+                            android:fontFamily="sans-serif-medium"
                             android:text="0 vnd"
                             android:textColor="@color/white"
-                            android:textSize="12sp"
+                            android:textSize="32sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:layout_gravity="top">
+
+                        <View
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:alpha="0.18"
+                            android:background="@drawable/bg_circle_login" />
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/balance"
+                            android:src="@drawable/ic_balance_white" />
+                    </FrameLayout>
                 </LinearLayout>
 
-                <FrameLayout
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center_vertical">
+                <LinearLayout
+                    android:id="@+id/layoutBudgetRemaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_chip_white"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp"
+                    android:visibility="gone">
 
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:alpha="0.15"
-                        android:background="@drawable/bg_circle_login" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/budget_remaining_label"
+                        android:textColor="@color/brand_text_on_blue"
+                        android:textSize="12sp" />
 
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/balance"
-                        android:src="@drawable/ic_balance_white" />
-                </FrameLayout>
+                    <TextView
+                        android:id="@+id/textBudgetRemaining"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="0 vnd"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -108,7 +119,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
@@ -116,8 +127,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/brand_surface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -126,12 +138,12 @@
                     android:padding="16dp">
 
                     <FrameLayout
-                        android:layout_width="36dp"
-                        android:layout_height="36dp">
+                        android:layout_width="38dp"
+                        android:layout_height="38dp">
 
                         <View
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
                             android:background="@drawable/bg_circle_green" />
 
                         <ImageView
@@ -145,7 +157,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="12dp"
                         android:text="@string/month_income"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
@@ -158,7 +170,7 @@
                         android:fontFamily="sans-serif-medium"
                         android:text="0 vnd"
                         android:textColor="@color/income_green"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -168,8 +180,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/brand_surface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -178,12 +191,12 @@
                     android:padding="16dp">
 
                     <FrameLayout
-                        android:layout_width="36dp"
-                        android:layout_height="36dp">
+                        android:layout_width="38dp"
+                        android:layout_height="38dp">
 
                         <View
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
                             android:background="@drawable/bg_circle_red" />
 
                         <ImageView
@@ -197,7 +210,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="12dp"
                         android:text="@string/month_expense"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
@@ -210,7 +223,7 @@
                         android:fontFamily="sans-serif-medium"
                         android:text="0 vnd"
                         android:textColor="@color/expense_red"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -220,7 +233,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -244,7 +257,7 @@
             android:id="@+id/cardAlerts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:visibility="gone"
             app:cardBackgroundColor="@color/expense_red_light"
             app:cardCornerRadius="16dp"
@@ -255,12 +268,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="14dp">
 
                 <View
-                    android:layout_width="8dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="4dp"
+                    android:layout_height="36dp"
                     android:background="@color/expense_red" />
 
                 <TextView
@@ -280,15 +294,16 @@
             android:id="@+id/cardFinancialHealth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="@color/brand_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <!-- Header: Tieu de + Score -->
                 <LinearLayout
@@ -297,21 +312,30 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
+                    <View
+                        android:layout_width="4dp"
+                        android:layout_height="18dp"
+                        android:background="@drawable/bg_pill_orange" />
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:layout_weight="1"
                         android:text="@string/financial_health"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/textHealthScore"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_pill_orange"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="4dp"
                         android:text="--"
-                        android:textColor="@color/primary"
+                        android:textColor="@color/brand_orange_dark"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -321,7 +345,8 @@
                     android:id="@+id/textHealthStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginTop="4dp"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 
@@ -329,7 +354,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
                     <!-- Ti le tiet kiem -->
@@ -352,6 +377,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="@string/saving_rate"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
@@ -382,6 +408,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="@string/budget_usage"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
@@ -405,13 +432,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="--"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/brand_blue"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="@string/vs_last_month"
                             android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
@@ -422,8 +450,10 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="16dp"
+                    android:background="@color/brand_blue_soft"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -442,7 +472,8 @@
                             android:id="@+id/textDailyAllowance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/brand_blue_dark"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -464,10 +495,118 @@
                             android:id="@+id/textPrediction"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_primary"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/brand_blue_dark"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- === LOI TAT NGAN SACH === -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBudgetShortcut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/brand_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="30dp"
+                        android:layout_height="30dp">
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/bg_circle_blue_soft" />
+
+                        <ImageView
+                            android:layout_width="17dp"
+                            android:layout_height="17dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/nav_budget"
+                            android:src="@drawable/ic_wallet_menu"
+                            app:tint="@color/brand_blue" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/textBudgetShortcutTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:text="@string/nav_budget"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/budget_detail"
+                        android:textColor="@color/brand_blue_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="2dp"
+                        android:contentDescription="@string/budget_detail"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/brand_blue_dark" />
+                </LinearLayout>
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progressBudgetShortcut"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:max="100"
+                    android:progress="0"
+                    app:indicatorColor="@color/expense_red"
+                    app:trackColor="@color/line_2"
+                    app:trackCornerRadius="99dp"
+                    app:trackThickness="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textBudgetSpent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12.5sp" />
+
+                    <TextView
+                        android:id="@+id/textBudgetLimit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12.5sp" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -476,7 +615,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -493,9 +632,13 @@
                 android:id="@+id/textSeeAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill_orange"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
                 android:text="@string/see_all"
-                android:textColor="@color/primary"
-                android:textSize="13sp" />
+                android:textColor="@color/brand_orange_dark"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
@@ -513,7 +656,7 @@
             android:id="@+id/recyclerRecentTransactions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:clipToPadding="false"
             android:nestedScrollingEnabled="false" />
     </LinearLayout>

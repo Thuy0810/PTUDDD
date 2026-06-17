@@ -20,19 +20,9 @@ public class WalletRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public LiveData<List<Wallet>> observeAll(String uid) {
-        MutableLiveData<List<Wallet>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("wallets")
-                .addSnapshotListener((snap, e) -> {
-                    List<Wallet> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Wallet w = parseSnapshot(doc.getId(), doc.getData());
-                            list.add(w);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("wallets"),
+                doc -> parseSnapshot(doc.getId(), doc.getData()));
     }
 
     @NonNull

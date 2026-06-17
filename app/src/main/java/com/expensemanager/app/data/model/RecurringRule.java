@@ -105,10 +105,14 @@ public class RecurringRule {
      * Format: {@code ruleId_scheduledDate}
      */
     public String makeOccurrenceId(Timestamp scheduledRun) {
-        String dateStr = scheduledRun != null
-                ? new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-                    .format(scheduledRun.toDate())
-                : "unknown";
+        String dateStr = "unknown";
+        if (scheduledRun != null) {
+            java.text.SimpleDateFormat sdf =
+                    new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+            // Cố định múi giờ ICT để khóa chống trùng nhất quán với lịch chạy (DateUtils).
+            sdf.setTimeZone(com.expensemanager.app.util.DateUtils.VIETNAM);
+            dateStr = sdf.format(scheduledRun.toDate());
+        }
         return (id != null ? id : "new") + "_" + dateStr;
     }
 

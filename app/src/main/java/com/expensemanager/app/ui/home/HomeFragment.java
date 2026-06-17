@@ -26,6 +26,7 @@ import com.expensemanager.app.util.MoneyFormat;
 import com.expensemanager.app.viewmodel.HomeViewModel;
 import com.expensemanager.app.viewmodel.HomeViewModelHolder;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,6 +62,9 @@ public class HomeFragment extends Fragment {
 
         binding.layoutHeader.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AddTransactionActivity.class)));
+
+        binding.cardBudgetShortcut.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.budgetFragment));
     }
 
     private void setupRecyclerView() {
@@ -194,6 +198,39 @@ public class HomeFragment extends Fragment {
         } else {
             binding.cardAlerts.setVisibility(View.GONE);
         }
+
+        bindBudgetShortcut(fi);
+    }
+
+    /** Loi tat ngan sach tren Trang chu — chi hien khi da dat ngan sach. */
+    private void bindBudgetShortcut(FinancialInsights fi) {
+        if (Double.isNaN(fi.budgetUsageRate) || fi.budgetUsageRate <= 0 || fi.expenseAmount <= 0) {
+            binding.cardBudgetShortcut.setVisibility(View.GONE);
+            return;
+        }
+        binding.cardBudgetShortcut.setVisibility(View.VISIBLE);
+
+        long spent = fi.expenseAmount;
+        long limit = Math.round(spent / fi.budgetUsageRate);
+        int pct = (int) Math.round(fi.budgetUsageRate * 100);
+
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        binding.textBudgetShortcutTitle.setText(
+                getString(R.string.budget_shortcut_title, String.valueOf(month)));
+
+        binding.progressBudgetShortcut.setProgress(Math.max(0, Math.min(100, pct)));
+
+        int barColor = pct >= 100
+                ? ContextCompat.getColor(requireContext(), R.color.expense_red)
+                : pct >= 80
+                        ? ContextCompat.getColor(requireContext(), R.color.warning)
+                        : ContextCompat.getColor(requireContext(), R.color.income_green);
+        binding.progressBudgetShortcut.setIndicatorColor(barColor);
+
+        binding.textBudgetSpent.setText(
+                getString(R.string.budget_spent_value, MoneyFormat.format(spent)));
+        binding.textBudgetLimit.setText(
+                getString(R.string.budget_limit_value, MoneyFormat.format(limit)));
     }
 
     private String getAlertLabel(FinancialAlertType type) {

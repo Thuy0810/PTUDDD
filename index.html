@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Xu — Quản lý chi tiêu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════ Bảng màu theo CONTEXT (xanh dương + cam, Android Material 3) ═══════════ */
+:root{
+  --app-bg:#F4F7FE;
+  --card:#FFFFFF;
+
+  --blue:#2563EB;
+  --blue-700:#1D4ED8;
+  --blue-900:#1E3A8A;
+  --blue-100:#DBEAFE;
+  --blue-50:#EFF4FF;
+  --header-grad:linear-gradient(135deg,#1D4ED8 0%,#2563EB 52%,#1E3A8A 100%);
+
+  --orange:#FB8C2E;
+  --orange-700:#EA7317;
+  --orange-50:#FFF1E3;
+
+  --green:#4CAF50;
+  --green-50:#E9F7EA;
+  --red:#FF6B6B;
+  --red-50:#FFECEC;
+
+  --ink:#1F2937;
+  --muted:#6B7280;
+  --faint:#9AA3B2;
+  --line:#EEF1F7;
+  --line-2:#E4E9F4;
+
+  --r-xl:24px;
+  --r-lg:20px;
+  --r-md:16px;
+  --r-sm:12px;
+  --r-full:999px;
+
+  --sh-card:0 6px 20px -10px rgba(30,58,138,.20);
+  --sh-soft:0 3px 12px -6px rgba(30,58,138,.18);
+  --sh-blue:0 14px 30px -12px rgba(37,99,235,.55);
+  --sh-fab:0 10px 22px -8px rgba(234,115,23,.6);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{font-family:"Roboto",system-ui,sans-serif;background:#dfe4ee;-webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;min-height:100%;}
+
+/* ───────── App device frame (no bezel — pure Android screen) ───────── */
+#root{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.device{position:relative;width:390px;height:844px;max-height:100vh;max-width:100vw;
+  border-radius:28px;overflow:hidden;background:var(--app-bg);
+  box-shadow:0 24px 70px -24px rgba(30,58,138,.55);}
+@media (max-width:430px){
+  body{background:var(--app-bg);}
+  .device{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;max-height:none;}
+}
+
+/* ───────── Android screen (no bezel) ───────── */
+.scr{position:relative;width:100%;height:100%;overflow:hidden;background:var(--app-bg);display:flex;flex-direction:column;}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;background:var(--app-bg);}
+
+.statusbar{flex:0 0 auto;height:30px;z-index:30;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;pointer-events:none;font-weight:500;font-size:13.5px;letter-spacing:.1px;}
+.statusbar .sb-icons{display:flex;align-items:center;gap:7px;}
+
+.gesture{flex:0 0 auto;height:22px;display:flex;align-items:center;justify-content:center;background:var(--card);}
+.gesture i{width:124px;height:4px;border-radius:99px;background:var(--ink);opacity:.4;}
+
+/* ───────── Typography ───────── */
+.display{font-weight:700;font-size:32px;line-height:1.1;letter-spacing:-.6px;color:var(--ink);margin:0;}
+.headline{font-weight:700;font-size:24px;line-height:1.2;letter-spacing:-.3px;color:var(--ink);margin:0;}
+.title-lg{font-weight:700;font-size:19px;line-height:1.3;letter-spacing:-.2px;color:var(--ink);margin:0;}
+.title-md{font-weight:700;font-size:16px;line-height:1.35;color:var(--ink);margin:0;}
+.title-sm{font-weight:700;font-size:14px;line-height:1.4;color:var(--ink);margin:0;}
+.body-lg{font-weight:400;font-size:15px;line-height:1.5;color:var(--muted);margin:0;}
+.body-md{font-weight:400;font-size:13px;line-height:1.45;color:var(--muted);margin:0;}
+.label-lg{font-weight:500;font-size:14px;letter-spacing:.1px;}
+.label-md{font-weight:500;font-size:12px;letter-spacing:.2px;}
+.label-sm{font-weight:500;font-size:11px;letter-spacing:.3px;}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.3px;}
+.muted{color:var(--muted);}
+.faint{color:var(--faint);}
+
+/* ───────── Common bits ───────── */
+.body-pad{padding:0 18px;}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{width:0;height:0;}
+.row{display:flex;align-items:center;}
+.col{display:flex;flex-direction:column;}
+.between{justify-content:space-between;}
+.gap4{gap:4px;}.gap6{gap:6px;}.gap8{gap:8px;}.gap10{gap:10px;}.gap12{gap:12px;}.gap14{gap:14px;}
+
+.card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh-card);}
+.card.flat{box-shadow:var(--sh-soft);}
+
+/* chips / pills */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r-full);font-size:12.5px;font-weight:500;}
+.pill-orange{background:var(--orange-50);color:var(--orange-700);}
+.pill-blue{background:var(--blue-50);color:var(--blue-700);}
+
+.ibadge{display:flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:var(--r-full);}
+.divider{height:1px;background:var(--line);}
+
+/* progress */
+.prog{height:8px;border-radius:99px;background:var(--line-2);overflow:hidden;display:flex;}
+.prog>i{display:block;height:100%;border-radius:99px;transition:width .3s;}
+
+/* text field (Android filled) */
+.field{background:var(--blue-50);border:1.5px solid transparent;border-radius:var(--r-md);
+  padding:0 14px;height:54px;display:flex;align-items:center;gap:10px;transition:border-color .15s,background .15s;}
+.field:focus-within{border-color:var(--blue);background:#fff;}
+.field input{flex:1;border:none;background:none;outline:none;font-family:"Roboto";font-size:15px;color:var(--ink);min-width:0;}
+.field input::placeholder{color:var(--faint);}
+.field-lbl{font-weight:500;font-size:13px;color:var(--ink);margin:0 0 7px 2px;}
+
+/* buttons */
+.btn{border:none;cursor:pointer;font-family:"Roboto";font-weight:700;border-radius:var(--r-md);
+  transition:box-shadow .2s,filter .15s,transform .08s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:active{transform:scale(.985);}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:var(--sh-blue);}
+.btn-blue:hover{filter:brightness(1.05);}
+.btn-orange{background:var(--orange);color:#fff;box-shadow:var(--sh-fab);}
+.btn-outline{background:#fff;color:var(--blue-700);border:1.5px solid var(--line-2);box-shadow:none;}
+.btn-outline:hover{background:var(--blue-50);}
+.btn-text{background:transparent;color:var(--blue);box-shadow:none;}
+.btn-lg{height:54px;font-size:15.5px;width:100%;letter-spacing:.2px;}
+
+/* icon button */
+.iconbtn{width:40px;height:40px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;
+  border:none;cursor:pointer;background:transparent;color:var(--muted);transition:background .15s;}
+.iconbtn:hover{background:rgba(31,41,55,.06);}
+.iconbtn.glass{background:rgba(255,255,255,.18);color:#fff;}
+.iconbtn.glass:hover{background:rgba(255,255,255,.28);}
+
+/* ───────── Bottom nav (4 tab + center FAB) ───────── */
+.nav{position:absolute;left:0;right:0;bottom:0;height:78px;z-index:20;background:var(--card);
+  border-top:1px solid var(--line);display:flex;align-items:flex-start;padding:9px 6px 0;
+  box-shadow:0 -6px 20px -14px rgba(30,58,138,.35);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:var(--faint);transition:color .15s;padding:0;min-width:0;}
+.nav-item .lbl{font-weight:500;font-size:10px;letter-spacing:.1px;white-space:nowrap;}
+.nav-item.on{color:var(--blue);}
+.nav-item.on .lbl{font-weight:700;}
+.nav-spacer{width:62px;flex:0 0 auto;}
+.fab{position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:60px;height:60px;border-radius:20px;
+  border:none;cursor:pointer;background:linear-gradient(135deg,#FBA94E,#FB8C2E 55%,#EA7317);color:#fff;box-shadow:var(--sh-fab);
+  display:flex;align-items:center;justify-content:center;transition:transform .14s;}
+.fab:active{transform:translateX(-50%) scale(.93);}
+
+.pad-nav{padding-bottom:90px;}
+
+/* page entrance */
+@keyframes slideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.anim{animation:slideUp .42s cubic-bezier(.2,.7,.3,1) both;}
+
+/* striped placeholder */
+.ph{background:repeating-linear-gradient(135deg,var(--line-2) 0 9px,var(--blue-50) 9px 18px);
+  display:flex;align-items:center;justify-content:center;font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.4px;color:var(--muted);}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:40;
+  background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:11px 16px;border-radius:var(--r-full);
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5);white-space:nowrap;animation:slideUp .3s both;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- ════════════════════ ICONS ════════════════════ -->
+<script type="text/babel">
+// icons — simple stroke icon set (Lucide-style geometry)
+const ICON_PATHS = {
+  home: 'M3 9.5L12 2l9 7.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z M9 22V12h6v10',
+  receipt: 'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1z M16 8H8 M16 12H8 M13 16H8',
+  pie: 'M21.21 15.89A10 10 0 1 1 8 2.83 M22 12A10 10 0 0 0 12 2v10z',
+  wallet: 'M21 12V7H5a2 2 0 0 1 0-4h14v4 M3 5v14a2 2 0 0 0 2 2h16v-5 M18 12a2 2 0 0 0 0 4h4v-4z',
+  plus: 'M12 5v14 M5 12h14',
+  bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0',
+  search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3',
+  sliders: 'M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6',
+  chevR: 'M9 18l6-6-6-6',
+  chevL: 'M15 18l-6-6 6-6',
+  chevD: 'M6 9l6 6 6-6',
+  arrowUR: 'M7 17L17 7 M8 7h9v9',
+  arrowDR: 'M7 7l10 10 M17 8v9H8',
+  x: 'M18 6L6 18 M6 6l12 12',
+  target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+  coffee: 'M17 8h1a4 4 0 0 1 0 8h-1 M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z M6 1v3 M10 1v3 M14 1v3',
+  car: 'M5 16a2 2 0 1 0 4 0 M15 16a2 2 0 1 0 4 0 M14 16H9 M19 16h3v-3.2a1 1 0 0 0-.8-1L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.2a2 2 0 0 0-1.8 1.1l-.8 1.6A6 6 0 0 0 2 12.4V16h2',
+  bag: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0',
+  bolt: 'M13 2L3 14h9l-1 8 10-12h-9z',
+  film: 'M2 4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z M7 2v20 M17 2v20 M2 12h20 M2 7h5 M2 17h5 M17 17h5 M17 7h5',
+  heart: 'M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z',
+  plane: 'M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
+  laptop: 'M4 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v11H4z M2 19h20 M2 19l1.3-2.5h17.4L22 19',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  gift: 'M20 12v10H4V12 M2 7h20v5H2z M12 22V7 M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z',
+  briefcase: 'M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2',
+  check: 'M20 6L9 17l-5-5',
+  pencil: 'M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+  trendUp: 'M22 7l-8.5 8.5-4-4L2 19 M16 7h6v6',
+  user: 'M20 21a8 8 0 1 0-16 0 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  calendar: 'M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M3 9h18 M8 2v4 M16 2v4',
+  settings: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+  note: 'M4 4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z M14 2v6h6 M9 13h6 M9 17h4',
+  repeat: 'M17 2l4 4-4 4 M3 11V9a4 4 0 0 1 4-4h14 M7 22l-4-4 4-4 M21 13v2a4 4 0 0 1-4 4H3',
+  scan: 'M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M7 12h10',
+  mail: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M2 7l10 7 10-7',
+  lock: 'M5 11a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z M8 9V6a4 4 0 0 1 8 0v3',
+  eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  fingerprint: 'M5 11a7 7 0 0 1 14 0 M8.5 11a3.5 3.5 0 0 1 7 0v2 M12 11v5 M6 14c.4 2 .6 3 .6 5 M18 13c0 2-.4 4-1 6',
+  alert: 'M12 3 2 20h20z M12 9v5 M12 17h.01',
+  pulse: 'M3 12h4l3 8 4-16 3 8h4',
+};
+
+function Icon({ name, size = 22, color = 'currentColor', sw = 2, style }) {
+  const d = ICON_PATHS[name];
+  if (!d) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
+      style={style} aria-hidden="true">
+      {d.split(' M').map((seg, i) => <path key={i} d={(i ? 'M' : '') + seg} />)}
+    </svg>
+  );
+}
+
+Object.assign(window, { Icon, ICON_PATHS });
+</script>
+
+<!-- ════════════════════ UI / SHARED ════════════════════ -->
+<script type="text/babel">
+const { Icon } = window;
+
+// VND formatter: dấu chấm ngăn nghìn, ký hiệu "VND" SAU số, không thập phân.
+// money(1500000) -> "1.500.000 VND" ; money(-250000) -> "-250.000 VND"
+function money(n, { sign = false, unit = 'VND' } = {}) {
+  const neg = n < 0;
+  const digits = Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const prefix = neg ? '-' : (sign ? '+' : '');
+  return prefix + digits + (unit ? ' ' + unit : '');
+}
+
+// danh mục (icon tròn + màu nhấn + nền nhạt)
+const CATS = {
+  food:     { label: 'Ăn uống',    icon: 'coffee',    c: '#EA7317', bg: '#FFF1E3' },
+  transport:{ label: 'Di chuyển',  icon: 'car',       c: '#2563EB', bg: '#DBEAFE' },
+  shopping: { label: 'Mua sắm',    icon: 'bag',       c: '#7C3AED', bg: '#EEE7FE' },
+  bills:    { label: 'Hóa đơn',    icon: 'bolt',      c: '#0891B2', bg: '#D8F3FA' },
+  fun:      { label: 'Giải trí',   icon: 'film',      c: '#DB2777', bg: '#FCE7F3' },
+  health:   { label: 'Sức khỏe',   icon: 'heart',     c: '#16A34A', bg: '#E9F7EA' },
+  income:   { label: 'Lương / Thu',icon: 'briefcase', c: '#16A34A', bg: '#E9F7EA' },
+  other:    { label: 'Khác',       icon: 'note',      c: '#6B7280', bg: '#EEF1F7' },
+};
+
+function IconBadge({ cat, size = 44, icon, c, bg, sw = 2 }) {
+  const m = cat ? CATS[cat] : { icon, c, bg };
+  return (
+    <div className="ibadge" style={{ width: size, height: size, background: m.bg }}>
+      <Icon name={m.icon} size={size * 0.48} color={m.c} sw={sw} />
+    </div>
+  );
+}
+
+function Progress({ value, color = 'var(--blue)', track, h = 8 }) {
+  const v = Math.max(2, Math.min(100, value));
+  return (
+    <div className="prog" style={{ height: h, background: track }}>
+      <i style={{ width: v + '%', background: color }} />
+    </div>
+  );
+}
+
+/* Android status bar — time left, signal/wifi/battery right */
+function StatusBar({ light }) {
+  const c = light ? '#fff' : 'var(--ink)';
+  return (
+    <div className="statusbar" style={{ color: c }}>
+      <span className="num" style={{ fontWeight: 500 }}>9:41</span>
+      <div className="sb-icons" style={{ color: c }}>
+        <svg width="17" height="13" viewBox="0 0 17 13" fill="none" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="4" rx="1" fill={c} />
+          <rect x="4.5" y="6" width="3" height="7" rx="1" fill={c} />
+          <rect x="9" y="3" width="3" height="10" rx="1" fill={c} />
+          <rect x="13.5" y="0" width="3" height="13" rx="1" fill={c} opacity=".45" />
+        </svg>
+        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" aria-hidden="true">
+          <path d="M8 11.6 1.2 4.4a9.6 9.6 0 0 1 13.6 0L8 11.6Z" fill={c} />
+        </svg>
+        <svg width="24" height="13" viewBox="0 0 24 13" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="20" height="11" rx="3" stroke={c} strokeWidth="1.4" />
+          <rect x="3" y="3" width="13" height="7" rx="1.5" fill={c} />
+          <rect x="22" y="4.5" width="2" height="4" rx="1" fill={c} />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* Bezel-less Android screen */
+function Phone({ children, light = false }) {
+  return (
+    <div className="scr">
+      <StatusBar light={light} />
+      {children}
+      <div className="gesture"><i></i></div>
+    </div>
+  );
+}
+
+/* Bottom navigation: 4 tab + nút ＋ Thêm ở giữa (tối đa 5 mục)
+   Thứ tự: Tổng quan | Giao dịch | (＋) | Báo cáo | Cá nhân
+   (Ngân sách KHÔNG nằm trên nav — mở từ lối tắt ở Tổng quan / Cá nhân) */
+function BottomNav({ active, go }) {
+  const left = [
+    { id: 'home', label: 'Tổng quan', icon: 'home' },
+    { id: 'history', label: 'Giao dịch', icon: 'receipt' },
+  ];
+  const right = [
+    { id: 'report', label: 'Báo cáo', icon: 'pie' },
+    { id: 'profile', label: 'Cá nhân', icon: 'user' },
+  ];
+  const Item = (it) => (
+    <button key={it.id} className={'nav-item' + (active === it.id ? ' on' : '')} onClick={() => go && go(it.id)}>
+      <Icon name={it.icon} size={23} sw={active === it.id ? 2.4 : 2} />
+      <span className="lbl">{it.label}</span>
+    </button>
+  );
+  return (
+    <nav className="nav">
+      {left.map(Item)}
+      <div className="nav-spacer"></div>
+      {right.map(Item)}
+      <button className="fab" onClick={() => go && go('add')} aria-label="Thêm giao dịch">
+        <Icon name="plus" size={27} color="#fff" sw={2.6} />
+      </button>
+    </nav>
+  );
+}
+
+// section header (title + optional action pill)
+function SectionHead({ title, action, onAction }) {
+  return (
+    <div className="row between" style={{ margin: '0 0 10px' }}>
+      <h3 className="title-sm">{title}</h3>
+      {action && (
+        <button onClick={onAction} className="chip pill-orange" style={{ border: 'none', cursor: 'pointer', fontFamily: 'Roboto', fontWeight: 700, padding: '6px 12px' }}>
+          {action}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// top app bar for sub-screens
+function TopBar({ title, onBack, right }) {
+  return (
+    <div className="row between" style={{ padding: '6px 6px' }}>
+      <button className="iconbtn" onClick={onBack}>
+        <Icon name="chevL" size={22} sw={2.2} />
+      </button>
+      <h2 className="title-lg" style={{ flex: 1, marginLeft: 4 }}>{title}</h2>
+      <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{right}</div>
+    </div>
+  );
+}
+
+Object.assign(window, { CATS, money, IconBadge, Progress, StatusBar, Phone, BottomNav, SectionHead, TopBar });
+</script>
+
+<!-- ════════════════════ SCREENS ════════════════════ -->
+<script type="text/babel">
+const { Icon, IconBadge, Progress, BottomNav, SectionHead, CATS, money } = window;
+
+/* ════════════════ ONBOARDING ════════════════ */
+function Onboarding({ go }) {
+  const feats = [
+    { icon: 'receipt', c: 'var(--blue)', bg: 'var(--blue-50)', t: 'Ghi thu chi nhanh', s: 'Theo ví & danh mục, chỉ vài chạm.' },
+    { icon: 'wallet', c: 'var(--orange-700)', bg: 'var(--orange-50)', t: 'Lập ngân sách', s: 'Đặt hạn mức và nhận cảnh báo khi sắp vượt.' },
+    { icon: 'target', c: 'var(--green)', bg: 'var(--green-50)', t: 'Mục tiêu tiết kiệm', s: 'Đặt mục tiêu và theo dõi tiến độ mỗi ngày.' },
+  ];
+  return (
+    <div className="screen anim">
+      {/* hero gradient */}
+      <div style={{ background: 'var(--header-grad)', flex: '0 0 auto', padding: '20px 24px 30px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -50, right: -40, width: 190, height: 190, borderRadius: '50%', background: 'rgba(255,255,255,.10)' }} />
+        <div style={{ position: 'absolute', bottom: -34, left: -24, width: 130, height: 130, borderRadius: '50%', background: 'rgba(251,140,46,.30)' }} />
+        <div className="row gap10" style={{ position: 'relative' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg,#FBA94E,#EA7317)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--sh-fab)' }}>
+            <span style={{ color: '#fff', fontWeight: 900, fontSize: 22 }}>X</span>
+          </div>
+          <span style={{ color: '#fff', fontWeight: 900, fontSize: 22, letterSpacing: -.4 }}>Xu</span>
+        </div>
+        {/* hero illustration placeholder */}
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', marginTop: 22 }}>
+          <div className="ph" style={{ width: 224, height: 196, borderRadius: 24, border: '1.5px dashed rgba(255,255,255,.55)', background: 'repeating-linear-gradient(135deg,rgba(255,255,255,.16) 0 9px,rgba(255,255,255,.05) 9px 18px)', color: 'rgba(255,255,255,.9)' }}>
+            minh_hoa · vi_&amp;_bieu_do
+          </div>
+        </div>
+      </div>
+
+      {/* bottom sheet */}
+      <div style={{ background: 'var(--card)', borderRadius: '28px 28px 0 0', marginTop: -22, padding: '26px 24px 26px', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', boxShadow: '0 -10px 36px -22px rgba(30,58,138,.5)' }}>
+        <h1 className="headline" style={{ textAlign: 'center', textWrap: 'balance' }}>Quản lý chi tiêu<br />trong tầm tay bạn</h1>
+        <p className="body-lg" style={{ textAlign: 'center', margin: '10px 4px 20px', textWrap: 'pretty' }}>
+          Tất cả những gì bạn cần để kiểm soát tài chính cá nhân.
+        </p>
+
+        {/* feature list */}
+        <div className="col gap12">
+          {feats.map((f, i) => (
+            <div key={i} className="row gap12">
+              <span className="ibadge" style={{ width: 40, height: 40, background: f.bg, flex: '0 0 auto' }}><Icon name={f.icon} size={20} color={f.c} sw={2} /></span>
+              <div style={{ minWidth: 0 }}>
+                <div className="title-sm" style={{ fontSize: 14.5 }}>{f.t}</div>
+                <div className="body-md" style={{ fontSize: 12.5, marginTop: 1 }}>{f.s}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* dots */}
+        <div className="row gap8" style={{ justifyContent: 'center', margin: '20px 0 16px' }}>
+          <span style={{ width: 22, height: 6, borderRadius: 99, background: 'var(--blue)' }} />
+          <span style={{ width: 6, height: 6, borderRadius: 99, background: 'var(--line-2)' }} />
+          <span style={{ width: 6, height: 6, borderRadius: 99, background: 'var(--line-2)' }} />
+        </div>
+        <button className="btn btn-blue btn-lg" onClick={() => go('login')}>Bắt đầu</button>
+        <button className="btn btn-text btn-lg" style={{ height: 46, marginTop: 6, fontWeight: 700 }} onClick={() => go('login')}>Tôi đã có tài khoản</button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════ ĐĂNG NHẬP ════════════════ */
+function Login({ go }) {
+  const [showPw, setShowPw] = React.useState(false);
+  return (
+    <div className="screen anim">
+      {/* gradient brand header */}
+      <div style={{ background: 'var(--header-grad)', borderRadius: '0 0 28px 28px', padding: '26px 24px 34px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -50, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,.10)' }} />
+        <div style={{ position: 'absolute', bottom: -30, left: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(251,140,46,.30)' }} />
+        <div className="row gap12" style={{ position: 'relative' }}>
+          <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg,#FBA94E,#EA7317)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--sh-fab)' }}>
+            <span style={{ color: '#fff', fontWeight: 900, fontSize: 26 }}>X</span>
+          </div>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 900, fontSize: 24, letterSpacing: -.4 }}>Xu</div>
+            <div style={{ color: 'rgba(255,255,255,.82)', fontSize: 13, fontWeight: 500 }}>Quản lý chi tiêu thông minh</div>
+          </div>
+        </div>
+        <h1 className="headline" style={{ color: '#fff', marginTop: 26, position: 'relative' }}>Chào mừng trở lại 👋</h1>
+        <p style={{ color: 'rgba(255,255,255,.82)', fontSize: 14, margin: '6px 0 0', position: 'relative' }}>Đăng nhập để tiếp tục theo dõi tài chính của bạn.</p>
+      </div>
+
+      {/* form */}
+      <div className="body-pad" style={{ paddingTop: 26, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div>
+          <div className="field-lbl">Email</div>
+          <div className="field">
+            <Icon name="mail" size={19} color="var(--muted)" />
+            <input type="email" defaultValue="minhanh@email.com" placeholder="email@cua-ban.com" />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <div className="field-lbl">Mật khẩu</div>
+          <div className="field">
+            <Icon name="lock" size={19} color="var(--muted)" />
+            <input type={showPw ? 'text' : 'password'} defaultValue="123456" placeholder="Ít nhất 6 ký tự" />
+            <button className="iconbtn" style={{ width: 32, height: 32 }} onClick={() => setShowPw((s) => !s)} aria-label="Hiện mật khẩu">
+              <Icon name="eye" size={18} color={showPw ? 'var(--blue)' : 'var(--faint)'} />
+            </button>
+          </div>
+        </div>
+
+        <button className="btn btn-text" style={{ alignSelf: 'flex-end', marginTop: 10, padding: '6px 6px', fontWeight: 700, fontSize: 13.5 }}>
+          Quên mật khẩu?
+        </button>
+
+        <button className="btn btn-blue btn-lg" style={{ marginTop: 16 }} onClick={() => go('home')}>Đăng nhập</button>
+
+        <div className="row gap12" style={{ margin: '20px 0' }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--line-2)' }} />
+          <span className="body-md">hoặc</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--line-2)' }} />
+        </div>
+
+        <button className="btn btn-outline btn-lg" onClick={() => go('home')}>
+          <Icon name="fingerprint" size={21} color="var(--blue-700)" sw={2} />
+          Đăng nhập bằng vân tay
+        </button>
+
+        <div style={{ flex: 1 }} />
+        <div className="row" style={{ justifyContent: 'center', gap: 5, padding: '18px 0 6px' }}>
+          <span className="body-md">Chưa có tài khoản?</span>
+          <button className="btn btn-text" style={{ padding: 0, fontWeight: 700, color: 'var(--orange-700)', fontSize: 13.5 }}>Đăng ký ngay</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════ TỔNG QUAN (Trang chủ) ════════════════ */
+function Metric({ label, value, color }) {
+  return (
+    <div style={{ flex: 1, textAlign: 'center' }}>
+      <div className="num" style={{ fontWeight: 700, fontSize: 17, color }}>{value}</div>
+      <div className="body-md" style={{ fontSize: 11.5, marginTop: 3, lineHeight: 1.3 }}>{label}</div>
+    </div>
+  );
+}
+
+function Home({ go }) {
+  const recent = [
+    { cat: 'food', name: 'Highlands Coffee', wallet: 'Tiền mặt', sub: 'Hôm nay · 08:24', amt: -65000 },
+    { cat: 'transport', name: 'Grab Bike', wallet: 'Ví MoMo', sub: 'Hôm nay · 07:50', amt: -48000 },
+    { cat: 'income', name: 'Lương tháng 6', wallet: 'Vietcombank', sub: '01 Th6', amt: 28000000, inc: true },
+  ];
+  return (
+    <div className="screen">
+      <div className="scroll pad-nav anim">
+        {/* ── gradient header ── */}
+        <div style={{ background: 'var(--header-grad)', borderRadius: '0 0 28px 28px', padding: '6px 18px 22px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: -46, right: -34, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,.10)' }} />
+          {/* greeting row */}
+          <div className="row between" style={{ position: 'relative', paddingTop: 4 }}>
+            <div>
+              <div style={{ color: 'rgba(255,255,255,.8)', fontSize: 13, fontWeight: 500 }}>Chào buổi sáng,</div>
+              <div style={{ color: '#fff', fontWeight: 700, fontSize: 19, marginTop: 1 }}>Minh Anh</div>
+            </div>
+            <div className="row gap8">
+              <button className="iconbtn glass" style={{ position: 'relative' }}>
+                <Icon name="bell" size={21} sw={2} />
+                <span style={{ position: 'absolute', top: 9, right: 9, width: 8, height: 8, borderRadius: 99, background: 'var(--orange)', border: '1.5px solid #2563EB' }} />
+              </button>
+              <div style={{ width: 40, height: 40, borderRadius: 99, background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>MA</div>
+            </div>
+          </div>
+
+          {/* balance */}
+          <div style={{ position: 'relative', marginTop: 18 }}>
+            <div className="row between">
+              <span style={{ color: 'rgba(255,255,255,.85)', fontSize: 13, fontWeight: 500 }}>Số dư</span>
+              <Icon name="wallet" size={19} color="rgba(255,255,255,.9)" />
+            </div>
+            <div className="num" style={{ color: '#fff', fontWeight: 700, fontSize: 33, marginTop: 4 }}>{money(24580000)}</div>
+            <div className="chip" style={{ marginTop: 12, background: 'rgba(255,255,255,.16)', color: '#fff', fontWeight: 500 }}>
+              <Icon name="target" size={15} color="#fff" sw={2} />
+              Còn lại trong ngân sách: <b style={{ marginLeft: 2 }}>{money(1800000)}</b>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Thu / Chi tháng này ── */}
+        <div className="body-pad row gap12" style={{ marginTop: -8, position: 'relative' }}>
+          <div className="card flat" style={{ flex: 1, padding: '13px 14px' }}>
+            <div className="row gap8">
+              <span className="ibadge" style={{ width: 28, height: 28, background: 'var(--green-50)' }}><Icon name="arrowDR" size={15} color="var(--green)" sw={2.4} /></span>
+              <span className="label-md muted">Thu tháng này</span>
+            </div>
+            <div className="num" style={{ fontWeight: 700, fontSize: 15, color: 'var(--green)', marginTop: 9, whiteSpace: 'nowrap' }}>{money(32500000, { sign: true })}</div>
+          </div>
+          <div className="card flat" style={{ flex: 1, padding: '13px 14px' }}>
+            <div className="row gap8">
+              <span className="ibadge" style={{ width: 28, height: 28, background: 'var(--red-50)' }}><Icon name="arrowUR" size={15} color="var(--red)" sw={2.4} /></span>
+              <span className="label-md muted">Chi tháng này</span>
+            </div>
+            <div className="num" style={{ fontWeight: 700, fontSize: 15, color: 'var(--red)', marginTop: 9, whiteSpace: 'nowrap' }}>{money(-18200000)}</div>
+          </div>
+        </div>
+
+        {/* ── dòng phụ ── */}
+        <div className="body-pad" style={{ marginTop: 12 }}>
+          <div className="card flat" style={{ padding: '4px 16px' }}>
+            <div className="row between" style={{ padding: '11px 0', borderBottom: '1px solid var(--line)' }}>
+              <span className="body-md" style={{ color: 'var(--ink)' }}>Hôm nay đã chi</span>
+              <span className="num title-sm" style={{ color: 'var(--red)' }}>{money(-113000)}</span>
+            </div>
+            <div className="row between" style={{ padding: '11px 0' }}>
+              <span className="body-md" style={{ color: 'var(--ink)' }}>Danh mục chi nhiều nhất</span>
+              <span className="chip pill-orange"><Icon name="coffee" size={14} color="var(--orange-700)" sw={2} />Ăn uống</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── cảnh báo ngân sách (≥90%) ── */}
+        <div className="body-pad" style={{ marginTop: 12 }}>
+          <div className="row gap10" style={{ background: 'var(--red-50)', border: '1px solid #FFD5D5', borderRadius: 16, padding: '12px 14px' }}>
+            <span className="ibadge" style={{ width: 34, height: 34, background: '#FFDCDC', flex: '0 0 auto' }}><Icon name="alert" size={19} color="var(--red)" sw={2.2} /></span>
+            <div style={{ minWidth: 0 }}>
+              <div className="title-sm" style={{ color: '#D33', fontSize: 13.5 }}>Sắp vượt ngân sách tháng</div>
+              <div className="body-md" style={{ fontSize: 12, marginTop: 1 }}>Bạn đã dùng <b style={{ color: '#D33' }}>91%</b> hạn mức · còn {money(1800000)}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Sức khỏe tài chính ── */}
+        <div className="body-pad" style={{ marginTop: 14 }}>
+          <div className="card" style={{ padding: 16 }}>
+            <div className="row between">
+              <div className="row gap8">
+                <Icon name="pulse" size={19} color="var(--blue)" sw={2.2} />
+                <span className="title-sm">Sức khỏe tài chính</span>
+              </div>
+              <span className="chip pill-orange" style={{ fontWeight: 700 }}>72 / 100</span>
+            </div>
+            <div className="body-md" style={{ marginTop: 8, color: 'var(--ink)' }}>Khá ổn — chi tiêu trong tầm kiểm soát.</div>
+
+            <div className="row" style={{ marginTop: 14 }}>
+              <Metric label="Tỉ lệ tiết kiệm" value="44%" color="var(--green)" />
+              <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--line)' }} />
+              <Metric label="% dùng ngân sách" value="91%" color="var(--red)" />
+              <div style={{ width: 1, alignSelf: 'stretch', background: 'var(--line)' }} />
+              <Metric label="So tháng trước" value="−5%" color="var(--blue)" />
+            </div>
+
+            <div className="row gap12" style={{ marginTop: 14, background: 'var(--blue-50)', borderRadius: 14, padding: '12px 14px' }}>
+              <div style={{ flex: 1 }}>
+                <div className="body-md" style={{ fontSize: 11.5 }}>Ngân sách / ngày</div>
+                <div className="num title-sm" style={{ color: 'var(--blue-700)', marginTop: 2 }}>{money(200000)}</div>
+              </div>
+              <div style={{ width: 1, background: '#CADBFB' }} />
+              <div style={{ flex: 1 }}>
+                <div className="body-md" style={{ fontSize: 11.5 }}>Dự báo chi cuối tháng</div>
+                <div className="num title-sm" style={{ color: 'var(--blue-700)', marginTop: 2 }}>{money(19700000)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── lối tắt Ngân sách ── */}
+        <div className="body-pad" style={{ marginTop: 14 }}>
+          <div className="card" style={{ padding: 16, cursor: 'pointer' }} onClick={() => go('budget')}>
+            <div className="row between" style={{ marginBottom: 11 }}>
+              <div className="row gap8">
+                <span className="ibadge" style={{ width: 30, height: 30, background: 'var(--blue-50)' }}><Icon name="wallet" size={17} color="var(--blue)" sw={2} /></span>
+                <span className="title-sm">Ngân sách tháng 6</span>
+              </div>
+              <div className="row gap4">
+                <span className="label-md" style={{ color: 'var(--blue-700)', fontWeight: 700 }}>Chi tiết</span>
+                <Icon name="chevR" size={16} color="var(--blue-700)" sw={2.2} />
+              </div>
+            </div>
+            <Progress value={91} color="var(--red)" />
+            <div className="row between" style={{ marginTop: 9 }}>
+              <span className="num body-md" style={{ fontSize: 12.5 }}>Đã chi <b style={{ color: 'var(--ink)' }}>{money(18200000)}</b></span>
+              <span className="num body-md" style={{ fontSize: 12.5 }}>Hạn mức {money(20000000)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── giao dịch gần đây ── */}
+        <div className="body-pad" style={{ marginTop: 18 }}>
+          <SectionHead title="Giao dịch gần đây" action="Xem tất cả" onAction={() => go('history')} />
+          <div className="card" style={{ padding: '4px 16px' }}>
+            {recent.map((t, i) => (
+              <div key={i} className="row gap14" style={{ padding: '12px 0', borderBottom: i < recent.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                <IconBadge cat={t.cat} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div className="title-sm" style={{ fontWeight: 500, fontSize: 14.5 }}>{t.name}</div>
+                  <div className="body-md" style={{ fontSize: 12, marginTop: 2 }}>{CATS[t.cat].label} · {t.wallet}</div>
+                </div>
+                <div className="num" style={{ fontWeight: 700, fontSize: 14.5, color: t.inc ? 'var(--green)' : 'var(--red)' }}>
+                  {money(t.amt, { sign: true })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <BottomNav active="home" go={go} />
+    </div>
+  );
+}
+
+Object.assign(window, { Onboarding, Login, Home });
+</script>
+
+<!-- ════════════════════ APP ROUTER ════════════════════ -->
+<script type="text/babel">
+const { Phone, Onboarding, Login, Home } = window;
+
+// màn hình đã dựng; các tab/màn chưa dựng sẽ hiển thị toast "đang phát triển"
+const SCREENS = { onboarding: Onboarding, login: Login, home: Home };
+const LIGHT_STATUS = { onboarding: true, login: true, home: true }; // status bar trắng (header gradient xanh)
+const PENDING_LABELS = {
+  add: 'Thêm giao dịch', history: 'Giao dịch', report: 'Báo cáo',
+  profile: 'Cá nhân', budget: 'Ngân sách',
+};
+
+function App() {
+  const [screen, setScreen] = React.useState('onboarding');
+  const [toast, setToast] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 1900);
+    return () => clearTimeout(id);
+  }, [toast]);
+
+  const go = (id) => {
+    if (SCREENS[id]) { setScreen(id); return; }
+    const lbl = PENDING_LABELS[id] || id;
+    setToast('“' + lbl + '” đang được phát triển');
+  };
+
+  const Screen = SCREENS[screen] || Home;
+  return (
+    <div className="device">
+      <Phone light={!!LIGHT_STATUS[screen]}>
+        <Screen go={go} />
+      </Phone>
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

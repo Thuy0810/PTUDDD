@@ -30,6 +30,9 @@ public class LoginActivity extends AppCompatActivity {
         binding.textRegister.setOnClickListener(v ->
                 startActivity(new Intent(this, RegisterActivity.class)));
         binding.textForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+        binding.btnFingerprint.setOnClickListener(v ->
+                Toast.makeText(this, getString(R.string.login_fingerprint_unavailable),
+                        Toast.LENGTH_LONG).show());
 
         String prefillEmail = getIntent().getStringExtra("email");
         if (prefillEmail != null && !prefillEmail.isEmpty()) {

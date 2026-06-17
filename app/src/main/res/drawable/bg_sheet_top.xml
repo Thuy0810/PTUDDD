@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom sheet trang bo goc tren cho Onboarding -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_surface" />
+    <corners
+        android:topLeftRadius="28dp"
+        android:topRightRadius="28dp" />
+</shape>

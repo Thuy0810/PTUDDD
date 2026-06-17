@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public final class QuickParseUtil {
     private static final Pattern AMOUNT_PATTERN = Pattern.compile(
-            "(\\d+(?:[.,]\\d+)?)\\s*(k|K|nghìn|ngàn|trieu|t|đ|d|tr)?",
+            "(\\d+(?:[.,]\\d+)?)\\s*(k|K|nghìn|ngàn|trieu|tr|t|đ|d)?",
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern DATE_PATTERN = Pattern.compile(
@@ -162,7 +162,7 @@ public final class QuickParseUtil {
             try {
                 int month = Integer.parseInt(m.group(1));
                 if (month >= 1 && month <= 12) {
-                    Calendar cal = Calendar.getInstance();
+                    Calendar cal = DateUtils.newCalendar();
                     cal.set(Calendar.MONTH, month - 1);
                     cal.set(Calendar.DAY_OF_MONTH, 1);
                     cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -176,7 +176,7 @@ public final class QuickParseUtil {
     }
 
     private static Date resolveRelativeDate(String key) {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = DateUtils.newCalendar();
 
         switch (key) {
             case "hom nay":
@@ -249,10 +249,10 @@ public final class QuickParseUtil {
                 year = Integer.parseInt(yearStr);
                 if (year < 100) year += 2000;
             } else {
-                year = Calendar.getInstance().get(Calendar.YEAR);
+                year = DateUtils.newCalendar().get(Calendar.YEAR);
             }
 
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = DateUtils.newCalendar();
             cal.set(year, month - 1, day, 0, 0, 0);
             cal.set(Calendar.MILLISECOND, 0);
             return cal.getTime();

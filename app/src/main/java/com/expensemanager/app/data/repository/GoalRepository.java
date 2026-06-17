@@ -23,36 +23,20 @@ public class GoalRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public LiveData<List<SavingsGoal>> observeAll(String uid) {
-        MutableLiveData<List<SavingsGoal>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("savings_goals")
-                .addSnapshotListener((snap, e) -> {
-                    List<SavingsGoal> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            SavingsGoal g = parseSnapshot(doc.getId(), doc.getData());
-                            list.add(g);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("savings_goals"),
+                doc -> parseSnapshot(doc.getId(), doc.getData()));
     }
 
     public LiveData<List<SavingsGoal>> observeOverdue(String uid) {
-        MutableLiveData<List<SavingsGoal>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("savings_goals")
-                .whereEqualTo("completed", false)
-                .addSnapshotListener((snap, e) -> {
-                    List<SavingsGoal> overdue = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            SavingsGoal g = parseSnapshot(doc.getId(), doc.getData());
-                            if (g.isOverdue()) overdue.add(g);
-                        }
-                    }
-                    live.setValue(overdue);
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("savings_goals")
+                        .whereEqualTo("completed", false),
+                doc -> {
+                    SavingsGoal g = parseSnapshot(doc.getId(), doc.getData());
+                    // Trả null để FirestoreQueryLiveData bỏ qua goal chưa quá hạn.
+                    return g.isOverdue() ? g : null;
                 });
-        return live;
     }
 
     private SavingsGoal parseSnapshot(String docId, Map<String, Object> data) {

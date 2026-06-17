@@ -68,6 +68,22 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
+    <!-- === BRAND XANH + CAM (REDESIGN - dùng riêng cho màn được làm lại) === -->
+    <color name="brand_blue">#2563EB</color>
+    <color name="brand_blue_dark">#1D4ED8</color>
+    <color name="brand_blue_deep">#1E3A8A</color>
+    <color name="brand_blue_light">#DBEAFE</color>
+    <color name="brand_blue_soft">#EFF4FF</color>
+    <color name="brand_orange">#FB8C2E</color>
+    <color name="brand_orange_dark">#EA7317</color>
+    <color name="brand_orange_light">#FFF1E3</color>
+    <color name="brand_text_on_blue">#CBDBFF</color>
+    <color name="brand_surface">#FFFFFF</color>
+    <color name="brand_bg">#F4F7FE</color>
+    <color name="brand_green">#4CAF50</color>
+    <color name="line_1">#EEF1F7</color>
+    <color name="line_2">#E4E9F4</color>
+
     <!-- === ALPHA UTILITIES === -->
     <!-- #B3FFFFFF = 70% white on dark backgrounds -->
     <!-- #33FFFFFF = 20% white -->

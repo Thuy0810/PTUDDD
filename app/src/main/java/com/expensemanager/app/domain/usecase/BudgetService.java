@@ -190,10 +190,12 @@ public final class BudgetService {
             return alerts;
         }
 
-        // Tìm ngưỡng cao nhất mà pct >= threshold
+        // Tìm ngưỡng CAO NHẤT mà pct >= threshold (alertAt sắp xếp tăng dần → duyệt ngược).
         double pct = u.usageRate;
-        for (Double threshold : b.getAlertAt()) {
-            if (pct >= threshold) {
+        List<Double> thresholds = b.getAlertAt();
+        for (int i = thresholds.size() - 1; i >= 0; i--) {
+            Double threshold = thresholds.get(i);
+            if (threshold != null && pct >= threshold) {
                 int percent = (int) Math.floor(pct * 100);
                 alerts.add("Đã dùng " + percent + "% ngân sách, còn "
                         + MoneyFormat.formatLong(u.remainingAmount));

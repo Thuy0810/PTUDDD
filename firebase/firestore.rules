@@ -127,7 +127,8 @@ service cloud.firestore {
         && request.resource.data.limitAmount > 0
         && request.resource.data.limitAmount == request.resource.data.limitAmount.round()
         && 'scope' in request.resource.data
-        && request.resource.data.scope in ['monthly', 'category']
+        // App dùng "monthlyTotal" cho ngân sách tổng (Budget.SCOPE_MONTHLY).
+        && request.resource.data.scope in ['monthlyTotal', 'category']
         && (
           request.resource.data.scope != 'category'
           || (
@@ -136,7 +137,7 @@ service cloud.firestore {
           )
         )
         && (
-          request.resource.data.scope != 'monthly'
+          request.resource.data.scope != 'monthlyTotal'
           || !('categoryId' in request.resource.data)
         )
         && (
@@ -172,27 +173,27 @@ service cloud.firestore {
             ? request.resource.data.enabled is bool
             : true
         )
-        // dayOfMonth: 1-31
+        // dayOfMonth: 0 = không dùng, hoặc 1-31 (app luôn ghi field này, mặc định 0)
         && (
           'dayOfMonth' in request.resource.data
             ? request.resource.data.dayOfMonth is int
-              && request.resource.data.dayOfMonth >= 1
+              && request.resource.data.dayOfMonth >= 0
               && request.resource.data.dayOfMonth <= 31
             : true
         )
-        // dayOfWeek: 1-7 (Calendar.SUNDAY=1 ... SATURDAY=7)
+        // dayOfWeek: 0 = không dùng, hoặc 1-7 (Calendar.SUNDAY=1 ... SATURDAY=7)
         && (
           'dayOfWeek' in request.resource.data
             ? request.resource.data.dayOfWeek is int
-              && request.resource.data.dayOfWeek >= 1
+              && request.resource.data.dayOfWeek >= 0
               && request.resource.data.dayOfWeek <= 7
             : true
         )
-        // monthOfYear: 1-12
+        // monthOfYear: 0 = không dùng, hoặc 1-12
         && (
           'monthOfYear' in request.resource.data
             ? request.resource.data.monthOfYear is int
-              && request.resource.data.monthOfYear >= 1
+              && request.resource.data.monthOfYear >= 0
               && request.resource.data.monthOfYear <= 12
             : true
         )
@@ -209,6 +210,28 @@ service cloud.firestore {
             : true
         );
 
+      allow delete: if isOwner(userId);
+    }
+
+    // =========================================================
+    // Recurring occurrences (sổ chống trùng cho giao dịch định kỳ)
+    //
+    // QUAN TRỌNG: thiếu match block này khiến mọi giao dịch định kỳ bị
+    // PERMISSION_DENIED — vì việc tạo giao dịch định kỳ là một atomic
+    // transaction (ghi occurrence + tạo giao dịch + cập nhật ví), chỉ cần
+    // ghi occurrence bị chặn là cả transaction bị rollback.
+    // =========================================================
+    match /users/{userId}/recurring_occurrences/{document=**} {
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId)
+        && 'ruleId' in request.resource.data
+        && request.resource.data.ruleId is string
+        && 'runAt' in request.resource.data
+        && request.resource.data.runAt is timestamp;
+
+      // Occurrence là bản ghi bất biến (idempotency) — không cho sửa.
+      allow update: if false;
       allow delete: if isOwner(userId);
     }
 
@@ -231,7 +254,9 @@ service cloud.firestore {
         && request.resource.data.savedAmount is number
         && request.resource.data.savedAmount >= 0
         && request.resource.data.savedAmount == request.resource.data.savedAmount.round()
-        && savedAmountNotExceedTarget(request.resource.data)
+        // Cho phép đóng góp vượt mục tiêu (app cho phép; getProgress() đã chặn ở 100%).
+        // Không ràng buộc savedAmount <= targetAmount để tránh PERMISSION_DENIED khi
+        // đóng góp nhiều hơn phần còn thiếu.
         && (
           'completed' in request.resource.data
             ? request.resource.data.completed is bool
@@ -244,11 +269,6 @@ service cloud.firestore {
         );
 
       allow delete: if isOwner(userId);
-    }
-
-    // savedAmount must not exceed targetAmount (computed field)
-    function savedAmountNotExceedTarget(data) {
-      return data.savedAmount <= data.targetAmount;
     }
 
     // =========================================================

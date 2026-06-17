@@ -27,7 +27,7 @@ public final class MoneyFormat {
      */
     public static void applySettings(String code, boolean before, int dec, Locale loc) {
         currencyCode = normalizeCurrencyCode(code);
-        symbolBefore = false;
+        symbolBefore = before;
         decimals = Math.max(0, dec);
         locale = loc != null ? loc : new Locale("vi", "VN");
         formatCache.clear();

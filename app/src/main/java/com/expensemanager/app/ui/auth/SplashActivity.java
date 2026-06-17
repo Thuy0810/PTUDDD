@@ -32,7 +32,11 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             AuthRepository auth = new AuthRepository();
             if (auth.getCurrentUser() == null) {
-                startActivity(new Intent(this, LoginActivity.class));
+                if (!PrefsHelper.isOnboardingDone(this)) {
+                    startActivity(new Intent(this, OnboardingActivity.class));
+                } else {
+                    startActivity(new Intent(this, LoginActivity.class));
+                }
             } else if (PrefsHelper.isPinEnabled(this)) {
                 startActivity(new Intent(this, LockActivity.class));
             } else {

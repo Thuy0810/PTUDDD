@@ -1,6 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Quản Lý Chi Tiêu</string>
+
+    <!-- Redesign: Onboarding -->
+    <string name="brand_short">Xu</string>
+    <string name="onboarding_title">Quản lý chi tiêu\ntrong tầm tay bạn</string>
+    <string name="onboarding_subtitle">Tất cả những gì bạn cần để kiểm soát tài chính cá nhân.</string>
+    <string name="onboarding_feat1_title">Ghi thu chi nhanh</string>
+    <string name="onboarding_feat1_desc">Theo ví &amp; danh mục, chỉ vài chạm.</string>
+    <string name="onboarding_feat2_title">Lập ngân sách</string>
+    <string name="onboarding_feat2_desc">Đặt hạn mức và nhận cảnh báo khi sắp vượt.</string>
+    <string name="onboarding_feat3_title">Mục tiêu tiết kiệm</string>
+    <string name="onboarding_feat3_desc">Đặt mục tiêu và theo dõi tiến độ mỗi ngày.</string>
+    <string name="onboarding_start">Bắt đầu</string>
+    <string name="onboarding_have_account">Tôi đã có tài khoản</string>
+    <string name="hero_illustration_placeholder">minh hoạ · ví &amp; biểu đồ</string>
+
+    <!-- Redesign: Login -->
+    <string name="login_welcome_back">Chào mừng trở lại 👋</string>
+    <string name="login_welcome_subtitle">Đăng nhập để tiếp tục theo dõi tài chính của bạn.</string>
+    <string name="login_or">hoặc</string>
+    <string name="login_fingerprint">Đăng nhập bằng vân tay</string>
+    <string name="login_fingerprint_unavailable">Chưa thiết lập vân tay. Vui lòng đăng nhập bằng email.</string>
+    <string name="email_hint_example">email@cua-ban.com</string>
+    <string name="password_hint_min">Ít nhất 6 ký tự</string>
+
+    <!-- Redesign: Home budget shortcut -->
+    <string name="budget_shortcut_title">Ngân sách tháng %1$s</string>
+    <string name="budget_detail">Chi tiết</string>
+    <string name="budget_spent_value">Đã chi %1$s</string>
+    <string name="budget_limit_value">Hạn mức %1$s</string>
+
     <!-- Auth -->
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>

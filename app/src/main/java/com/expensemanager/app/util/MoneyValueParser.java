@@ -119,8 +119,9 @@ public final class MoneyValueParser {
     private static Long parseString(String s) {
         if (s == null || s.trim().isEmpty()) return null;
         try {
-            // Thử parse thẳng trước
-            return Long.parseLong(s.trim());
+            // Thử parse thẳng trước — số âm là không hợp lệ cho tiền tệ.
+            long v = Long.parseLong(s.trim());
+            return v < 0 ? null : v;
         } catch (NumberFormatException ignore) {
             // Nếu không được, thử bỏ dấu phân cách
             String normalized = s.trim().replace(".", "").replace(",", "").replace(" ", "");

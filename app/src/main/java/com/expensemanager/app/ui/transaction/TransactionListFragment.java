@@ -138,9 +138,10 @@ public class TransactionListFragment extends Fragment {
             int y = Integer.parseInt(parts[0]);
             int m = Integer.parseInt(parts[1]);
             int d = Integer.parseInt(parts[2]);
-            Calendar c = Calendar.getInstance();
+            Calendar c = DateUtils.newCalendar();
             c.set(y, m - 1, d, 0, 0, 0);
-            return c.getTime();
+            c.set(Calendar.MILLISECOND, 0);
+            return DateUtils.startOfDay(c.getTime());
         } catch (Exception e) {
             return new java.util.Date();
         }
@@ -152,9 +153,12 @@ public class TransactionListFragment extends Fragment {
             int y = Integer.parseInt(parts[3]);
             int m = Integer.parseInt(parts[4]);
             int d = Integer.parseInt(parts[5]);
-            Calendar c = Calendar.getInstance();
-            c.set(y, m - 1, d, 23, 59, 59);
-            return c.getTime();
+            Calendar c = DateUtils.newCalendar();
+            c.set(y, m - 1, d, 0, 0, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            // Biên cuối nửa mở [start, end): đầu ngày HÔM SAU theo ICT,
+            // tránh dùng 23:59:59 làm ranh giới cuối (mất 1 giây cuối ngày).
+            return DateUtils.startOfNextDay(c.getTime());
         } catch (Exception e) {
             return new java.util.Date();
         }

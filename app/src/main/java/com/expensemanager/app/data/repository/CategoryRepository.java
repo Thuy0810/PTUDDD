@@ -1,13 +1,10 @@
 package com.expensemanager.app.data.repository;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.expensemanager.app.data.model.Category;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,20 +13,13 @@ public class CategoryRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public LiveData<List<Category>> observeAll(String uid) {
-        MutableLiveData<List<Category>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("categories")
-                .addSnapshotListener((snap, e) -> {
-                    List<Category> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Category c = doc.toObject(Category.class);
-                            c.setId(doc.getId());
-                            list.add(c);
-                        }
-                    }
-                    live.setValue(list);
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("categories"),
+                doc -> {
+                    Category c = doc.toObject(Category.class);
+                    c.setId(doc.getId());
+                    return c;
                 });
-        return live;
     }
 
     public static Map<String, Category> toMap(List<Category> list) {

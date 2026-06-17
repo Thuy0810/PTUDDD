@@ -26,7 +26,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.auth.LoginActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
+        <activity android:name=".ui.auth.OnboardingActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.Auth" />
+        <activity android:name=".ui.auth.LoginActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.Auth" />
         <activity android:name=".ui.auth.RegisterActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />
         <activity android:name=".ui.main.MainActivity" android:exported="false" />
         <activity android:name=".ui.transaction.AddTransactionActivity" android:exported="false" android:theme="@style/Theme.ExpenseManager.WithActionBar" />

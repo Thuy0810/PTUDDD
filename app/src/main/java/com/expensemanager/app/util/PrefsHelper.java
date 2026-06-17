@@ -34,6 +34,7 @@ public final class PrefsHelper {
     private static final String KEY_CURRENCY_POSITION = "currency_position";
     private static final String KEY_CURRENCY_DECIMALS = "currency_decimals";
     private static final String KEY_CURRENCY_LOCALE = "currency_locale";
+    private static final String KEY_ONBOARDING_DONE = "onboarding_done";
 
     private static final int MAX_PIN_ATTEMPTS = 5;
     private static final long LOCK_DURATION_MS = 5 * 60 * 1000L; // 5 minutes
@@ -116,7 +117,10 @@ public final class PrefsHelper {
         String storedHash = prefs(ctx).getString(KEY_PIN_HASH, "");
         if (storedHash == null || storedHash.isEmpty()) return false;
         String computedHash = hashPin(ctx, pin);
-        return computedHash.equals(storedHash);
+        // So sánh hằng-thời-gian để tránh timing side-channel.
+        return java.security.MessageDigest.isEqual(
+                computedHash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                storedHash.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     /**
@@ -248,6 +252,17 @@ public final class PrefsHelper {
 
     public static void clearPendingLogout(Context ctx) {
         prefs(ctx).edit().putBoolean(KEY_PENDING_LOGOUT, false).apply();
+    }
+
+    // ========== Onboarding ==========
+
+    /** Da xem man hinh gioi thieu chua (chi hien thi lan dau mo app). */
+    public static boolean isOnboardingDone(Context ctx) {
+        return prefs(ctx).getBoolean(KEY_ONBOARDING_DONE, false);
+    }
+
+    public static void setOnboardingDone(Context ctx, boolean done) {
+        prefs(ctx).edit().putBoolean(KEY_ONBOARDING_DONE, done).apply();
     }
 
     // ========== Currency settings ==========

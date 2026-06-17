@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/brand_bg"
+    android:orientation="vertical">
+
+    <!-- ===== HERO (gradient xanh) ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_hero_gradient"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="34dp">
+
+        <!-- Logo row -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_logo_orange">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="X"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/brand_short"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Hero illustration placeholder -->
+        <TextView
+            android:layout_width="224dp"
+            android:layout_height="184dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/bg_hero_placeholder"
+            android:gravity="center"
+            android:text="@string/hero_illustration_placeholder"
+            android:textColor="#E6FFFFFF"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- ===== BOTTOM SHEET ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-22dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_sheet_top"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="26dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/onboarding_title"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/onboarding_subtitle"
+            android:textColor="@color/text_secondary"
+            android:textSize="15sp" />
+
+        <!-- Feature 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_blue_soft">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/onboarding_feat1_title"
+                    android:src="@drawable/ic_transaction"
+                    app:tint="@color/brand_blue" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_feat1_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:text="@string/onboarding_feat1_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Feature 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_orange_soft">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/onboarding_feat2_title"
+                    android:src="@drawable/ic_wallet_menu"
+                    app:tint="@color/brand_orange_dark" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_feat2_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:text="@string/onboarding_feat2_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Feature 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_green">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/onboarding_feat3_title"
+                    android:src="@drawable/ic_goal_menu"
+                    app:tint="@color/income_green" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_feat3_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:text="@string/onboarding_feat3_desc"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="16dp" />
+
+        <!-- dots -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="22dp"
+                android:layout_height="6dp"
+                android:background="@drawable/bg_dot_active" />
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_dot_inactive" />
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_dot_inactive" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="@string/onboarding_start"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="15.5sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/brand_blue"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnHaveAccount"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/onboarding_have_account"
+            android:textAllCaps="false"
+            android:textColor="@color/brand_blue"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

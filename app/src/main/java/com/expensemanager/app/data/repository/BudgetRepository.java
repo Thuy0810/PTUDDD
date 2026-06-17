@@ -32,36 +32,16 @@ public class BudgetRepository {
      * Trả về snapshot liên tục.
      */
     public LiveData<List<Budget>> observeAll(String uid) {
-        MutableLiveData<List<Budget>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("budgets")
-                .addSnapshotListener((snap, e) -> {
-                    List<Budget> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Budget b = parseSnapshot(doc.getId(), doc.getData());
-                            list.add(b);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("budgets"),
+                doc -> parseSnapshot(doc.getId(), doc.getData()));
     }
 
     public LiveData<List<Budget>> observeMonth(String uid, String monthKey) {
-        MutableLiveData<List<Budget>> live = new MutableLiveData<>();
-        db.collection("users").document(uid).collection("budgets")
-                .whereEqualTo("month", monthKey)
-                .addSnapshotListener((snap, e) -> {
-                    List<Budget> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            Budget b = parseSnapshot(doc.getId(), doc.getData());
-                            list.add(b);
-                        }
-                    }
-                    live.setValue(list);
-                });
-        return live;
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("budgets")
+                        .whereEqualTo("month", monthKey),
+                doc -> parseSnapshot(doc.getId(), doc.getData()));
     }
 
     /**

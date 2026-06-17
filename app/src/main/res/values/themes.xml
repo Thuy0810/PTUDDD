@@ -38,6 +38,16 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <!-- Theme Auth (Onboarding/Login) - khong action bar, header gradient xanh -->
+    <style name="Theme.ExpenseManager.Auth" parent="Theme.ExpenseManager">
+        <item name="colorPrimary">@color/brand_blue</item>
+        <item name="colorPrimaryDark">@color/brand_blue_dark</item>
+        <item name="android:statusBarColor">@color/brand_blue_dark</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowBackground">@color/brand_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
     <!-- === CUSTOM WIDGET STYLES === -->
 
     <!-- Card view - bo goc lon, shadow nhe -->

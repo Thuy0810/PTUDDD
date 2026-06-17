@@ -44,21 +44,13 @@ public class RecurringRepository {
     private final TransactionRepository txRepo = new TransactionRepository();
 
     public LiveData<List<RecurringRule>> observeAll(String uid) {
-        MutableLiveData<List<RecurringRule>> live = new MutableLiveData<>();
-        db.collection("users").document(uid)
-                .collection("recurring")
-                .addSnapshotListener((snap, e) -> {
-                    List<RecurringRule> list = new ArrayList<>();
-                    if (snap != null) {
-                        for (QueryDocumentSnapshot doc : snap) {
-                            RecurringRule r = doc.toObject(RecurringRule.class);
-                            r.setId(doc.getId());
-                            list.add(r);
-                        }
-                    }
-                    live.setValue(list);
+        return new FirestoreQueryLiveData<>(
+                db.collection("users").document(uid).collection("recurring"),
+                doc -> {
+                    RecurringRule r = doc.toObject(RecurringRule.class);
+                    r.setId(doc.getId());
+                    return r;
                 });
-        return live;
     }
 
     // === CRUD ===
@@ -202,46 +194,51 @@ public class RecurringRepository {
                 .collection("recurring_occurrences")
                 .document(occurrenceId);
 
+        String walletId = rule.getWalletId();
+        DocumentReference walletRef = db.collection("users").document(uid)
+                .collection("wallets").document(walletId);
+
         db.runTransaction(transaction -> {
+            // ---- TẤT CẢ lệnh đọc phải đứng trước mọi lệnh ghi (ràng buộc Firestore) ----
             DocumentSnapshot occSnap = transaction.get(occRef);
             if (occSnap.exists()) {
                 return null;
             }
+            DocumentSnapshot walletSnap = transaction.get(walletRef);
 
-            // 1. Tạo occurrence record
+            // ---- Từ đây trở đi chỉ ghi, không đọc ----
+
+            // 1. Tạo occurrence record (đảm bảo idempotent & rule luôn tiến tới)
             java.util.Map<String, Object> occData = new java.util.HashMap<>();
             occData.put("ruleId", rule.getId());
             occData.put("runAt", runAt);
             occData.put("createdAt", Timestamp.now());
             transaction.set(occRef, occData);
 
-            // 2. Tạo transaction
-            Transaction t = new Transaction();
-            t.setType(rule.getType());
-            t.setAmount(rule.getAmount());
-            t.setCategoryId(rule.getCategoryId());
-            t.setWalletId(rule.getWalletId());
-            t.setRecurringRuleId(rule.getId());
-            t.setNote(rule.getNote() != null ? rule.getNote()
-                    : (rule.isIncome() ? "Thu nhập định kỳ" : "Chi tiêu định kỳ"));
-            t.setDate(runAt);
-
-            String walletId = rule.getWalletId();
-            DocumentReference txRef = db.collection("users").document(uid)
-                    .collection("transactions").document();
-            transaction.set(txRef, t.toMap());
-
-            // 3. Cập nhật số dư ví
-            DocumentReference walletRef = db.collection("users").document(uid)
-                    .collection("wallets").document(walletId);
-            DocumentSnapshot walletSnap = transaction.get(walletRef);
+            // 2. Chỉ tạo giao dịch + cập nhật số dư khi ví còn tồn tại
+            //    (tránh tạo giao dịch mồ côi khi ví đã bị xoá).
             if (walletSnap.exists()) {
+                Transaction t = new Transaction();
+                t.setType(rule.getType());
+                t.setAmount(rule.getAmount());
+                t.setCategoryId(rule.getCategoryId());
+                t.setWalletId(walletId);
+                t.setRecurringRuleId(rule.getId());
+                t.setNote(rule.getNote() != null ? rule.getNote()
+                        : (rule.isIncome() ? "Thu nhập định kỳ" : "Chi tiêu định kỳ"));
+                t.setDate(runAt);
+
+                DocumentReference txRef = db.collection("users").document(uid)
+                        .collection("transactions").document();
+                transaction.set(txRef, t.toMap());
+
                 Long balance = MoneyValueParser.toLong(walletSnap.get("currentBalance"));
                 if (balance == null) balance = 0L;
                 long newBalance = rule.isIncome()
                         ? balance + rule.getAmount()
                         : balance - rule.getAmount();
-                transaction.update(walletRef, "currentBalance", newBalance);
+                transaction.update(walletRef, "currentBalance", newBalance,
+                        "updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
             }
 
             // 4. Cập nhật rule: lastRun và nextRun
