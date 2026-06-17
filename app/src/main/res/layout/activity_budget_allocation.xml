@@ -103,8 +103,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- Chưa phân bổ -->
+                <!-- Cần phân bổ / Vượt phân bổ -->
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardUnallocated"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
@@ -120,6 +121,7 @@
                         android:padding="14dp">
 
                         <TextView
+                            android:id="@+id/textUnallocatedLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/s1_unallocated_money"
@@ -212,6 +214,15 @@
                             android:textColor="@color/income_green"
                             android:textSize="16sp"
                             android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textRolloverTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <ImageView
@@ -274,6 +285,42 @@
                 android:textColor="@color/text_secondary"
                 app:cornerRadius="10dp"
                 app:strokeColor="@color/divider" />
+
+            <!-- ===== Mục tiêu tiết kiệm ===== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/budget_goal_section"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/budget_goal_section_sub"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/layoutGoalItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/textNoGoals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="@string/budget_goal_no_goals"
+                android:textColor="@color/text_hint"
+                android:textSize="12sp"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

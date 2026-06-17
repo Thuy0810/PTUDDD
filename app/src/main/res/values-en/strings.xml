@@ -336,6 +336,9 @@
     <string name="reallocation_confirm">Confirm allocation</string>
     <string name="reallocation_exceed_source">Amount exceeds what the source can transfer</string>
     <string name="reallocation_no_source">No source available to cover</string>
+    <string name="reallocation_other_category">From another category</string>
+    <string name="reallocation_success">Covered %1$s for the category</string>
+    <string name="reallocation_change">%1$s: %2$s → %3$s</string>
     <!-- Bottom Nav -->
     <string name="add">Add</string>
     <!-- Alerts -->
@@ -376,9 +379,24 @@
     <string name="s1_save_upper">SAVE</string>
     <string name="s1_current">Current</string>
     <string name="s1_next">Next</string>
-    <string name="s1_unallocated_money">Unallocated money</string>
+    <string name="s1_unallocated_money">To be budgeted</string>
     <string name="s1_allocated_money">Allocated money</string>
     <string name="s1_expected_income_month">Expected income this month</string>
+    <!-- Zero-Based Budgeting -->
+    <string name="s1_over_budgeted">Over-budgeted</string>
+    <string name="s1_all_assigned">Every dollar has a job</string>
+    <string name="s1_rollover_label">Rollover</string>
+    <string name="s1_rollover_from_last">Rolled over from last month</string>
+    <string name="budget_rollover_in">Rollover: %1$s</string>
+    <string name="budget_envelope_available">Available: %1$s</string>
+    <!-- Allocate into savings goals -->
+    <string name="budget_goal_section">Savings goals</string>
+    <string name="budget_goal_section_sub">Set aside money for your goals</string>
+    <string name="budget_goal_allocate">Allocate</string>
+    <string name="budget_goal_allocate_to">Allocate to: %1$s</string>
+    <string name="budget_goal_no_wallet">Goal has no source wallet</string>
+    <string name="budget_goal_no_goals">No savings goals yet</string>
+    <string name="budget_goal_contributed">Allocated %1$s to goal</string>
     <string name="s1_essential">Essential</string>
     <string name="s1_monthly_fixed_expenses">Fixed monthly expenses</string>
     <string name="s1_add_plus">+ Add</string>
@@ -638,4 +656,28 @@
     <string name="s5_pos_after">After amount (500,000 ₫)</string>
     <string name="s5_fmt_dot">Dot (500.000)</string>
     <string name="s5_fmt_comma">Comma (500,000)</string>
+
+    <!-- ===== Dashboard: Financial overview ===== -->
+    <string name="dash_title">Financial overview</string>
+    <string name="home_financial_overview">Your whole financial picture</string>
+    <string name="home_financial_overview_sub">Income, budget &amp; goals on one page</string>
+    <string name="dash_month_summary">This month</string>
+    <string name="dash_income">Income</string>
+    <string name="dash_expense">Expenses</string>
+    <string name="dash_net">Net</string>
+    <string name="dash_budget_status">Budget status (ZBB)</string>
+    <string name="dash_over_categories">%1$d categories over budget</string>
+    <string name="dash_rollover_total">Rollover: %1$s</string>
+    <string name="dash_spending_by_category">Spending by category</string>
+    <string name="dash_wallets">Wallet balances</string>
+    <string name="dash_total_balance">Total balance</string>
+    <string name="dash_savings_goals">Savings goal progress</string>
+    <string name="dash_goal_progress_value">%1$s / %2$s</string>
+    <string name="dash_goal_remaining">%1$s to go</string>
+    <string name="dash_goal_monthly">Save %1$s/month</string>
+    <string name="dash_goal_days_left">%1$d days left</string>
+    <string name="dash_goal_overdue">Overdue</string>
+    <string name="dash_goal_done">Completed</string>
+    <string name="dash_no_goals">No savings goals yet</string>
+    <string name="dash_no_data">No spending data this month</string>
 </resources>

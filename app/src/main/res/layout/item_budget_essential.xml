@@ -153,6 +153,7 @@
                 app:indicatorColor="@color/brand_blue"
                 app:trackColor="@color/budget_track"
                 app:trackCornerRadius="99dp"
+                app:trackStopIndicatorSize="0dp"
                 app:trackThickness="7dp" />
 
             <!-- Row: Con lai -->

@@ -54,6 +54,12 @@ public class BudgetOverviewFragment extends Fragment {
     private List<BudgetSectionAdapter.Section> sections = new ArrayList<>();
     private Map<String, Long> allocatedMap = new HashMap<>();
     private Map<String, Long> spentMap = new HashMap<>();
+    // Tong thu / chi cua thang dang chon (cache de tinh tom tat header)
+    private long monthIncome = 0L;
+    private long monthExpense = 0L;
+    // ZBB rollover: dữ liệu tháng trước để tính cuốn chiếu
+    private Map<String, Long> prevAllocatedMap = new HashMap<>();
+    private Map<String, Long> prevSpentMap = new HashMap<>();
 
     private int selectedYear = Calendar.getInstance().get(Calendar.YEAR);
     private int selectedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -172,7 +178,7 @@ public class BudgetOverviewFragment extends Fragment {
                 }
             }
             adapter.setAllocatedMap(allocatedMap);
-            calculateAndUpdateSummary();
+            updateHeaderSummary();
         });
 
         txRepo.observeMonth(uid, monthKey).observe(getViewLifecycleOwner(), txs -> {
@@ -193,8 +199,54 @@ public class BudgetOverviewFragment extends Fragment {
                 }
             }
             adapter.setSpentMap(spentMap);
-            updateSummaryWithAmounts(totalIncome, totalExpense);
+            monthIncome = totalIncome;
+            monthExpense = totalExpense;
+            updateHeaderSummary();
         });
+
+        // ----- Tháng trước: tính cuốn chiếu (rollover) cho ZBB -----
+        String prevMonthKey = DateUtils.previousMonthKey(monthKey);
+
+        budgetRepo.observeMonth(uid, prevMonthKey).observe(getViewLifecycleOwner(), list -> {
+            prevAllocatedMap = new HashMap<>();
+            if (list != null) {
+                for (Budget b : list) {
+                    if (b.getCategoryId() != null) {
+                        prevAllocatedMap.put(b.getCategoryId(), b.getAllocatedAmount());
+                    }
+                }
+            }
+            updateRollover();
+        });
+
+        txRepo.observeMonth(uid, prevMonthKey).observe(getViewLifecycleOwner(), txs -> {
+            prevSpentMap = new HashMap<>();
+            if (txs != null) {
+                for (Transaction t : txs) {
+                    if (Transaction.TYPE_EXPENSE.equals(t.getType()) && t.getCategoryId() != null) {
+                        long prev = prevSpentMap.containsKey(t.getCategoryId())
+                                ? prevSpentMap.get(t.getCategoryId()) : 0L;
+                        prevSpentMap.put(t.getCategoryId(), prev + t.getAmount());
+                    }
+                }
+            }
+            updateRollover();
+        });
+    }
+
+    /** Tính bản đồ cuốn chiếu từ tháng trước rồi đẩy vào adapter. */
+    private void updateRollover() {
+        Map<String, Long> rolloverMap = new HashMap<>();
+        java.util.Set<String> catIds = new java.util.HashSet<>();
+        catIds.addAll(prevAllocatedMap.keySet());
+        catIds.addAll(prevSpentMap.keySet());
+        for (String catId : catIds) {
+            long a = prevAllocatedMap.containsKey(catId) ? prevAllocatedMap.get(catId) : 0L;
+            long s = prevSpentMap.containsKey(catId) ? prevSpentMap.get(catId) : 0L;
+            long roll = com.expensemanager.app.domain.usecase.BudgetService.categoryRollover(a, s);
+            if (roll != 0L) rolloverMap.put(catId, roll);
+        }
+        adapter.setRolloverMap(rolloverMap);
     }
 
     private void calculateAndUpdateSummary() {
@@ -243,9 +295,9 @@ public class BudgetOverviewFragment extends Fragment {
             }
         }
 
-        // Update UI with calculated values
-        binding.textTotalExpense.setText(MoneyFormat.formatLong(recurringExpense));
-        binding.textExtraSaving.setText(MoneyFormat.formatLong(savingsNeeded));
+        // recurringExpense / savingsNeeded duoc giu lai cho cac tinh nang du bao khac;
+        // header tom tat (tong tien / da giao / con lai / vuot muc) do updateHeaderSummary lo.
+        updateHeaderSummary();
     }
 
     private void buildSections() {
@@ -290,18 +342,50 @@ public class BudgetOverviewFragment extends Fragment {
         adapter.setSections(sections);
     }
 
-    private void updateSummaryWithAmounts(long totalIncome, long totalExpense) {
-        binding.textTotalExpense.setText(MoneyFormat.formatLong(totalExpense));
-        binding.textTotalIncome.setText(MoneyFormat.formatLong(totalIncome));
+    /**
+     * Tom tat header ngan sach, tra loi 3 cau hoi:
+     *  1) Tong tien thang nay (= tong thu)
+     *  2) Da giao bao nhieu / con lai bao nhieu (tong han muc da phan bo)
+     *  3) Co bao nhieu danh muc vuot muc (da chi > han muc)
+     */
+    private void updateHeaderSummary() {
+        if (binding == null) return;
 
-        long saved = totalIncome - totalExpense;
-        binding.textTotalSaving.setText(MoneyFormat.formatLong(Math.max(saved, 0L)));
+        // (1) Tong tien thang nay
+        long totalMoney = monthIncome;
 
-        long extraSaving = totalIncome - totalExpense;
-        if (extraSaving > 0) {
-            binding.textExtraSaving.setText(MoneyFormat.formatLong(extraSaving));
+        // (2) Tong da giao = tong han muc da phan bo cho cac danh muc
+        long totalAllocated = 0L;
+        for (Long v : allocatedMap.values()) {
+            if (v != null) totalAllocated += v;
+        }
+        long unassigned = totalMoney - totalAllocated;
+        int pctAssigned = totalMoney > 0 ? (int) (totalAllocated * 100 / totalMoney) : 0;
+        if (pctAssigned > 100) pctAssigned = 100;
+        if (pctAssigned < 0) pctAssigned = 0;
+
+        binding.textTotalMoney.setText(MoneyFormat.formatLong(totalMoney));
+        binding.textAllocated.setText(MoneyFormat.formatLong(totalAllocated));
+        binding.textUnassigned.setText(MoneyFormat.formatLong(Math.max(unassigned, 0L)));
+        binding.progressOverview.setProgress(pctAssigned);
+
+        // Con lai am => da giao vuot tong tien: to do canh bao
+        binding.textUnassigned.setTextColor(
+                requireContext().getColor(unassigned < 0 ? R.color.budget_danger : android.R.color.white));
+
+        // (3) Dem so danh muc vuot muc (da chi > han muc, han muc > 0)
+        int overCount = 0;
+        for (Map.Entry<String, Long> e : allocatedMap.entrySet()) {
+            long limit = e.getValue() != null ? e.getValue() : 0L;
+            if (limit <= 0) continue;
+            long spent = spentMap.containsKey(e.getKey()) ? spentMap.get(e.getKey()) : 0L;
+            if (spent > limit) overCount++;
+        }
+        if (overCount > 0) {
+            binding.cardOverBudget.setVisibility(View.VISIBLE);
+            binding.textOverBudget.setText(getString(R.string.dash_over_categories, overCount));
         } else {
-            binding.textExtraSaving.setText(MoneyFormat.formatLong(0L));
+            binding.cardOverBudget.setVisibility(View.GONE);
         }
     }
 

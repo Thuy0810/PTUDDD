@@ -40,14 +40,21 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
         public Category category;
         public long allocated = 0L;
         public long spent = 0L;
+        public long rollover = 0L; // cuốn chiếu từ tháng trước (có thể âm)
+
+        /** Tiền khả dụng của phong bì (ZBB) = phân bổ + cuốn chiếu. */
+        public long getAvailable() {
+            return allocated + rollover;
+        }
 
         public long getRemaining() {
-            return allocated - spent;
+            return getAvailable() - spent;
         }
 
         public int getProgressPercent() {
-            if (allocated <= 0) return 0;
-            return (int) Math.min((spent * 100) / allocated, 100L);
+            long avail = getAvailable();
+            if (avail <= 0) return spent > 0 ? 100 : 0;
+            return (int) Math.min((spent * 100) / avail, 100L);
         }
     }
 
@@ -58,6 +65,7 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
     private List<Section> sections = new ArrayList<>();
     private Map<String, Long> allocatedMap = new HashMap<>();
     private Map<String, Long> spentMap = new HashMap<>();
+    private Map<String, Long> rolloverMap = new HashMap<>();
     private OnCategoryEdit editListener;
     private long totalBalance = 0L;
 
@@ -73,6 +81,11 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
 
     public void setSpentMap(Map<String, Long> map) {
         this.spentMap = map;
+        notifyDataSetChanged();
+    }
+
+    public void setRolloverMap(Map<String, Long> map) {
+        this.rolloverMap = map != null ? map : new HashMap<>();
         notifyDataSetChanged();
     }
 
@@ -121,7 +134,8 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
                 String catId = item.category.getId();
                 item.allocated = allocatedMap.containsKey(catId) ? allocatedMap.get(catId) : 0L;
                 item.spent = spentMap.containsKey(catId) ? spentMap.get(catId) : 0L;
-                totalAllocated += item.allocated;
+                item.rollover = rolloverMap.containsKey(catId) ? rolloverMap.get(catId) : 0L;
+                totalAllocated += item.getAvailable();
                 totalSpent += item.spent;
             }
             int progress = totalAllocated > 0 ? (int) (totalSpent * 100 / totalAllocated) : 0;
@@ -152,7 +166,8 @@ public class BudgetSectionAdapter extends RecyclerView.Adapter<BudgetSectionAdap
 
             Category cat = item.category;
             cardBinding.textCategoryName.setText(cat.getName());
-            cardBinding.textAllocated.setText(MoneyFormat.formatLong(item.allocated));
+            // ZBB: hiển thị tiền khả dụng của phong bì (phân bổ + cuốn chiếu).
+            cardBinding.textAllocated.setText(MoneyFormat.formatLong(item.getAvailable()));
             cardBinding.textSpent.setText(MoneyFormat.formatLong(item.spent));
             cardBinding.textRemaining.setText(
                     MoneyFormat.formatLong(Math.max(item.getRemaining(), 0L)));

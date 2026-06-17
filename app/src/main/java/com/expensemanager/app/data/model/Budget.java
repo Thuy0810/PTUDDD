@@ -55,6 +55,14 @@ public class Budget {
     public long getLimitAmount() { return limitAmount; }
     public void setLimitAmount(long limitAmount) { this.limitAmount = limitAmount; }
 
+    /**
+     * Alias theo ngữ nghĩa Zero-Based Budgeting: {@code limitAmount} chính là
+     * <b>số tiền được phân bổ</b> cho danh mục trong tháng (không còn là "hạn mức"
+     * thuần tuý). Giữ nguyên field {@code limitAmount} để tương thích ngược dữ liệu cũ.
+     */
+    public long getAllocatedAmount() { return limitAmount; }
+    public void setAllocatedAmount(long allocatedAmount) { this.limitAmount = allocatedAmount; }
+
     public List<Double> getAlertAt() {
         return alertAt != null ? alertAt : new ArrayList<>(Arrays.asList(0.8, 0.9));
     }

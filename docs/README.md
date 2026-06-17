@@ -29,5 +29,5 @@ File kế hoạch tổng thể nằm tại `c:\Users\nguye\.cursor\plans\r_C3_A0
 3. **Kiến trúc:** UI không gọi `FirebaseFirestore.getInstance()`. Mọi truy cập Firestore qua Repository, nghiệp vụ phức tạp trong `domain/usecase/`.
 4. **Tiền atomic:** thêm/sửa/xoá transaction phải là Firestore transaction (cập nhật số dư ví trong cùng transaction).
 5. **Ví:** có `isArchived`, không xoá ví đang có giao dịch (chỉ archive).
-6. **Ngân sách:** chỉ tính `expense`, bỏ qua `income`.
+6. **Ngân sách (Zero-Based Budgeting):** thu nhập là **nguồn để phân bổ**; mục tiêu là "Cần phân bổ" (`income − tổng phân bổ`) = 0. Mức chi của mỗi danh mục chỉ đo bằng `expense`. Mỗi danh mục cuốn chiếu (rollover) số dư sang tháng sau (`allocated − spent` của tháng trước, tính 1 tháng liền kề).
 7. **Migrate không phá dữ liệu:** KHÔNG cập nhật hàng loạt Firestore, chỉ parse tương thích khi đọc.

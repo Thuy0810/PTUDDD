@@ -88,7 +88,7 @@
                     app:tint="@color/text_secondary" />
             </LinearLayout>
 
-            <!-- Overview gradient card -->
+            <!-- Overview gradient card: tong tien + da giao + con lai -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,38 +97,18 @@
                 android:orientation="vertical"
                 android:padding="18dp">
 
-                <!-- Top row: label + percent pill -->
-                <LinearLayout
+                <!-- Label -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:alpha="0.9"
+                    android:text="@string/budget_total_money"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:alpha="0.9"
-                        android:text="@string/report_expense"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/textProgressPill"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_chip_white"
-                        android:paddingHorizontal="11dp"
-                        android:paddingVertical="4dp"
-                        android:text="0%"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Big total expense amount -->
+                <!-- Big total money amount -->
                 <TextView
-                    android:id="@+id/textTotalExpense"
+                    android:id="@+id/textTotalMoney"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -138,7 +118,7 @@
                     android:textSize="28sp"
                     android:textStyle="bold" />
 
-                <!-- Overview progress -->
+                <!-- Allocation progress (da giao / tong tien) -->
                 <ProgressBar
                     android:id="@+id/progressOverview"
                     style="?android:attr/progressBarStyleHorizontal"
@@ -149,7 +129,7 @@
                     android:progress="0"
                     android:progressDrawable="@drawable/progress_white" />
 
-                <!-- Bottom row: income + saving -->
+                <!-- Bottom row: da giao + con lai -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -160,66 +140,66 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="start"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
                             android:alpha="0.9"
-                            android:text="@string/report_income"
+                            android:text="@string/budget_assigned"
                             android:textColor="#FFFFFF"
-                            android:textSize="13sp" />
+                            android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/textTotalIncome"
+                            android:id="@+id/textAllocated"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:alpha="0.9"
+                            android:fontFeatureSettings="tnum"
                             android:text="0 VND"
                             android:textColor="#FFFFFF"
-                            android:textSize="13sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="end"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
                             android:alpha="0.9"
-                            android:text="@string/saving_rate"
+                            android:text="@string/budget_remaining_left"
                             android:textColor="#FFFFFF"
-                            android:textSize="13sp" />
+                            android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/textTotalSaving"
+                            android:id="@+id/textUnassigned"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:alpha="0.9"
+                            android:fontFeatureSettings="tnum"
                             android:text="0 VND"
                             android:textColor="#FFFFFF"
-                            android:textSize="13sp"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- "Save more" banner -->
+            <!-- Over-budget alert banner (chi hien khi co danh muc vuot) -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOverBudget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/brand_blue_soft"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/brand_red_light"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
-                app:strokeColor="@color/line_2"
+                app:strokeColor="@color/budget_danger"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -229,21 +209,20 @@
                     android:orientation="horizontal"
                     android:padding="13dp">
 
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_alert_tri"
+                        android:importantForAccessibility="no"
+                        app:tint="@color/budget_danger" />
+
                     <TextView
+                        android:id="@+id/textOverBudget"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/s2_can_save_more"
-                        android:textColor="@color/brand_blue_dark"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/textExtraSaving"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="0 VND"
-                        android:textColor="@color/brand_blue_dark"
+                        android:textColor="@color/budget_danger"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -255,25 +234,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="14dp"
-                android:text="@string/s2_allocate_money_task"
+                android:text="@string/assign_money_title"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/brand_blue"
                 app:cornerRadius="14dp" />
 
-            <!-- Category heading -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
-                android:text="@string/budgets"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <!-- Category sections -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="14dp" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerSections"
                 android:layout_width="match_parent"

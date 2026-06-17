@@ -177,16 +177,24 @@ Tài liệu này mô tả chi tiết các module nghiệp vụ, dựa trên rà 
 
 ---
 
-## 11. Ngân sách (`BudgetFragment`, `BudgetListActivity`, `BudgetEditActivity`, `BudgetAllocationActivity`)
+## 11. Ngân sách — Zero-Based Budgeting (`BudgetFragment`, `BudgetListActivity`, `BudgetEditActivity`, `BudgetAllocationActivity`)
 
-- **Mục đích:** Đặt hạn mức chi tiêu theo tháng + theo danh mục.
+- **Phương pháp:** **Zero-Based Budgeting (ZBB)** — phân bổ toàn bộ thu nhập cho các danh mục đến khi **"Cần phân bổ" (To Be Budgeted) = 0** ("mỗi đồng đều có việc"). Thay thế hoàn toàn cơ chế "hạn mức" cũ.
+- **Quy ước ZBB:**
+  - `Budget.limitAmount` được hiểu là **số tiền phân bổ** cho danh mục trong tháng (alias `getAllocatedAmount()`). Giữ tên field cũ để tương thích dữ liệu.
+  - **To Be Budgeted** = `thu nhập (thực tế hoặc dự kiến) − tổng đã phân bổ`. Có thể **ÂM** = vượt phân bổ (hiển thị cảnh báo, không chặn lưu).
+  - Logic thuần ở `BudgetService`: `pool(income, totalAllocated)` và `BudgetService.BudgetPool`.
+- **Cuốn chiếu (Rollover):** mỗi danh mục là một "phong bì" có số dư cuốn sang tháng sau.
+  - `rollover(c, m) = allocated(c, m−1) − spent(c, m−1)` (dương = dư mang sang; âm = bội chi trừ vào tháng này). MVP chỉ tính **1 tháng liền trước**.
+  - Tiền khả dụng của phong bì = `allocated + rollover`; còn lại = `khả dụng − spent`. Logic ở `BudgetService.envelope(...)` → `BudgetService.Envelope`.
+- **Vẫn chỉ tính `expense`** khi đo mức chi của từng phong bì; **`income` là nguồn để phân bổ** (khác cơ chế cũ vốn bỏ qua income).
 - **Màn hình:**
-  - `BudgetFragment`: tổng quan.
+  - `BudgetFragment` / `BudgetOverviewFragment`: tổng quan (rollover-aware).
   - `BudgetListActivity`: danh sách.
   - `BudgetEditActivity`: sửa theo danh mục.
-  - `BudgetAllocationActivity`: phân bổ theo tháng.
+  - `BudgetAllocationActivity`: phân bổ theo tháng (workspace ZBB — thu nhập → phân bổ → To Be Budgeted, hiển thị cuốn chiếu).
   - `BudgetSettingsDialog`: cài đặt (ngôn ngữ, tiền tệ).
-- **Model:** `Budget` (đang `limitAmount: double`).
+- **Model:** `Budget` (`limitAmount: long` = số tiền phân bổ).
 - **Repository:** `BudgetRepository`.
 - **Vi phạm NGHIÊM TRỌNG:**
   - `FirebaseFirestore.getInstance()` trong `BudgetFragment` (line 237-240), `BudgetEditActivity` (line 183-186), `BudgetSettingsDialog` (line 141).

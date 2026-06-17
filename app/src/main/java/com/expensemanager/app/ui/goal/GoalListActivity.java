@@ -153,26 +153,36 @@ public class GoalListActivity extends AppCompatActivity {
             return;
         }
 
-        LayoutInflater li = LayoutInflater.from(this);
-        View view = li.inflate(R.layout.dialog_goal, null);
-        EditText editTitle = view.findViewById(R.id.editGoalTitle);
-        EditText editTarget = view.findViewById(R.id.editGoalTarget);
-        Spinner spinnerWallet = view.findViewById(R.id.spinnerGoalWallet);
-        view.findViewById(R.id.editGoalDeadline).setEnabled(false);
-        MoneyInputFormatter.attach(editTarget);
+        // Tạo view mới hoàn toàn — KHÔNG tái dùng view đã inflate từ dialog_goal
+        // (gắn lại view đã có cha sẽ gây crash "child already has a parent").
+        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(48, 16, 48, 16);
 
-        editTitle.setText(g.getTitle());
-        editTitle.setEnabled(false);
-        editTarget.setText(MoneyInputFormatter.format(g.getTargetAmount()));
-        editTarget.setEnabled(false);
+        // Dòng tiến độ (chỉ đọc): đã để dành / mục tiêu
+        android.widget.TextView info = new android.widget.TextView(this);
+        info.setText(getString(R.string.dash_goal_progress_value,
+                MoneyFormat.formatLong(g.getSavedAmount()),
+                MoneyFormat.formatLong(g.getTargetAmount())));
+        info.setTextColor(getResources().getColor(R.color.text_primary, null));
+        info.setPadding(0, 0, 0, 8);
+        container.addView(info);
 
+        // Nhãn + spinner chọn ví nguồn
+        android.widget.TextView label = new android.widget.TextView(this);
+        label.setText(getString(R.string.j3_select_source_wallet));
+        label.setTextSize(13);
+        label.setTextColor(getResources().getColor(R.color.text_secondary, null));
+        label.setPadding(0, 16, 0, 4);
+        container.addView(label);
+
+        Spinner spinnerWallet = new Spinner(this);
         List<String> walletNames = new ArrayList<>();
         for (Wallet w : wallets) walletNames.add(w.getName());
         ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, walletNames);
         walletAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerWallet.setAdapter(walletAdapter);
-
         if (g.getWalletId() != null) {
             for (int i = 0; i < wallets.size(); i++) {
                 if (g.getWalletId().equals(wallets.get(i).getId())) {
@@ -181,32 +191,20 @@ public class GoalListActivity extends AppCompatActivity {
                 }
             }
         }
-
-        EditText editContribute = new EditText(this);
-        editContribute.setHint(getString(R.string.j3_contribute_amount_hint));
-        editContribute.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        MoneyInputFormatter.attach(editContribute);
-
-        android.widget.LinearLayout container = new android.widget.LinearLayout(this);
-        container.setOrientation(android.widget.LinearLayout.VERTICAL);
-        container.setPadding(48, 16, 48, 16);
-        container.addView(editTitle);
-        container.addView(editTarget);
-
-        android.widget.TextView label = new android.widget.TextView(this);
-        label.setText(getString(R.string.j3_select_source_wallet));
-        label.setTextSize(13);
-        label.setTextColor(getResources().getColor(R.color.text_secondary, null));
-        label.setPadding(0, 16, 0, 4);
-        container.addView(label);
         container.addView(spinnerWallet);
 
+        // Nhãn + ô nhập số tiền đóng góp
         android.widget.TextView label2 = new android.widget.TextView(this);
         label2.setText(getString(R.string.j3_contribute_more));
         label2.setTextSize(13);
         label2.setTextColor(getResources().getColor(R.color.text_secondary, null));
         label2.setPadding(0, 16, 0, 4);
         container.addView(label2);
+
+        EditText editContribute = new EditText(this);
+        editContribute.setHint(getString(R.string.j3_contribute_amount_hint));
+        editContribute.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        MoneyInputFormatter.attach(editContribute);
         container.addView(editContribute);
 
         new AlertDialog.Builder(this)

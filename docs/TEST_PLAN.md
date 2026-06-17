@@ -285,6 +285,22 @@ File: `app/src/androidTest/java/com/expensemanager/app/IntegrationTest.java`
 3. Thêm expense food 400k. Tổng = 900k (vượt 80%).
 4. Verify: home hiển thị alert "Đã đạt 80% ngân sách food".
 
+### Scenario E2E: Zero-Based Budgeting — phân bổ về 0
+
+1. Đặt thu nhập dự kiến tháng 6/2026 = 10.000.000L.
+2. Phân bổ: food 4.000.000L, bills 3.000.000L. Verify: "Cần phân bổ" = 3.000.000L (`isUnderBudgeted`).
+3. Phân bổ thêm transport 3.000.000L. Verify: "Cần phân bổ" = 0 → "Đã giao việc cho từng đồng".
+4. Phân bổ thêm 1.000.000L bất kỳ. Verify: "Cần phân bổ" = −1.000.000L hiển thị đỏ ("Vượt phân bổ").
+
+### Scenario E2E: Cuốn chiếu (Rollover) qua tháng
+
+1. Tháng 5/2026: food phân bổ 1.000.000L, chi 700.000L (dư 300.000L).
+2. Tháng 5/2026: bills phân bổ 500.000L, chi 600.000L (bội chi 100.000L).
+3. Sang tháng 6/2026, mở phân bổ. Verify:
+   - food hiển thị "Cuốn chiếu: +300.000" (xanh); khả dụng = phân bổ tháng 6 + 300.000.
+   - bills hiển thị "Cuốn chiếu: −100.000" (đỏ); khả dụng = phân bổ tháng 6 − 100.000.
+4. Verify tổng cuốn chiếu ở thẻ thu nhập = +200.000.
+
 ### Scenario E2E: Sao lưu → xoá app data → khôi phục
 
 1. Export dữ liệu ra JSON.

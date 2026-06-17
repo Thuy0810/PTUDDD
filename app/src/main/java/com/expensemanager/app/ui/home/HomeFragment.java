@@ -26,6 +26,7 @@ import com.expensemanager.app.databinding.FragmentHomeBinding;
 import com.expensemanager.app.util.DateUtils;
 import com.expensemanager.app.ui.adapter.TransactionAdapter;
 import com.expensemanager.app.ui.category.CategoryListActivity;
+import com.expensemanager.app.ui.dashboard.DashboardActivity;
 import com.expensemanager.app.ui.goal.GoalListActivity;
 import com.expensemanager.app.ui.recurring.RecurringListActivity;
 import com.expensemanager.app.ui.transaction.AddTransactionActivity;
@@ -77,6 +78,9 @@ public class HomeFragment extends Fragment {
 
         binding.cardBudgetShortcut.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.budgetFragment));
+
+        binding.cardFinancialOverview.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), DashboardActivity.class)));
 
         // Thao tac nhanh
         binding.qaWallets.setOnClickListener(v ->

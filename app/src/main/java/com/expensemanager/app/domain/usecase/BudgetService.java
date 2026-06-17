@@ -247,4 +247,89 @@ public final class BudgetService {
         if (sorted.isEmpty()) sorted.add(0.8);
         return sorted;
     }
+
+    // ==================================================================
+    //  ZERO-BASED BUDGETING (ZBB) + CUỐN CHIẾU (ROLLOVER)
+    // ==================================================================
+    //
+    //  Mô hình:
+    //   - Mỗi tháng, người dùng phân bổ thu nhập cho từng danh mục cho tới khi
+    //     "Cần phân bổ" (To Be Budgeted) = 0 → "mỗi đồng đều có việc".
+    //   - Mỗi danh mục là một "phong bì" có số dư cuốn chiếu sang tháng sau.
+    //
+    //  Quy ước cuốn chiếu (MVP — chỉ tính 1 tháng liền trước):
+    //     rollover(c, m) = allocated(c, m-1) - spent(c, m-1)
+    //  Số dương = phần dư mang sang; số âm = phần bội chi trừ vào tháng này.
+    // ------------------------------------------------------------------
+
+    /**
+     * Tính phần cuốn chiếu của một danh mục từ tháng liền trước.
+     *
+     * @param prevAllocated số tiền đã phân bổ cho danh mục ở tháng trước
+     * @param prevSpent     số tiền đã chi cho danh mục ở tháng trước
+     * @return dư (dương) hoặc bội chi (âm) mang sang tháng này
+     */
+    public static long categoryRollover(long prevAllocated, long prevSpent) {
+        return prevAllocated - prevSpent;
+    }
+
+    /** Trạng thái một "phong bì" danh mục trong tháng (đã gồm cuốn chiếu). */
+    public static final class Envelope {
+        public final long allocated;   // phân bổ tháng này
+        public final long rollover;    // cuốn chiếu từ tháng trước (có thể âm)
+        public final long spent;       // đã chi tháng này
+        public final long available;   // allocated + rollover (tiền phong bì có)
+        public final long remaining;   // available - spent (có thể âm = bội chi)
+        public final int usagePercent; // 0..100 (so với available)
+
+        public Envelope(long allocated, long rollover, long spent) {
+            this.allocated = allocated;
+            this.rollover = rollover;
+            this.spent = spent;
+            this.available = allocated + rollover;
+            this.remaining = this.available - spent;
+            this.usagePercent = this.available > 0
+                    ? (int) Math.min(100L, Math.max(0L, spent * 100L / this.available))
+                    : (spent > 0 ? 100 : 0);
+        }
+
+        public boolean isOverspent() { return remaining < 0; }
+    }
+
+    /** Tạo {@link Envelope} cho một danh mục. */
+    @NonNull
+    public static Envelope envelope(long allocated, long rollover, long spent) {
+        return new Envelope(allocated, rollover, spent);
+    }
+
+    /**
+     * Trạng thái "quỹ" tổng của tháng theo ZBB.
+     *
+     * <p>{@code toBeBudgeted = income - totalAllocated} và có thể ÂM
+     * (đã phân bổ vượt thu nhập). Mục tiêu ZBB là đưa giá trị này về 0.
+     */
+    public static final class BudgetPool {
+        public final long income;          // thu nhập (thực tế hoặc dự kiến)
+        public final long totalAllocated;  // tổng đã phân bổ cho mọi danh mục
+        public final long toBeBudgeted;    // income - totalAllocated (có thể âm)
+
+        public BudgetPool(long income, long totalAllocated) {
+            this.income = income;
+            this.totalAllocated = totalAllocated;
+            this.toBeBudgeted = income - totalAllocated;
+        }
+
+        /** Đã giao việc cho đúng từng đồng (ZBB hoàn hảo). */
+        public boolean isBalanced() { return toBeBudgeted == 0; }
+        /** Phân bổ vượt thu nhập (cần cắt bớt). */
+        public boolean isOverBudgeted() { return toBeBudgeted < 0; }
+        /** Còn tiền chưa giao việc (cần phân bổ tiếp). */
+        public boolean isUnderBudgeted() { return toBeBudgeted > 0; }
+    }
+
+    /** Tạo {@link BudgetPool} cho tháng. */
+    @NonNull
+    public static BudgetPool pool(long income, long totalAllocated) {
+        return new BudgetPool(income, totalAllocated);
+    }
 }

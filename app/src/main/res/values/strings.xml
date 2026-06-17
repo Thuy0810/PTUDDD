@@ -378,6 +378,9 @@
     <string name="reallocation_confirm">Xác nhận phân bổ</string>
     <string name="reallocation_exceed_source">Số tiền vượt quá nguồn có thể chuyển</string>
     <string name="reallocation_no_source">Không có nguồn để bù</string>
+    <string name="reallocation_other_category">Từ danh mục khác</string>
+    <string name="reallocation_success">Đã bù %1$s cho danh mục</string>
+    <string name="reallocation_change">%1$s: %2$s → %3$s</string>
     <!-- Bottom Nav -->
     <string name="add">Thêm</string>
     <!-- Alerts -->
@@ -418,9 +421,24 @@
     <string name="s1_save_upper">LƯU</string>
     <string name="s1_current">Hiện tại</string>
     <string name="s1_next">Kế tiếp</string>
-    <string name="s1_unallocated_money">Tiền chưa phân bổ</string>
+    <string name="s1_unallocated_money">Cần phân bổ</string>
     <string name="s1_allocated_money">Tiền đã phân bổ</string>
     <string name="s1_expected_income_month">Thu nhập dự kiến tháng này</string>
+    <!-- Zero-Based Budgeting -->
+    <string name="s1_over_budgeted">Vượt phân bổ</string>
+    <string name="s1_all_assigned">Đã giao việc cho từng đồng</string>
+    <string name="s1_rollover_label">Cuốn chiếu</string>
+    <string name="s1_rollover_from_last">Cuốn chiếu từ tháng trước</string>
+    <string name="budget_rollover_in">Cuốn chiếu: %1$s</string>
+    <string name="budget_envelope_available">Có thể chi: %1$s</string>
+    <!-- Phân bổ vào mục tiêu tiết kiệm -->
+    <string name="budget_goal_section">Mục tiêu tiết kiệm</string>
+    <string name="budget_goal_section_sub">Phân bổ tiền để dành cho mục tiêu</string>
+    <string name="budget_goal_allocate">Phân bổ</string>
+    <string name="budget_goal_allocate_to">Phân bổ vào: %1$s</string>
+    <string name="budget_goal_no_wallet">Mục tiêu chưa gắn ví nguồn</string>
+    <string name="budget_goal_no_goals">Chưa có mục tiêu tiết kiệm</string>
+    <string name="budget_goal_contributed">Đã phân bổ %1$s vào mục tiêu</string>
     <string name="s1_essential">Thiết yếu</string>
     <string name="s1_monthly_fixed_expenses">Những khoản chi cố định hàng tháng</string>
     <string name="s1_add_plus">+ Thêm</string>
@@ -433,6 +451,11 @@
     <!-- group s2 -->
     <string name="s2_month_5">Tháng 5</string>
     <string name="s2_allocate_money_task">Giao việc cho tiền (Phân bổ ngân sách)</string>
+    <string name="budget_total_money">Tổng tiền tháng này</string>
+    <string name="budget_assigned">Đã giao</string>
+    <string name="budget_remaining_left">Còn lại</string>
+    <string name="budget_pct_assigned">%1$d%% đã giao</string>
+    <string name="budget_no_over">Mọi danh mục trong hạn mức ✓</string>
     <string name="s2_can_save_more">Bạn có thể tiết kiệm thêm</string>
     <string name="s2_total_month_budget">Tổng ngân sách tháng</string>
     <string name="s2_by_category">Theo danh mục</string>
@@ -681,4 +704,28 @@
     <string name="s5_pos_after">Sau số (500.000 ₫)</string>
     <string name="s5_fmt_dot">Dấu chấm (500.000)</string>
     <string name="s5_fmt_comma">Dấu phẩy (500,000)</string>
+
+    <!-- ===== Dashboard: Tổng quan tài chính ===== -->
+    <string name="dash_title">Tổng quan tài chính</string>
+    <string name="home_financial_overview">Bức tranh tài chính tổng thể</string>
+    <string name="home_financial_overview_sub">Thu chi, ngân sách &amp; mục tiêu trong 1 trang</string>
+    <string name="dash_month_summary">Thu chi tháng này</string>
+    <string name="dash_income">Thu nhập</string>
+    <string name="dash_expense">Chi tiêu</string>
+    <string name="dash_net">Còn lại</string>
+    <string name="dash_budget_status">Tình trạng ngân sách (ZBB)</string>
+    <string name="dash_over_categories">%1$d danh mục vượt phân bổ</string>
+    <string name="dash_rollover_total">Cuốn chiếu: %1$s</string>
+    <string name="dash_spending_by_category">Chi theo danh mục</string>
+    <string name="dash_wallets">Số dư ví</string>
+    <string name="dash_total_balance">Tổng số dư</string>
+    <string name="dash_savings_goals">Tiến độ mục tiêu tiết kiệm</string>
+    <string name="dash_goal_progress_value">%1$s / %2$s</string>
+    <string name="dash_goal_remaining">Còn thiếu %1$s</string>
+    <string name="dash_goal_monthly">Cần để dành %1$s/tháng</string>
+    <string name="dash_goal_days_left">Còn %1$d ngày</string>
+    <string name="dash_goal_overdue">Quá hạn</string>
+    <string name="dash_goal_done">Đã hoàn thành</string>
+    <string name="dash_no_goals">Chưa có mục tiêu tiết kiệm</string>
+    <string name="dash_no_data">Chưa có dữ liệu chi tiêu tháng này</string>
 </resources>
