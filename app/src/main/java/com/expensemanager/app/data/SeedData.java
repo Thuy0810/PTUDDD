@@ -23,7 +23,6 @@ public final class SeedData {
         list.add(new Category("entertainment", "Giải trí", Category.TYPE_EXPENSE, "entertainment", "#A855F7", true));
         list.add(new Category("health", "Sức khỏe", Category.TYPE_EXPENSE, "health", "#22C55E", true));
         list.add(new Category("family", "Gia đình", Category.TYPE_EXPENSE, "family", "#EAB308", true));
-        list.add(new Category("saving", "Tiết kiệm", Category.TYPE_EXPENSE, "saving", "#3B82F6", true));
         list.add(new Category("expense_other", "Khác", Category.TYPE_EXPENSE, "other", "#6B7280", true));
         // Income categories
         list.add(new Category("salary", "Lương", Category.TYPE_INCOME, "salary", "#10B981", true));

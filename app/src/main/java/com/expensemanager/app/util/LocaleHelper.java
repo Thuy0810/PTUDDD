@@ -5,20 +5,12 @@ import androidx.core.os.LocaleListCompat;
 
 import java.util.Locale;
 
-/**
- * Quản lý ngôn ngữ ứng dụng (per-app locale) qua AppCompat.
- *
- * <p>Dùng {@link AppCompatDelegate#setApplicationLocales} nên hệ thống tự lưu
- * lựa chọn (đã khai báo service {@code AppLocalesMetadataHolderService} với
- * {@code autoStoreLocales=true} trong manifest) và tự khởi tạo lại các Activity.
- */
 public final class LocaleHelper {
     public static final String VIETNAMESE = "vi";
     public static final String ENGLISH = "en";
 
     private LocaleHelper() {}
 
-    /** Áp dụng ngôn ngữ theo mã ("vi" hoặc "en"). */
     public static void setLanguage(String languageTag) {
         if (languageTag == null || languageTag.trim().isEmpty()) {
             languageTag = VIETNAMESE;
